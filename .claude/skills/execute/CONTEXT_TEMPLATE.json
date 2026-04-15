@@ -1,0 +1,66 @@
+{
+  "feature": "{feature-name}",
+  "masterplan_path": "docs/features/{feature}/Masterplan.md",
+
+  "files": {
+    "created": [],
+    "deleted": [],
+    "modified": []
+  },
+
+  "new_exports": {
+    "services": [],
+    "components": [],
+    "hooks": [],
+    "types": [],
+    "utils": [],
+    "endpoints": []
+  },
+
+  "breaking_changes": [
+    {
+      "_example": true,
+      "what": "UserService.authenticate() signature changed",
+      "from": "authenticate(username, password)",
+      "to": "authenticate(credentials)",
+      "affected_callers": ["LoginController", "AuthGuard"],
+      "migration_hint": "Wrap username/password in credentials object"
+    }
+  ],
+
+  "migrations": [
+    {
+      "_example": true,
+      "type": "database",
+      "name": "AddNewColumn",
+      "file": "migrations/add-new-column",
+      "status": "pending|executed|failed",
+      "executed_at": null
+    }
+  ],
+
+  "tests": {
+    "unit": {
+      "written": [],
+      "pending": [],
+      "skipped_reason": null
+    },
+    "integration": {
+      "written": [],
+      "pending": []
+    },
+    "e2e": {
+      "written": [],
+      "pending": []
+    }
+  },
+
+  "important_decisions": [],
+  "notes": [],
+
+  "_meta": {
+    "schema_version": "2.0",
+    "last_updated": null,
+    "last_plan_completed": null
+  }
+}

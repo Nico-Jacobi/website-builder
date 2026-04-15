@@ -1,0 +1,49 @@
+/* ============================================================
+   Design tokens — single source of truth for colors, spacing,
+   typography. All modules should consume these via var(--…).
+   ============================================================ */
+:root {
+    /* Colors */
+    --primary: #2D5BFF;
+    --secondary: #1A1B3A;
+    --accent: #FF6B6B;
+    --alt_primary: #14B8A6;
+    --alt_secondary: #0F766E;
+
+    --background: #F8FAFC;
+    --surface: #FFFFFF;
+    --text: #1A1B3A;
+    --muted_text: #64748B;
+    --inverted_text: #FFFFFF;
+
+    /* Dividers — translucent, sit on top of --primary-tinted backgrounds */
+    --divider_inverted: rgba(255, 255, 255, 0.15);
+
+    /* Spacing scale */
+    --space_xs: 4px;
+    --space_sm: 8px;
+    --space_md: 16px;
+    --space_lg: 24px;
+    --space_xl: 40px;
+
+    /* Radii */
+    --radius_sm: 6px;
+    --radius_md: 10px;
+
+    /* Typography */
+    --font_family: system-ui, sans-serif;
+}
+
+/* Global reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: var(--background);
+    color: var(--text);
+    font-family: var(--font_family);
+}

@@ -1,0 +1,48 @@
+/* Column count → CSS custom property for grid-template-columns */
+.gallery__grid[data-columns="2"] { --gallery-cols: 2; }
+.gallery__grid[data-columns="3"] { --gallery-cols: 3; }
+
+/* Gap size → CSS custom property for gap */
+.gallery__grid[data-gap="sm"] { --gallery-gap: var(--space_sm); }
+.gallery__grid[data-gap="md"] { --gallery-gap: var(--space_md); }
+.gallery__grid[data-gap="lg"] { --gallery-gap: var(--space_lg); }
+
+.gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--gallery-cols, 2), 1fr);
+    gap: var(--gallery-gap, var(--space_md));
+}
+
+.gallery__item {
+    margin: 0;          /* reset browser default figure margin */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_xs);
+}
+
+.gallery__img-wrap {
+    position: relative;
+    line-height: 0;
+}
+
+.gallery__img {
+    display: block;     /* remove inline baseline gap */
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius_md);
+    background-color: var(--background);
+}
+
+.gallery__caption {
+    font-size: 0.85rem;
+    color: var(--muted_text);
+    text-align: center;
+    line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+    .gallery__grid {
+        grid-template-columns: 1fr;
+    }
+}

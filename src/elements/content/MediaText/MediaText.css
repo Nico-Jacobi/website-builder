@@ -1,0 +1,48 @@
+.media_text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space_xl);
+}
+
+/* Flip column order when image is on the right */
+.media_text[data-image-position="right"] .media_text__img-wrap { order: 2; }
+.media_text[data-image-position="right"] .media_text__content  { order: 1; }
+
+.media_text__img-wrap {
+    position: relative;
+    width: 50%;
+    max-width: 560px;
+    flex-shrink: 0;
+    line-height: 0;
+}
+
+.media_text__image {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: var(--radius_md);
+}
+
+.media_text__content { flex: 1; min-width: 0; }
+
+.media_text__heading {
+    margin: 0 0 var(--space_md) 0;
+    font-size: 1.75rem;
+    color: var(--secondary);
+}
+
+.media_text__body {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--text);
+}
+
+@media (max-width: 640px) {
+    .media_text { flex-direction: column; }
+    .media_text__img-wrap { width: 100%; max-width: none; }
+    /* Reset CSS order so image stays above content in DOM order */
+    .media_text[data-image-position="right"] .media_text__img-wrap,
+    .media_text[data-image-position="right"] .media_text__content { order: unset; }
+}

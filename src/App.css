@@ -1,0 +1,61 @@
+/* ── Layout primitives ─────────────────────────────────────── */
+
+.vertical_layout {
+    display: flex;
+    flex-direction: column;
+}
+
+.horizontal_layout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space_lg);
+}
+
+/* ── Shared element primitives ─────────────────────────────── */
+
+/* Base class for standard content/media sections.
+   Compose with a module class: className="section text_block" */
+.section {
+    width: 100%;
+    padding: var(--space_lg) var(--space_xl);
+}
+
+@media (max-width: 640px) {
+    .section { padding: var(--space_md); }
+}
+
+/* Shared image-title-body card used by CardRow and CardGrid */
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_sm);
+    border-radius: var(--radius_md);
+    overflow: hidden;
+    padding-bottom: var(--space_md);
+}
+
+.card__img-wrap {
+    position: relative;
+    line-height: 0;
+}
+
+.card__img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
+.card__title {
+    margin: var(--space_md) var(--space_md) 0;
+    font-size: 1.1rem;
+    color: var(--text);
+}
+
+.card__body {
+    margin: 0 var(--space_md);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--muted_text);
+}

@@ -1,0 +1,45 @@
+/* Alignment variants on tiles container */
+.stat_row[data-align="left"]   .stat_row__tiles { justify-content: flex-start; }
+.stat_row[data-align="center"] .stat_row__tiles { justify-content: center; }
+
+.stat_row__tiles {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space_xl);
+}
+
+.stat_row__tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space_xs);
+    flex: 1 1 120px;
+}
+
+.stat_row__value {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--secondary);
+}
+
+.stat_row__label {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--muted_text);
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .stat_row__tiles {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space_lg);
+    }
+
+    .stat_row__tile {
+        flex: none;
+        width: 100%;
+    }
+}

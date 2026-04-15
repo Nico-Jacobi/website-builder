@@ -1,0 +1,32 @@
+{
+  "feature": "module-variants",
+  "feature_path": "docs/features/module-variants/",
+  "masterplan": {
+    "read": true,
+    "path": "docs/features/module-variants/Masterplan.md",
+    "summary": "Add 6 variant modules: HeroBanner, FooterSimple, Callout, StatRow, CardGrid, Gallery",
+    "goals": ["HeroBanner", "FooterSimple", "Callout", "StatRow", "CardGrid", "Gallery"],
+    "non_goals": ["No code deleted", "No Container variants", "No MediaText stacked variant"],
+    "architecture_decisions": ["JSDoc on every schema field", "data-* attrs for bounded enums", "No inline styles except dynamic CSS color/px values"]
+  },
+  "plans": {
+    "total": 3,
+    "files": [
+      "docs/features/module-variants/plans/01_Layout_Variants.md",
+      "docs/features/module-variants/plans/02_Content_Variants.md",
+      "docs/features/module-variants/plans/03_Media_Variants.md"
+    ],
+    "current_index": 0
+  },
+  "status": "in_progress",
+  "completed": [],
+  "in_progress": "01_Layout_Variants",
+  "blocked": [],
+  "decisions": [],
+  "files_changed": [],
+  "files_created": [],
+  "errors": [],
+  "last_updated": "2026-04-11",
+  "started_at": "2026-04-11",
+  "completed_at": null
+}

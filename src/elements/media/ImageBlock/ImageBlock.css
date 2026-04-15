@@ -1,0 +1,24 @@
+.image_block {
+    margin: 0;          /* reset browser default figure margin */
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius_md);
+}
+
+.image_block__img-wrap {
+    position: relative;
+    line-height: 0;
+}
+
+.image_block__img {
+    display: block;     /* removes inline baseline gap */
+    width: 100%;
+    height: 100%;
+}
+
+.image_block__caption {
+    padding: var(--space_sm) var(--space_md);
+    font-size: 0.875rem;
+    color: var(--muted_text);
+    text-align: center;
+}

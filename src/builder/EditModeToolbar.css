@@ -1,0 +1,35 @@
+.edit-toolbar {
+    position: fixed;
+    bottom: var(--space_xl);
+    right: var(--space_xl);
+    z-index: 9000;
+}
+
+.edit-toolbar__btn {
+    background: var(--surface);
+    color: var(--text);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius_md);
+    padding: var(--space_sm) var(--space_md);
+    cursor: pointer;
+    font-family: var(--font_family);
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 16%);
+    transition: background 0.15s, color 0.15s;
+}
+
+.edit-toolbar__btn:hover {
+    background: var(--primary);
+    color: var(--inverted_text);
+}
+
+.edit-toolbar__btn--active {
+    background: var(--primary);
+    color: var(--inverted_text);
+}
+
+.edit-toolbar__btn--active:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}

@@ -1,0 +1,28 @@
+.container_block {
+    width: 100%;
+}
+
+/* paddingY variants — driven by data-padding-y attribute */
+.container_block[data-padding-y="none"] { padding-top: 0; padding-bottom: 0; }
+.container_block[data-padding-y="sm"]   { padding-top: var(--space_sm);  padding-bottom: var(--space_sm); }
+.container_block[data-padding-y="md"]   { padding-top: var(--space_lg);  padding-bottom: var(--space_lg); }
+.container_block[data-padding-y="lg"]   { padding-top: var(--space_xl);  padding-bottom: var(--space_xl); }
+
+/* Inner wrapper — constrained to maxWidth when provided via inline style */
+.container_block__inner {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--space_md);
+}
+
+/* Content area — vertical stack of child blocks */
+.container_block__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_lg);
+}
+
+/* Scrollable state — max-height is set via inline style; overflow is static */
+.container_block__content[data-scrollable] {
+    overflow-y: auto;
+}

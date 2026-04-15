@@ -1,0 +1,21 @@
+.builder__error {
+    padding: var(--space_md);
+    margin: var(--space_sm) 0;
+    border: 2px dashed #c0392b;
+    background: #fff5f4;
+    color: #c0392b;
+    font-family: var(--font_family);
+    font-size: 0.9rem;
+    border-radius: var(--radius_sm);
+}
+
+.builder__error strong {
+    display: block;
+    margin-bottom: var(--space_xs);
+}
+
+.builder__error pre {
+    margin: var(--space_xs) 0 0 0;
+    white-space: pre-wrap;
+    font-size: 0.8rem;
+}

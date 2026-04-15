@@ -1,0 +1,37 @@
+/* Back-Link als Overlay wenn eine Spec gerendert wird */
+.site_preview__back-overlay {
+    position: fixed;
+    top: var(--space_sm);
+    left: var(--space_sm);
+    z-index: 10;
+    padding: var(--space_xs) var(--space_sm);
+    border-radius: var(--radius_sm);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid var(--muted_text);
+    font-size: 0.9rem;
+}
+
+.site_preview__back-overlay:hover {
+    background: var(--background);
+}
+
+/* Empty-State (kein Spec im Storage) */
+.site_preview__empty {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_md);
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: var(--space_lg);
+    text-align: center;
+    background: var(--background);
+    color: var(--text);
+}
+
+.site_preview__back-link {
+    color: var(--primary);
+    text-decoration: underline;
+}

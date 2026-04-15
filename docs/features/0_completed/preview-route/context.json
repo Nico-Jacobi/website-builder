@@ -1,0 +1,17 @@
+{
+  "feature": "preview-route",
+  "masterplan_path": "docs/features/preview-route/Masterplan.md",
+  "files": { "created": [], "deleted": [], "modified": [] },
+  "new_exports": { "services": [], "components": [], "hooks": [], "types": [], "utils": [], "endpoints": [] },
+  "breaking_changes": [],
+  "migrations": [],
+  "tests": { "unit": { "written": [], "pending": [], "skipped_reason": null }, "integration": { "written": [], "pending": [] }, "e2e": { "written": [], "pending": [] } },
+  "important_decisions": [
+    "localStorage-Key 'website-builder:state' — single blob, nicht Key-Sprawl",
+    "Prompt auf jedem Keystroke persistiert, kein Debounce",
+    "Spec nur bei ok-Kind persistiert — fehlende/schlechte Gens lassen alte Spec intakt",
+    "Success-Box unterhalb des Prompt-Forms; Form bleibt sichtbar für direkte Regen"
+  ],
+  "notes": [],
+  "_meta": { "schema_version": "2.0", "last_updated": "2026-04-15", "last_plan_completed": null }
+}

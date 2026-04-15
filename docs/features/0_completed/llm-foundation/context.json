@@ -1,0 +1,79 @@
+{
+  "feature": "llm-foundation",
+  "masterplan_path": "docs/features/llm-foundation/Masterplan.md",
+
+  "files": {
+    "created": [
+      "src/builder/schemas.ts",
+      "src/builder/validateSpec.ts",
+      "src/builder/schemas.test.ts",
+      "src/builder/validateSpec.test.ts"
+    ],
+    "deleted": [],
+    "modified": [
+      "src/App.tsx",
+      "src/builder/Renderer.tsx",
+      "src/builder/EditModeContext.tsx",
+      "src/builder/specHelpers.ts",
+      "src/builder/blockIds.ts",
+      "src/elements/layout/Container/Container.schema.ts",
+      "src/builder/types.ts",
+      "src/test/renderWithProviders.tsx",
+      "src/builder/blockIds.test.ts",
+      "src/builder/editMode.test.tsx",
+      "src/builder/Renderer.test.tsx",
+      "src/elements/components.test.tsx"
+    ]
+  },
+
+  "new_exports": {
+    "services": [],
+    "components": [],
+    "hooks": [],
+    "types": [
+      "BlockSpec (from src/builder/schemas.ts)",
+      "SiteSpec (from src/builder/schemas.ts)",
+      "SpecError (from src/builder/validateSpec.ts)",
+      "ValidateResult (from src/builder/validateSpec.ts)"
+    ],
+    "utils": [
+      "BlockSpecSchema (from src/builder/schemas.ts)",
+      "SiteSpecSchema (from src/builder/schemas.ts)",
+      "validateSpecAgainstRegistry (from src/builder/validateSpec.ts)"
+    ],
+    "endpoints": []
+  },
+
+  "breaking_changes": [],
+
+  "migrations": [],
+
+  "tests": {
+    "unit": {
+      "written": [],
+      "pending": [],
+      "skipped_reason": null
+    },
+    "integration": {
+      "written": [],
+      "pending": []
+    },
+    "e2e": {
+      "written": [],
+      "pending": []
+    }
+  },
+
+  "important_decisions": [
+    "validateSpecAgainstRegistry lebt in src/builder/validateSpec.ts (eigenes File), nicht in schemas.ts — Grund: schemas.ts bleibt registry-frei und kann isoliert importiert werden.",
+    "SpecError-Shape ist { path: string, message: string, raw?: ZodIssue[] } — minimales Pflicht-Paar + optionaler Escape-Hatch.",
+    "BlockSpec TS-Typ ist hand-getippt (nicht z.infer), weil rekursives z.lazy + z.infer zu unknown-Zirkel führt."
+  ],
+  "notes": [],
+
+  "_meta": {
+    "schema_version": "2.0",
+    "last_updated": "2026-04-14",
+    "last_plan_completed": "04_RegistryLLMSurface.md"
+  }
+}

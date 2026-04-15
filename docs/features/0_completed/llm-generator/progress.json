@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "feature": "llm-generator",
+  "feature_path": "docs/features/llm-generator/",
+  "masterplan": {
+    "read": true,
+    "path": "docs/features/llm-generator/Masterplan.md",
+    "summary": "Prompt→Website-Demo: BuilderPage mit Textarea+Generate, Anthropic-SDK-Call über Tool-Use, validateSpecAgainstRegistry als Trust-Boundary, Renderer zeigt Ergebnis. One-shot, kein Edit, kein Feedback-Loop. App.tsx wird durch BuilderPage-Shell ersetzt; App.css-Import bleibt kritisch.",
+    "goals": [
+      "Anthropic SDK installieren + .env-Infra",
+      "src/llm/-Layer mit client/buildSystemPrompt/generateSpec/types + Unit-Tests",
+      "BuilderPage mit Prompt-Input + 5-Kind-Result-Handling + Renderer"
+    ],
+    "non_goals": [
+      "Persistenz",
+      "Feedback-Loop",
+      "Streaming",
+      "Auto-Retry",
+      "Proxy/Deployment",
+      "Edit-Mode-Cleanup"
+    ],
+    "architecture_decisions": [
+      "@anthropic-ai/sdk mit dangerouslyAllowBrowser: true (dev-only)",
+      "Tool-Use: ein Tool emit_site_spec, input_schema = siteSpecJSONSchema",
+      "Modul-Schemas im System-Prompt als Markdown, nicht im Tool-Schema",
+      "Edit-Mode-Code bleibt dead-but-compilable, nicht gemountet",
+      "BuilderPage hält State; keine Tests für BuilderPage (Glue-Code)",
+      "App.css-Import MUSS in App.tsx bleiben (Shared-Primitives)"
+    ]
+  },
+  "plans": {
+    "total": 3,
+    "files": [
+      "01_Dependency_And_Env.md",
+      "02_LLM_Layer.md",
+      "03_BuilderPage.md"
+    ],
+    "current_index": 0
+  },
+  "status": "in_progress",
+  "completed": [],
+  "in_progress": "01_Dependency_And_Env.md",
+  "blocked": [],
+  "decisions": [],
+  "files_changed": [],
+  "files_created": [],
+  "errors": [],
+  "last_updated": "2026-04-14",
+  "started_at": "2026-04-14",
+  "completed_at": null
+}

@@ -1,0 +1,22 @@
+.text_block[data-align="left"]   { text-align: left; }
+.text_block[data-align="center"] { text-align: center; }
+.text_block[data-align="right"]  { text-align: right; }
+
+.text_block__heading {
+    margin: 0 0 var(--space_md) 0;
+    font-size: 2rem;
+    color: var(--secondary);
+}
+
+.text_block__body {
+    margin: 0 0 var(--space_sm) 0;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+.text_block__subtext {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--muted_text);
+}

@@ -1,0 +1,64 @@
+.hero_banner {
+    width: 100%;
+    background: var(--primary);   /* overridden by inline style when background prop is set */
+    padding: var(--space_xl) var(--space_lg);
+    text-align: center;
+}
+
+.hero_banner__inner {
+    max-width: 720px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space_md);
+}
+
+.hero_banner__heading {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.hero_banner__subheading {
+    margin: 0;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    opacity: 0.85;
+    max-width: 560px;
+}
+
+.hero_banner__cta {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--inverted_text);
+    border-radius: var(--radius_md);
+    padding: var(--space_sm) var(--space_lg);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    margin-top: var(--space_sm);
+}
+
+.hero_banner__cta:hover {
+    opacity: 0.85;
+}
+
+/* light variant: white text (default for dark backgrounds) */
+.hero_banner[data-text-color="light"] .hero_banner__heading,
+.hero_banner[data-text-color="light"] .hero_banner__subheading {
+    color: var(--inverted_text);
+}
+
+/* dark variant: dark text (for light or custom backgrounds) */
+.hero_banner[data-text-color="dark"] .hero_banner__heading,
+.hero_banner[data-text-color="dark"] .hero_banner__subheading {
+    color: var(--text);
+}
+
+@media (max-width: 640px) {
+    .hero_banner {
+        padding: var(--space_lg) var(--space_md);
+    }
+}

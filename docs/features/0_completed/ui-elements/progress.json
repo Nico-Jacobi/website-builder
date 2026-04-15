@@ -1,0 +1,31 @@
+{
+  "feature": "ui-elements",
+  "feature_path": "docs/features/ui-elements/",
+  "masterplan": {
+    "read": true,
+    "path": "docs/features/ui-elements/Masterplan.md",
+    "summary": "Add 5 stackable UI modules: ImageBlock, TextBlock, MediaText, CardRow, Container",
+    "goals": ["ImageBlock", "TextBlock", "MediaText", "CardRow", "Container"],
+    "non_goals": ["No code deleted — greenfield additions only"],
+    "architecture_decisions": ["Max 1 level nesting", "Renderer already supports recursion", "BEM CSS + token vars only"]
+  },
+  "plans": {
+    "total": 2,
+    "files": [
+      "docs/features/ui-elements/plans/01_Leaf_Modules.md",
+      "docs/features/ui-elements/plans/02_Container_Module.md"
+    ],
+    "current_index": 0
+  },
+  "status": "in_progress",
+  "completed": [],
+  "in_progress": "01_Leaf_Modules",
+  "blocked": [],
+  "decisions": [],
+  "files_changed": [],
+  "files_created": [],
+  "errors": [],
+  "last_updated": "2026-04-11",
+  "started_at": "2026-04-11",
+  "completed_at": null
+}

@@ -1,0 +1,51 @@
+{
+  "feature": "ui-elements",
+  "masterplan_path": "docs/features/ui-elements/Masterplan.md",
+  "files": {
+    "created": [
+      "src/elements/ImageBlock/ImageBlock.schema.ts",
+      "src/elements/ImageBlock/ImageBlock.tsx",
+      "src/elements/ImageBlock/ImageBlock.css",
+      "src/elements/ImageBlock/index.ts",
+      "src/elements/TextBlock/TextBlock.schema.ts",
+      "src/elements/TextBlock/TextBlock.tsx",
+      "src/elements/TextBlock/TextBlock.css",
+      "src/elements/TextBlock/index.ts",
+      "src/elements/MediaText/MediaText.schema.ts",
+      "src/elements/MediaText/MediaText.tsx",
+      "src/elements/MediaText/MediaText.css",
+      "src/elements/MediaText/index.ts",
+      "src/elements/CardRow/CardRow.schema.ts",
+      "src/elements/CardRow/CardRow.tsx",
+      "src/elements/CardRow/CardRow.css",
+      "src/elements/CardRow/index.ts"
+    ],
+    "deleted": [],
+    "modified": ["src/builder/registry.ts"]
+  },
+  "new_exports": {
+    "services": [],
+    "components": [],
+    "hooks": [],
+    "types": [],
+    "utils": [],
+    "endpoints": []
+  },
+  "breaking_changes": [],
+  "migrations": [],
+  "tests": {
+    "unit": { "written": [], "pending": [], "skipped_reason": "No test infra in project" },
+    "integration": { "written": [], "pending": [] },
+    "e2e": { "written": [], "pending": [] }
+  },
+  "important_decisions": [
+    "Renderer already has materializeBlockProps — no changes needed",
+    "ContainerRenderProps bridges Zod BlockSpec[] type and runtime ReactNode via cast in index.ts"
+  ],
+  "notes": [],
+  "_meta": {
+    "schema_version": "2.0",
+    "last_updated": "2026-04-11",
+    "last_plan_completed": null
+  }
+}

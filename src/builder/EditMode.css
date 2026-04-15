@@ -1,0 +1,106 @@
+/* ── Text Editing ─────────────────────────────────────────────────────────── */
+
+[data-edit-mode="text"] {
+    outline: 2px dashed var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius_sm);
+    cursor: text;
+    min-width: 1ch;
+}
+
+[data-edit-mode="text"]:focus {
+    outline-style: solid;
+    background-color: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+/* ── Image Editing ────────────────────────────────────────────────────────── */
+
+.edit__image-wrap {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.edit__image-wrap:hover,
+.edit__image-wrap:focus-within {
+    pointer-events: auto;
+}
+
+.edit__image-btn {
+    position: absolute;
+    top: var(--space_xs);
+    right: var(--space_xs);
+    background: var(--primary);
+    color: var(--inverted_text);
+    border: none;
+    border-radius: var(--radius_sm);
+    padding: var(--space_xs) var(--space_sm);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.15s;
+    pointer-events: auto;
+}
+
+.edit__image-wrap:hover .edit__image-btn,
+.edit__image-wrap:focus-within .edit__image-btn {
+    opacity: 1;
+}
+
+.edit__image-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 40%);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+
+.edit__image-panel {
+    display: flex;
+    gap: var(--space_sm);
+    background: var(--surface);
+    border-radius: var(--radius_md);
+    padding: var(--space_md);
+    box-shadow: 0 8px 32px rgb(0 0 0 / 24%);
+    min-width: 360px;
+}
+
+.edit__image-input {
+    flex: 1;
+    border: 1px solid var(--muted_text);
+    border-radius: var(--radius_sm);
+    padding: var(--space_xs) var(--space_sm);
+    font-family: var(--font_family);
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--background);
+}
+
+.edit__image-input:focus {
+    outline: 2px solid var(--primary);
+    border-color: transparent;
+}
+
+.edit__image-confirm {
+    background: var(--primary);
+    color: var(--inverted_text);
+    border: none;
+    border-radius: var(--radius_sm);
+    padding: var(--space_xs) var(--space_md);
+    cursor: pointer;
+    font-family: var(--font_family);
+}
+
+.edit__image-cancel {
+    background: transparent;
+    color: var(--muted_text);
+    border: 1px solid var(--muted_text);
+    border-radius: var(--radius_sm);
+    padding: var(--space_xs) var(--space_sm);
+    cursor: pointer;
+    font-family: var(--font_family);
+}

@@ -1,0 +1,36 @@
+{
+  "feature": "edit-mode",
+  "feature_path": "docs/features/edit-mode/",
+  "masterplan": {
+    "read": true,
+    "path": "docs/features/edit-mode/Masterplan.md",
+    "summary": "Zentraler Edit Mode: Inline-Text-Editing + Bild-URL-Tausch via Hooks + Context",
+    "goals": ["Inline edit mode for all modules", "Consistent edit UI", "No prop drilling"],
+    "non_goals": ["Persistence", "Undo/Redo", "Rich text", "File upload", "Auth"],
+    "architecture_decisions": ["Split Context (State/Actions)", "data-edit-mode attribute", "setNestedProp helper (no deps)", "BlockIndexContext in Renderer"]
+  },
+  "plans": {
+    "total": 7,
+    "files": [
+      "01_Foundation.md",
+      "02_EditPrimitives.md",
+      "03_Toolbar.md",
+      "04.1_Modules_SimpleContent.md",
+      "04.2_Modules_Layout.md",
+      "04.3_Modules_Media.md",
+      "04.4_Modules_Cards.md"
+    ],
+    "current_index": 0
+  },
+  "status": "in_progress",
+  "completed": [],
+  "in_progress": null,
+  "blocked": [],
+  "decisions": [],
+  "files_changed": [],
+  "files_created": [],
+  "errors": [],
+  "last_updated": "2026-04-11",
+  "started_at": "2026-04-11",
+  "completed_at": null
+}

@@ -1,0 +1,16 @@
+/* Column count — drives grid-template-columns via CSS custom property */
+.card_grid[data-columns="2"] { --card-grid-cols: 2; }
+.card_grid[data-columns="3"] { --card-grid-cols: 3; }
+.card_grid[data-columns="4"] { --card-grid-cols: 4; }
+
+.card_grid__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--card-grid-cols, 3), 1fr);
+    gap: var(--space_md);
+}
+
+@media (max-width: 640px) {
+    .card_grid__grid {
+        grid-template-columns: 1fr;
+    }
+}

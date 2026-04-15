@@ -1,0 +1,15 @@
+.card_row__scroll {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space_md);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted_text) transparent;
+    padding-bottom: var(--space_sm);
+}
+
+/* Cards in a scroll row have a fixed width instead of growing */
+.card_row .card {
+    flex: 0 0 280px;
+}
