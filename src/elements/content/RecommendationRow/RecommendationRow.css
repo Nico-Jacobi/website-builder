@@ -7,11 +7,9 @@
 .recommendation_row__scroll {
     display: flex;
     flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
     gap: var(--space_md);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--muted_text) transparent;
     padding-bottom: var(--space_sm);
 }
 
