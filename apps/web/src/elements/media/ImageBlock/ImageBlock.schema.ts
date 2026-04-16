@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
+export { ImageBlockContentFields } from '@website-builder/shared';
+
 export const ImageBlockPropsSchema = z.object({
     /** Keywords describing the desired image (e.g. "modern office workspace"). Filled automatically into src — do not provide a URL. */
     imageQuery: z.string(),
@@ -28,3 +30,4 @@ export const ImageBlockMeta: ModuleMeta = {
     description: 'Full-width image with an optional caption. Use for hero images, section dividers, or standalone illustrations.',
     tags:        ['image', 'media', 'photo', 'caption'],
 };
+

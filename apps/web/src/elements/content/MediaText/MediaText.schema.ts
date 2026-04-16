@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
+export { MediaTextContentFields } from '@website-builder/shared';
+
 export const MediaTextPropsSchema = z.object({
     /** Keywords describing the desired image (e.g. "barista latte art coffee"). Filled automatically into imageSrc — do not provide a URL. */
     imageQuery:    z.string(),
@@ -28,3 +30,4 @@ export const MediaTextMeta: ModuleMeta = {
     description: 'Image beside a text column (heading + body). Position image left or right. Stacks vertically on narrow viewports.',
     tags:        ['media', 'image', 'text', 'side-by-side', 'layout'],
 };
+

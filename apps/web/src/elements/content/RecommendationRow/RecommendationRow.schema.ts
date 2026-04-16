@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
+export { RecommendationRowContentFields } from '@website-builder/shared';
+
 /** A single review entry: who said it, how many stars, and the excerpt. */
 export const RecommendationSchema = z.object({
     /** Reviewer's name — a person, customer, or publication (e.g. "Süddeutsche Zeitung"). */
@@ -61,3 +63,4 @@ export const RecommendationRowMeta: ModuleMeta = {
     description: 'Horizontal scrollable row of short reviews from customers or publications — each with name, source, star rating, and quote excerpt.',
     tags: ['reviews', 'ratings', 'press', 'social-proof', 'recommendations', 'testimonials'],
 };
+

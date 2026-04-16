@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 import { LinkSchema } from '../../shared/schemas';
 
+export { FooterSimpleContentFields } from '@website-builder/shared';
+
 export const FooterSimplePropsSchema = z.object({
     tagline:   z.string().optional(),
     copyright: z.string().optional(),
@@ -27,3 +29,4 @@ export const FooterSimpleMeta: ModuleMeta = {
         'Minimal single-row footer with tagline and copyright on the left and a flat link list on the right. No link column groups.',
     tags: ['footer', 'links', 'simple', 'minimal', 'layout'],
 };
+

@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
+export { StatRowContentFields } from '@website-builder/shared';
+
 /** A single statistic tile. */
 export const StatSchema = z.object({
     /** The statistic value displayed large, e.g. '10k+' or '99%'. */
@@ -41,3 +43,4 @@ export const StatRowMeta: ModuleMeta = {
     description: 'Row of large-value statistic tiles with descriptive labels. Common on marketing and landing pages.',
     tags: ['stats', 'metrics', 'numbers', 'marketing', 'kpi'],
 };
+

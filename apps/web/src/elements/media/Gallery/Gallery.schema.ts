@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
+export { GalleryContentFields } from '@website-builder/shared';
+
 /** A single image entry in the gallery. */
 export const GalleryImageSchema = z.object({
     /** Keywords describing the desired photo (e.g. "mountain landscape sunset"). Filled automatically into src — do not provide a URL. */
@@ -65,3 +67,4 @@ export const GalleryMeta: ModuleMeta = {
     description: 'Responsive CSS-grid photo gallery of 2–4 images with configurable columns and gap. Use for portfolios, showcases, or photo collections.',
     tags: ['gallery', 'grid', 'images', 'photos', 'media', 'caption'],
 };
+

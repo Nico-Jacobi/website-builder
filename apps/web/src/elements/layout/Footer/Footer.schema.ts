@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 import { LinkSchema } from '../../shared/schemas';
 
+export { FooterContentFields } from '@website-builder/shared';
+
 export const FooterColumnSchema = z.object({
     heading: z.string().optional(),
     links:   z.array(LinkSchema).min(1),
@@ -43,3 +45,4 @@ export const FooterMeta: ModuleMeta = {
     description: 'Page footer with optional tagline, copyright notice, and grouped link columns.',
     tags:        ['footer', 'links', 'nav', 'layout'],
 };
+

@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
+export { HeroBannerContentFields } from '@website-builder/shared';
+
 export const HeroBannerPropsSchema = z.object({
     /** Large H1 headline displayed center-stage. */
     heading: z.string(),
@@ -51,3 +53,4 @@ export const HeroBannerMeta: ModuleMeta = {
         'Full-width centered hero section with headline, optional subheading, background image/color, and configurable minimum height. Text is centered both horizontally and vertically. Place directly below the Header.',
     tags: ['hero', 'banner', 'layout', 'landing'],
 };
+

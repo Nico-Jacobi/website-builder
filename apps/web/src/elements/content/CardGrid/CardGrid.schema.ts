@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 import { CardSchema } from '../../shared/schemas';
 
+export { CardGridContentFields } from '@website-builder/shared';
+
 export const CardGridPropsSchema = z.object({
     cards:   z.array(CardSchema).min(1),
     columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).default(3),
@@ -25,3 +27,4 @@ export const CardGridMeta: ModuleMeta = {
     description: 'Grid of image-title-body cards that wraps into rows. Use instead of CardRow when cards should stack rather than scroll horizontally.',
     tags:        ['cards', 'grid', 'gallery', 'features', 'wrap'],
 };
+

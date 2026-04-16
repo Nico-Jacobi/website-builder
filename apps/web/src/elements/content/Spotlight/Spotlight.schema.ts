@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
+export { SpotlightContentFields } from '@website-builder/shared';
+
 export const SpotlightPropsSchema = z.object({
     /** Keywords describing the desired photo (e.g. "professional male portrait office"). Filled automatically into image — do not provide a URL. */
     imageQuery: z.string().optional(),
@@ -45,3 +47,4 @@ export const SpotlightMeta: ModuleMeta = {
     description: 'A spotlight block introducing a person, team, or topic. Photo beside a short statement with optional eyebrow label and signature caption. Suitable for "about us", founder introductions, or team highlights.',
     tags: ['about', 'owner', 'team', 'introduction', 'spotlight', 'profile', 'statement'],
 };
+

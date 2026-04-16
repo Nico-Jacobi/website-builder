@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 import { CardSchema } from '../../shared/schemas';
 
+export { CardRowContentFields } from '@website-builder/shared';
+
 export const CardRowPropsSchema = z.object({
     cards: z.array(CardSchema).min(1),
 });
@@ -22,3 +24,4 @@ export const CardRowMeta: ModuleMeta = {
     description: 'A horizontal row of image-title-body cards. Scrolls horizontally on narrow viewports.',
     tags:        ['cards', 'grid', 'gallery', 'features', 'list'],
 };
+

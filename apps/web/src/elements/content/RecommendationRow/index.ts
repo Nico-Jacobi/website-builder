@@ -3,6 +3,7 @@ import {
     RecommendationRowPropsSchema,
     RecommendationRowDefaults,
     RecommendationRowMeta,
+    RecommendationRowContentFields,
 } from './RecommendationRow.schema';
 import type { RecommendationRowProps } from './RecommendationRow.schema';
 import type { ModuleDefinition } from '../../../builder/types';
@@ -12,6 +13,7 @@ export const RecommendationRowModule: ModuleDefinition<RecommendationRowProps> =
     propsSchema: RecommendationRowPropsSchema,
     defaults:    RecommendationRowDefaults,
     Component:   RecommendationRow,
+    contentFields: RecommendationRowContentFields,
 };
 
 export { default as RecommendationRow } from './RecommendationRow';

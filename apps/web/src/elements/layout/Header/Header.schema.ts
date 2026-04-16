@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 import { LinkSchema } from '../../shared/schemas';
 
+export { HeaderContentFields } from '@website-builder/shared';
+
 export const HeaderPropsSchema = z.object({
     title:    z.string(),
     subtitle: z.string().optional(),
@@ -22,3 +24,4 @@ export const HeaderMeta: ModuleMeta = {
     description: 'Page header with brand (title + optional subtitle/icon) and optional navigation links.',
     tags: ['header', 'nav', 'branding'],
 };
+

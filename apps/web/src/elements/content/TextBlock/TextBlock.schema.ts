@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
+export { TextBlockContentFields } from '@website-builder/shared';
+
 export const TextBlockPropsSchema = z.object({
     eyebrow: z.string().optional(),
     heading: z.string().optional(),
@@ -22,3 +24,4 @@ export const TextBlockMeta: ModuleMeta = {
     description: 'Heading, body paragraph, and optional subtext with configurable text alignment.',
     tags:        ['text', 'heading', 'copy', 'paragraph', 'content'],
 };
+
