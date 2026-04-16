@@ -13,38 +13,46 @@ Three contracts make this work:
 3. **Module contract** — how modules are declared so the registry, renderer,
    and future editor/LLM can all consume them from one source of truth.
 
-## File layout
+## Repository layout (monorepo)
 
 ```
-src/
-├── index.css                        # Design tokens + global reset
-├── App.css                          # Layout primitives + shared element classes
-├── App.tsx                          # Composes modules (eventually: hosts <Renderer>)
-├── main.tsx
-├── builder/
-│   ├── types.ts                     # ModuleDefinition, BlockSpec, SiteSpec
-│   ├── registry.ts                  # Central map of all known modules
-│   └── Renderer.tsx                 # Walks a SiteSpec and renders it
-└── elements/
-    ├── shared/                      # Reusable building blocks (not modules)
-    │   ├── schemas.ts               # LinkSchema, CardSchema — shared Zod schemas
-    │   └── Card.tsx                 # Shared <Card> component (.card CSS class)
-    ├── layout/
-    │   ├── Header/
-    │   ├── HeroBanner/
-    │   ├── Container/
-    │   ├── Footer/
-    │   └── FooterSimple/
-    ├── content/
-    │   ├── TextBlock/
-    │   ├── MediaText/
-    │   ├── CardRow/
-    │   ├── CardGrid/
-    │   ├── Callout/
-    │   └── StatRow/
-    └── media/
-        ├── ImageBlock/
-        └── Gallery/
+website_builder/
+├── apps/
+│   ├── api/                         # Express backend
+│   └── web/                         # React/Vite frontend
+│       ├── src/
+│       │   ├── index.css            # Design tokens + global reset
+│       │   ├── App.css              # Layout primitives + shared element classes
+│       │   ├── App.tsx
+│       │   ├── main.tsx
+│       │   ├── builder/
+│       │   │   ├── types.ts         # ModuleDefinition, BlockSpec, SiteSpec
+│       │   │   ├── registry.ts      # Central map of all known modules
+│       │   │   └── Renderer.tsx     # Walks a SiteSpec and renders it
+│       │   └── elements/
+│       │       ├── shared/          # Reusable building blocks (not modules)
+│       │       │   ├── schemas.ts   # LinkSchema, CardSchema — shared Zod schemas
+│       │       │   └── Card.tsx     # Shared <Card> component (.card CSS class)
+│       │       ├── layout/
+│       │       │   ├── Header/
+│       │       │   ├── HeroBanner/
+│       │       │   ├── Container/
+│       │       │   ├── Footer/
+│       │       │   └── FooterSimple/
+│       │       ├── content/
+│       │       │   ├── TextBlock/
+│       │       │   ├── MediaText/
+│       │       │   ├── CardRow/
+│       │       │   ├── CardGrid/
+│       │       │   ├── StatRow/
+│       │       │   ├── RecommendationRow/
+│       │       │   └── Spotlight/
+│       │       └── media/
+│       │           ├── ImageBlock/
+│       │           └── Gallery/
+│       └── index.html
+└── packages/
+    └── shared/                      # Shared types & utilities
 ```
 
 Each module folder contains exactly four files:
@@ -59,7 +67,7 @@ Header/
 
 ## The CSS layers
 
-### 1. Tokens — [src/index.css](src/index.css)
+### 1. Tokens — [apps/web/src/index.css](apps/web/src/index.css)
 
 The only place colors, spacing, radii, and fonts are defined. Exposed as CSS
 custom properties. Also holds the global reset, including:
@@ -71,7 +79,7 @@ custom properties. Also holds the global reset, including:
 **Never** declare `box-sizing` or `font-family` inside a module — both are
 already inherited from the global reset.
 
-### 2. Shared primitives — [src/App.css](src/App.css)
+### 2. Shared primitives — [apps/web/src/App.css](apps/web/src/App.css)
 
 Layout primitives (`.vertical_layout`, `.horizontal_layout`) **and** shared
 element base classes that modules compose with their own BEM class:
@@ -93,7 +101,7 @@ A standard content module applies both its own class and a shared base:
 This means changing section padding in one place updates every content module
 automatically. Only add module-specific rules to the module's own CSS file.
 
-### 3. Module styles — `src/elements/<category>/<Name>/<Name>.css`
+### 3. Module styles — `apps/web/src/elements/<category>/<Name>/<Name>.css`
 
 BEM-scoped classes for everything that is unique to this module. The module
 imports its own CSS (`import './Header.css'`), not the other way around.
@@ -111,7 +119,7 @@ imports its own CSS (`import './Header.css'`), not the other way around.
   component. Override per-context via a parent selector (e.g.
   `.card_row .card { flex: 0 0 280px; }`).
 
-## Shared schemas — [src/elements/shared/schemas.ts](src/elements/shared/schemas.ts)
+## Shared schemas — [apps/web/src/elements/shared/schemas.ts](apps/web/src/elements/shared/schemas.ts)
 
 Two Zod schemas are used by multiple modules. Always import them instead of
 redefining locally:
@@ -129,7 +137,7 @@ import type { Link, CardData } from '../../shared/schemas';
 
 ## The module contract
 
-Every module is a **`ModuleDefinition`** (see [src/builder/types.ts](src/builder/types.ts)):
+Every module is a **`ModuleDefinition`** (see [apps/web/src/builder/types.ts](apps/web/src/builder/types.ts)):
 
 ```ts
 interface ModuleDefinition<P> {
@@ -146,7 +154,7 @@ Props types are derived from the schema via `z.infer` — never hand-written.
 
 ## The registry
 
-[src/builder/registry.ts](src/builder/registry.ts) is the single place that
+[apps/web/src/builder/registry.ts](apps/web/src/builder/registry.ts) is the single place that
 knows every module. Import `<Name>Module` and add it to the `modules` array.
 That is the only central change adding a module requires.
 
@@ -169,7 +177,7 @@ schema. The renderer recurses into it — nesting has no other mechanism.
 
 ## Adding a new module
 
-1. Create `src/elements/<category>/Foo/` with:
+1. Create `apps/web/src/elements/<category>/Foo/` with:
    - `Foo.tsx` — import `'./Foo.css'` at the top; apply `.section` if it's a
      standard full-width content block
    - `Foo.css` — BEM-scoped classes (`.foo`, `.foo__part`), tokens only
@@ -177,12 +185,12 @@ schema. The renderer recurses into it — nesting has no other mechanism.
      `CardSchema`); export `FooPropsSchema`, `FooDefaults`, `FooMeta`, and
      `type FooProps = z.infer<typeof FooPropsSchema>`
    - `index.ts` — assembles and exports `FooModule: ModuleDefinition`
-2. Register `FooModule` in [src/builder/registry.ts](src/builder/registry.ts).
+2. Register `FooModule` in [apps/web/src/builder/registry.ts](apps/web/src/builder/registry.ts).
 3. Reference `Foo` in a spec by name: `{ "type": "Foo", "props": { … } }`.
 
 ## Tokens reference
 
-Defined in [src/index.css](src/index.css):
+Defined in [apps/web/src/index.css](apps/web/src/index.css):
 
 - **Colors:** `--primary`, `--secondary`, `--accent`, `--alt_primary`,
   `--alt_secondary`, `--background`, `--surface`, `--text`, `--muted_text`,
