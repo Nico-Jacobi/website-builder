@@ -63,7 +63,8 @@ export async function fillImages(spec: SiteSpec): Promise<SiteSpec> {
         const slot = slots[idx];
         if (result.status === 'fulfilled') {
             slot.apply(result.value.url);
-            log('ok', `  ${slot.label} → "${result.value.query}"`);
+            const shortUrl = result.value.url.replace(/^https?:\/\/[^/]+/, '').slice(0, 60);
+            log('ok', `  ${slot.label} → ${shortUrl}`);
         } else {
             log('warn', `  ${slot.label} → Fehler: ${String(result.reason)}`);
         }
@@ -125,6 +126,18 @@ function collectFromBlock(block: BlockSpec, slots: ImageSlot[], path: string[]):
                 label: `${where}.imageSrc`,
                 apply: (url) => { props.imageSrc = url; },
             });
+            break;
+        }
+
+        case 'Spotlight': {
+            if (typeof props.imageQuery === 'string' && props.imageQuery !== '') {
+                slots.push({
+                    imageQuery: props.imageQuery,
+                    width: 800, height: 900,
+                    label: `${where}.image`,
+                    apply: (url) => { props.image = url; },
+                });
+            }
             break;
         }
 

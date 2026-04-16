@@ -2,8 +2,11 @@ import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
 export const SpotlightPropsSchema = z.object({
-    /** URL to the photo — a portrait of the person, team, or a representative image. */
-    image: z.string().url(),
+    /** Keywords describing the desired photo (e.g. "professional male portrait office"). Filled automatically into image — do not provide a URL. */
+    imageQuery: z.string().optional(),
+
+    /** Populated automatically from imageQuery — leave empty. */
+    image: z.string().default(''),
 
     /** Alt text for the image. Falls back to the title if omitted. */
     imageAlt: z.string().optional(),
@@ -27,7 +30,8 @@ export const SpotlightPropsSchema = z.object({
 export type SpotlightProps = z.infer<typeof SpotlightPropsSchema>;
 
 export const SpotlightDefaults: SpotlightProps = {
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&h=900&fit=crop',
+    imageQuery: 'professional portrait office',
+    image: '',
     eyebrow: 'Unser Gründer',
     title: 'Handwerk seit 1987',
     body: 'Wir glauben an den ruhigen, sorgfältigen Ton eines Ortes, an dem die Dinge mit Bedacht entstehen — jeden Tag aufs Neue, mit den gleichen Händen und denselben Überzeugungen.',

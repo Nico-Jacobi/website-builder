@@ -54,6 +54,7 @@ export function buildSystemPrompt(surface: RegistryLLMSurface): string {
         '5. The first block is typically `Header` and the last is typically `Footer` or `FooterSimple`. Between them, build a coherent landing-page narrative.',
         '6. Use `Container` for grouping only when a section clearly needs a distinct background or max-width. Max ONE level of nesting — do not put Containers inside Containers.',
         '7. Header `links` may point to other pages that do not yet exist — dead hrefs like `"#about"` are fine.',
+        '8. **Never write image URLs.** For any image field use the corresponding `imageQuery` field with descriptive English keywords (e.g. `"trailer rental truck"`). The builder fetches real photos automatically. Leave `imageSrc`, `image`, `backgroundImage`, and `src` fields empty or omit them entirely.',
         '',
         '## Theme',
         '',
