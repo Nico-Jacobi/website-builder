@@ -6,10 +6,10 @@ import { assembleSpec } from '../services/assembleSpec';
 export const sitesRouter = new Hono();
 
 /** Site overview: meta + list of pages. */
-sitesRouter.get('/:slug', async (c) => {
-    const slug = c.req.param('slug');
+sitesRouter.get('/:identifier', async (c) => {
+    const identifier = c.req.param('identifier');
     const site = await db.query.sites.findFirst({
-        where: eq(schema.sites.slug, slug),
+        where: eq(schema.sites.identifier, identifier),
     });
     if (!site) return c.json({ error: 'site not found' }, 404);
 
@@ -19,12 +19,11 @@ sitesRouter.get('/:slug', async (c) => {
 
     return c.json({
         id: site.id,
-        slug: site.slug,
+        identifier: site.identifier,
         name: site.name,
         theme: site.theme ?? null,
         pages: pages.map((p) => ({
             path: p.path,
-            title: p.title,
             metaDesc: p.metaDesc,
             published: p.published,
         })),
@@ -38,10 +37,10 @@ sitesRouter.get('/:slug', async (c) => {
  *
  *   GET /api/sites/acme/spec?path=/about
  */
-sitesRouter.get('/:slug/spec', async (c) => {
-    const slug = c.req.param('slug');
+sitesRouter.get('/:identifier/spec', async (c) => {
+    const identifier = c.req.param('identifier');
     const path = c.req.query('path') ?? '/';
-    const spec = await assembleSpec(slug, path);
+    const spec = await assembleSpec(identifier, path);
     if (!spec) return c.json({ error: 'site or page not found' }, 404);
     return c.json(spec);
 });

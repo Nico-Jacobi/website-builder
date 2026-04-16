@@ -48,7 +48,6 @@ CREATE TABLE "pages" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"site_id" uuid NOT NULL,
 	"path" text NOT NULL,
-	"title" text NOT NULL,
 	"meta_desc" text,
 	"published" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -69,11 +68,11 @@ CREATE TABLE "site_members" (
 --> statement-breakpoint
 CREATE TABLE "sites" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"slug" text NOT NULL,
+	"identifier" text NOT NULL,
 	"name" text NOT NULL,
 	"theme" jsonb,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "sites_slug_unique" UNIQUE("slug")
+	CONSTRAINT "sites_identifier_unique" UNIQUE("identifier")
 );
 --> statement-breakpoint
 CREATE TABLE "users" (

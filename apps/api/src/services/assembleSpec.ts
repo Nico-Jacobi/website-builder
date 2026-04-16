@@ -10,9 +10,9 @@ import { db, schema } from '../db/client';
  *
  * Returns `null` if the site or page is not found.
  */
-export async function assembleSpec(slug: string, pagePath: string): Promise<SiteSpec | null> {
+export async function assembleSpec(identifier: string, pagePath: string): Promise<SiteSpec | null> {
     const site = await db.query.sites.findFirst({
-        where: eq(schema.sites.slug, slug),
+        where: eq(schema.sites.identifier, identifier),
     });
     if (!site) return null;
 

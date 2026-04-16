@@ -6,11 +6,10 @@ import { db, schema } from '../db/client';
 import { splitSpec } from '../services/splitSpec';
 
 const SeedBody = z.object({
-    slug:  z.string().min(1).regex(/^[a-z0-9-]+$/, 'slug must be lower-case, digits, or dashes'),
-    name:  z.string().min(1),
-    path:  z.string().default('/'),
-    title: z.string(),
-    spec:  SiteSpecSchema,
+    identifier: z.string().min(1).regex(/^[a-z0-9-]+$/, 'identifier must be lower-case, digits, or dashes'),
+    name:       z.string().min(1),
+    path:       z.string().default('/'),
+    spec:       SiteSpecSchema,
 });
 
 export const seedRouter = new Hono();
@@ -33,15 +32,15 @@ seedRouter.post('/', async (c) => {
     if (!parsed.success) {
         return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
     }
-    const { slug, name, path, title, spec } = parsed.data;
+    const { identifier, name, path, spec } = parsed.data;
     const split = splitSpec(spec);
 
     const result = await db.transaction(async (tx) => {
-        let site = await tx.query.sites.findFirst({ where: eq(schema.sites.slug, slug) });
+        let site = await tx.query.sites.findFirst({ where: eq(schema.sites.identifier, identifier) });
         if (!site) {
             const [inserted] = await tx
                 .insert(schema.sites)
-                .values({ slug, name, theme: split.theme })
+                .values({ identifier, name, theme: split.theme })
                 .returning();
             site = inserted!;
         } else {
@@ -57,13 +56,13 @@ seedRouter.post('/', async (c) => {
         if (!page) {
             const [inserted] = await tx
                 .insert(schema.pages)
-                .values({ siteId: site.id, path, title, published: true })
+                .values({ siteId: site.id, path, published: true })
                 .returning();
             page = inserted!;
         } else {
             await tx
                 .update(schema.pages)
-                .set({ title, published: true })
+                .set({ published: true })
                 .where(eq(schema.pages.id, page.id));
             // Cascade deletes blocks + block_content + form_definitions.
             await tx.delete(schema.pageBlocks).where(eq(schema.pageBlocks.pageId, page.id));
@@ -102,5 +101,5 @@ seedRouter.post('/', async (c) => {
         return { siteId: site.id, pageId: page.id, blockCount: split.blocks.length };
     });
 
-    return c.json({ ok: true, slug, path, ...result });
+    return c.json({ ok: true, identifier, path, ...result });
 });

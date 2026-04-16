@@ -16,7 +16,7 @@ import {
 
 export const sites = pgTable('sites', {
     id:        uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    slug:      text('slug').notNull().unique(),
+    identifier: text('identifier').notNull().unique(),
     name:      text('name').notNull(),
     /** CSS-variable overrides applied at :root (SiteSpec.theme). */
     theme:     jsonb('theme').$type<Record<string, string> | null>(),
@@ -29,7 +29,6 @@ export const pages = pgTable(
         id:        uuid('id').primaryKey().default(sql`gen_random_uuid()`),
         siteId:    uuid('site_id').notNull().references(() => sites.id, { onDelete: 'cascade' }),
         path:      text('path').notNull(), // "/", "/about"
-        title:     text('title').notNull(),
         metaDesc:  text('meta_desc'),
         published: boolean('published').notNull().default(false),
         createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
