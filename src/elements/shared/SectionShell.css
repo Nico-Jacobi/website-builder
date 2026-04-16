@@ -1,0 +1,28 @@
+/* SectionShell — applies background and text color based on data-tone attribute.
+   No padding — modules control their own spacing via .section or their own CSS.
+   When data-tone is absent, no styles are applied (shell is transparent). */
+
+[data-tone="surface"] {
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+[data-tone="muted"] {
+    background-color: var(--background);
+    color: var(--text);
+}
+
+[data-tone="primary"] {
+    background-color: var(--primary);
+    color: var(--inverted_text);
+}
+
+[data-tone="dark"] {
+    background-color: var(--secondary);
+    color: var(--inverted_text);
+}
+
+[data-tone="accent"] {
+    background-color: var(--accent);
+    color: var(--inverted_text);
+}

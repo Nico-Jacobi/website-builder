@@ -1,5 +1,6 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import './Renderer.css';
+import { SectionShell } from '../elements/shared/SectionShell';
 import { BlockIndexContext } from './editModeStore';
 import { getModule } from './registry';
 import type { BlockSpec, SiteSpec } from './schemas';
@@ -25,7 +26,9 @@ export default function Renderer({ spec }: { spec: SiteSpec }) {
         <div className="vertical_layout" style={themeStyle}>
             {spec.blocks.map((block, i) => (
                 <BlockIndexContext.Provider key={block.id ?? `idx_${i}`} value={i}>
-                    {renderBlock(block, `blocks[${i}]`)}
+                    <SectionShell tone={block.tone}>
+                        {renderBlock(block, `blocks[${i}]`)}
+                    </SectionShell>
                 </BlockIndexContext.Provider>
             ))}
         </div>
