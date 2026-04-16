@@ -13,7 +13,7 @@ import { FooterSimpleModule } from '../elements/layout/FooterSimple';
 import { TextBlockModule   } from '../elements/content/TextBlock';
 import { MediaTextModule   } from '../elements/content/MediaText';
 import { CardRowModule     } from '../elements/content/CardRow';
-import { CalloutModule     } from '../elements/content/Callout';
+import { TestimonialModule } from '../elements/content/Testimonial';
 import { StatRowModule     } from '../elements/content/StatRow';
 import { CardGridModule    } from '../elements/content/CardGrid';
 
@@ -44,7 +44,7 @@ const modules: AnyModule[] = [
     TextBlockModule,
     MediaTextModule,
     CardRowModule,
-    CalloutModule,
+    TestimonialModule,
     StatRowModule,
     CardGridModule,
     // Media

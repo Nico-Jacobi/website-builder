@@ -13,7 +13,7 @@ import { TextBlockPropsSchema, TextBlockDefaults } from './content/TextBlock/Tex
 import { MediaTextPropsSchema, MediaTextDefaults } from './content/MediaText/MediaText.schema';
 import { CardRowPropsSchema, CardRowDefaults } from './content/CardRow/CardRow.schema';
 import { CardGridPropsSchema, CardGridDefaults } from './content/CardGrid/CardGrid.schema';
-import { CalloutPropsSchema, CalloutDefaults } from './content/Callout/Callout.schema';
+import { TestimonialPropsSchema, TestimonialDefaults } from './content/Testimonial/Testimonial.schema';
 import { StatRowPropsSchema, StatRowDefaults, StatSchema } from './content/StatRow/StatRow.schema';
 import { ImageBlockPropsSchema, ImageBlockDefaults } from './media/ImageBlock/ImageBlock.schema';
 import { GalleryPropsSchema, GalleryDefaults, GalleryImageSchema } from './media/Gallery/Gallery.schema';
@@ -545,49 +545,75 @@ describe('CardGridPropsSchema', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 10. Callout
+// 10. Testimonial
 // ---------------------------------------------------------------------------
 
-describe('CalloutPropsSchema', () => {
+describe('TestimonialPropsSchema', () => {
     it('parses defaults', () => {
-        expect(parses(CalloutPropsSchema, CalloutDefaults)).toBe(true);
+        expect(parses(TestimonialPropsSchema, TestimonialDefaults)).toBe(true);
     });
 
     it('parses with all fields populated', () => {
-        expect(parses(CalloutPropsSchema, {
-            icon: '!', heading: 'Warning', body: 'Careful', tone: 'danger',
+        expect(parses(TestimonialPropsSchema, {
+            image: 'https://example.com/avatar.jpg',
+            quote: 'Great product!',
+            author: 'Jane Doe',
+            title: 'CEO',
         })).toBe(true);
     });
 
-    it('parses with only required field (body)', () => {
-        expect(parses(CalloutPropsSchema, { body: 'Note' })).toBe(true);
+    it('parses with only required fields (image, quote, author)', () => {
+        expect(parses(TestimonialPropsSchema, {
+            image: 'https://example.com/avatar.jpg',
+            quote: 'Great product!',
+            author: 'Jane Doe',
+        })).toBe(true);
     });
 
-    it('applies default tone when omitted', () => {
-        const result = CalloutPropsSchema.parse({ body: 'Note' });
-        expect(result.tone).toBe('info');
+    it('rejects missing image', () => {
+        expect(fails(TestimonialPropsSchema, {
+            quote: 'Great!',
+            author: 'Jane',
+        })).toBe(true);
     });
 
-    it('rejects missing body', () => {
-        expect(fails(CalloutPropsSchema, { tone: 'info' })).toBe(true);
+    it('rejects invalid image URL', () => {
+        expect(fails(TestimonialPropsSchema, {
+            image: 'not-a-url',
+            quote: 'Great!',
+            author: 'Jane',
+        })).toBe(true);
     });
 
-    it('rejects non-string body', () => {
-        expect(fails(CalloutPropsSchema, { body: 42 })).toBe(true);
+    it('rejects missing quote', () => {
+        expect(fails(TestimonialPropsSchema, {
+            image: 'https://example.com/avatar.jpg',
+            author: 'Jane',
+        })).toBe(true);
     });
 
-    it('accepts all valid tone values', () => {
-        for (const t of ['info', 'success', 'warning', 'danger']) {
-            expect(parses(CalloutPropsSchema, { body: 'B', tone: t })).toBe(true);
-        }
+    it('rejects missing author', () => {
+        expect(fails(TestimonialPropsSchema, {
+            image: 'https://example.com/avatar.jpg',
+            quote: 'Great!',
+        })).toBe(true);
     });
 
-    it('rejects invalid tone value', () => {
-        expect(fails(CalloutPropsSchema, { body: 'B', tone: 'error' })).toBe(true);
+    it('rejects non-string quote', () => {
+        expect(fails(TestimonialPropsSchema, {
+            image: 'https://example.com/avatar.jpg',
+            quote: 123,
+            author: 'Jane',
+        })).toBe(true);
     });
 
-    it('rejects numeric tone', () => {
-        expect(fails(CalloutPropsSchema, { body: 'B', tone: 0 })).toBe(true);
+    it('accepts title as optional field', () => {
+        expect(parses(TestimonialPropsSchema, {
+            image: 'https://example.com/avatar.jpg',
+            quote: 'Great!',
+            author: 'Jane',
+            title: 'Director',
+        })).toBe(true);
     });
 });
 

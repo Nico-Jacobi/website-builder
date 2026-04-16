@@ -17,7 +17,7 @@ import { TextBlock } from './content/TextBlock';
 import { MediaText } from './content/MediaText';
 import { CardRow } from './content/CardRow';
 import { CardGrid } from './content/CardGrid';
-import { Callout } from './content/Callout';
+import Testimonial from './content/Testimonial/Testimonial';
 import { StatRow } from './content/StatRow';
 
 // Media modules
@@ -343,40 +343,41 @@ describe('CardGrid', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 10. Callout
+// 10. Testimonial
 // ---------------------------------------------------------------------------
-describe('Callout', () => {
-    it('renders body text', () => {
-        renderInProvider(<Callout body="Important info" tone="info" />);
-        expect(screen.getByText('Important info')).toBeInTheDocument();
+describe('Testimonial', () => {
+    const testimonialProps = {
+        image: 'https://example.com/avatar.jpg',
+        quote: 'This is an amazing product!',
+        author: 'Jane Doe',
+        title: 'CEO',
+    };
+
+    it('renders the quote', () => {
+        renderInProvider(<Testimonial {...testimonialProps} />);
+        expect(screen.getByText(/This is an amazing product!/)).toBeInTheDocument();
     });
 
-    it('renders icon when provided', () => {
-        renderInProvider(<Callout icon="💡" body="Tip" tone="info" />);
-        expect(screen.getByText('💡')).toBeInTheDocument();
+    it('renders the author name', () => {
+        renderInProvider(<Testimonial {...testimonialProps} />);
+        expect(screen.getByText('Jane Doe')).toBeInTheDocument();
     });
 
-    it('renders heading when provided', () => {
-        renderInProvider(<Callout heading="Did you know?" body="Fact" tone="info" />);
-        expect(screen.getByText('Did you know?')).toBeInTheDocument();
+    it('renders the author title when provided', () => {
+        renderInProvider(<Testimonial {...testimonialProps} />);
+        expect(screen.getByText('CEO')).toBeInTheDocument();
     });
 
-    it('applies data-tone attribute', () => {
-        const { container } = renderInProvider(<Callout body="Warning" tone="warning" />);
-        expect(container.querySelector('.callout')).toHaveAttribute('data-tone', 'warning');
+    it('renders the avatar image with correct src and alt', () => {
+        const { container } = renderInProvider(<Testimonial {...testimonialProps} />);
+        const img = container.querySelector('.testimonial__image');
+        expect(img).toHaveAttribute('src', 'https://example.com/avatar.jpg');
+        expect(img).toHaveAttribute('alt', 'Jane Doe');
     });
 
-    it('supports different tones', () => {
-        const { container: c1 } = renderInProvider(<Callout body="a" tone="success" />);
-        expect(c1.querySelector('.callout')).toHaveAttribute('data-tone', 'success');
-
-        const { container: c2 } = renderInProvider(<Callout body="b" tone="danger" />);
-        expect(c2.querySelector('.callout')).toHaveAttribute('data-tone', 'danger');
-    });
-
-    it('does not render icon when omitted', () => {
-        const { container } = renderInProvider(<Callout body="No icon" tone="info" />);
-        expect(container.querySelector('.callout__icon')).not.toBeInTheDocument();
+    it('does not render title when omitted', () => {
+        const { container } = renderInProvider(<Testimonial image={testimonialProps.image} quote={testimonialProps.quote} author={testimonialProps.author} />);
+        expect(container.querySelector('.testimonial__title')).not.toBeInTheDocument();
     });
 });
 

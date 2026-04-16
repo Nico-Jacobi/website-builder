@@ -16,7 +16,7 @@ describe('buildSystemPrompt', () => {
             'TextBlock',
             'MediaText',
             'CardRow',
-            'Callout',
+            'Testimonial',
             'StatRow',
             'CardGrid',
             'ImageBlock',
