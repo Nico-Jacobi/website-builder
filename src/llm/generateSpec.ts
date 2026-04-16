@@ -4,6 +4,7 @@ import { getRegistryLLMSurface } from '../builder/registry';
 import { validateSpecAgainstRegistry } from '../builder/validateSpec';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { log } from './logger';
+import { setTrace, clearTrace } from './llmTrace';
 import { fillImages } from './imageFiller';
 import type { GenerateResult } from './types';
 import type { RegistryLLMSurface } from '../builder/types';
@@ -33,6 +34,7 @@ export async function generateSpec(
     options: GenerateSpecOptions = {},
 ): Promise<GenerateResult> {
     log('step', `Prompt empfangen (${userPrompt.length} chars)`);
+    clearTrace();
 
     const client = 'client' in options ? options.client : getClient();
     if (!client) {
@@ -46,6 +48,7 @@ export async function generateSpec(
 
     const systemInstruction = buildSystemPrompt(surface);
     log('ok', `System-Prompt gebaut (${systemInstruction.length} chars)`);
+    setTrace({ systemPrompt: systemInstruction, userPrompt, rawResponse: null });
 
     let response;
     try {
@@ -59,6 +62,7 @@ export async function generateSpec(
             },
         });
         log('ok', 'Antwort erhalten');
+        setTrace({ systemPrompt: systemInstruction, userPrompt, rawResponse: response.text ?? null });
     } catch (err) {
         const message = extractErrorMessage(err);
         log('error', `API-Fehler: ${message}`);

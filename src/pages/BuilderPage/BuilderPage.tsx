@@ -5,6 +5,8 @@ import { generateSpec } from '../../llm/generateSpec';
 import { loadState, savePrompt, saveSpec } from '../../state/specStore';
 import { clearLog, getLogSnapshot, subscribeLog, type LogEntry } from '../../llm/logger';
 import type { GenerateResult } from '../../llm/types';
+import { listModules, getRegistryLLMSurface } from '../../builder/registry';
+import { subscribeTrace, getTrace } from '../../llm/llmTrace';
 
 type UIStatus = 'idle' | 'loading' | 'done';
 
@@ -63,6 +65,8 @@ export function BuilderPage() {
             <section className="builder_page__output">
                 {status === 'done' && result && <ResultView result={result} />}
             </section>
+
+            <DebugPanel />
         </div>
     );
 }
@@ -172,4 +176,104 @@ function ErrorPanel({
 
 function formatSpecErrors(errors: Array<{ path: string; message: string }>): string {
     return errors.map((e) => `• ${e.path || '(root)'}: ${e.message}`).join('\n');
+}
+
+function DebugPanel() {
+    const modules = listModules();
+    const surface = getRegistryLLMSurface();
+    const trace = useSyncExternalStore(subscribeTrace, getTrace);
+
+    return (
+        <details className="debug_panel">
+            <summary className="debug_panel__toggle">Debug</summary>
+
+            <div className="debug_panel__sections">
+                <details className="debug_panel__section">
+                    <summary className="debug_panel__summary">
+                        listModules() — {modules.length} Module
+                    </summary>
+                    <div className="debug_panel__body">
+                        <table className="debug_table">
+                            <thead>
+                                <tr>
+                                    <th>name</th>
+                                    <th>category</th>
+                                    <th>description</th>
+                                    <th>tags</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {modules.map((m) => (
+                                    <tr key={m.meta.name}>
+                                        <td>{m.meta.name}</td>
+                                        <td>{m.meta.category}</td>
+                                        <td>{m.meta.description}</td>
+                                        <td>{m.meta.tags?.join(', ') ?? '—'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+
+                <details className="debug_panel__section">
+                    <summary className="debug_panel__summary">
+                        getRegistryLLMSurface()
+                    </summary>
+                    <div className="debug_panel__body">
+                        <pre className="debug_panel__pre">
+                            {JSON.stringify(surface, null, 2)}
+                        </pre>
+                    </div>
+                </details>
+
+                <details className="debug_panel__section">
+                    <summary className="debug_panel__summary">
+                        Letzter LLM-Request / Response
+                        {trace ? '' : ' — noch kein Request'}
+                    </summary>
+                    <div className="debug_panel__body">
+                        {!trace ? (
+                            <p className="debug_panel__empty">Noch kein Request abgesetzt.</p>
+                        ) : (
+                            <div className="debug_trace">
+                                <details className="debug_trace__part" open>
+                                    <summary className="debug_trace__label">
+                                        User Prompt
+                                    </summary>
+                                    <pre className="debug_panel__pre debug_panel__pre--prose">{trace.userPrompt}</pre>
+                                </details>
+
+                                <details className="debug_trace__part">
+                                    <summary className="debug_trace__label">
+                                        System Prompt ({trace.systemPrompt.length} chars)
+                                    </summary>
+                                    <pre className="debug_panel__pre debug_panel__pre--prose">{trace.systemPrompt}</pre>
+                                </details>
+
+                                <details className="debug_trace__part" open>
+                                    <summary className="debug_trace__label">
+                                        Raw Response {trace.rawResponse ? `(${trace.rawResponse.length} chars)` : '— ausstehend'}
+                                    </summary>
+                                    {trace.rawResponse ? (
+                                        <pre className="debug_panel__pre">{formatJson(trace.rawResponse)}</pre>
+                                    ) : (
+                                        <p className="debug_panel__empty">Warte auf Antwort…</p>
+                                    )}
+                                </details>
+                            </div>
+                        )}
+                    </div>
+                </details>
+            </div>
+        </details>
+    );
+}
+
+function formatJson(text: string): string {
+    try {
+        return JSON.stringify(JSON.parse(text), null, 2);
+    } catch {
+        return text;
+    }
 }
