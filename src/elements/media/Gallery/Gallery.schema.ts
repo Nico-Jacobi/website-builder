@@ -28,6 +28,8 @@ export const GalleryPropsSchema = z.object({
     /**
      * Images to display in the gallery grid.
      * Must contain at least 2 and at most 4 items.
+     * Tip: use an even number (2 or 4) so the grid fills cleanly with 2 columns.
+     * For 3 columns, use 3 images.
      */
     images: z.array(GalleryImageSchema).min(2).max(4),
 
@@ -44,12 +46,7 @@ export const GalleryPropsSchema = z.object({
      * Accepts 'sm', 'md', or 'lg'. Defaults to 'md'.
      */
     gap: z.enum(['sm', 'md', 'lg']).default('md'),
-}).refine(
-    (v) => v.images.length % v.columns === 0,
-    {
-        message: 'Anzahl der Bilder muss ein Vielfaches der Spalten sein',
-    },
-);
+});
 
 export type GalleryProps = z.infer<typeof GalleryPropsSchema>;
 
