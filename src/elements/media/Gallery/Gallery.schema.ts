@@ -34,7 +34,10 @@ export const GalleryPropsSchema = z.object({
      * Accepts 'sm', 'md', or 'lg'. Defaults to 'md'.
      */
     gap: z.enum(['sm', 'md', 'lg']).default('md'),
-});
+}).refine(
+    (v) => v.images.length % v.columns === 0,
+    (v) => ({ message: `Anzahl der Bilder (${v.images.length}) muss ein Vielfaches der Spalten (${v.columns}) sein` }),
+);
 
 export type GalleryProps = z.infer<typeof GalleryPropsSchema>;
 

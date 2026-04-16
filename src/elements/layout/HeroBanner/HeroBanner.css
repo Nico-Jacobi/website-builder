@@ -19,6 +19,7 @@
     font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 800;
     line-height: 1.1;
+    color: var(--inverted_text);
 }
 
 .hero_banner__subheading {
@@ -26,6 +27,7 @@
     font-size: clamp(1rem, 2.5vw, 1.25rem);
     opacity: 0.85;
     max-width: 560px;
+    color: var(--inverted_text);
 }
 
 .hero_banner__cta {
@@ -45,16 +47,10 @@
     opacity: 0.85;
 }
 
-/* light variant: white text (default for dark backgrounds) */
-.hero_banner[data-text-color="light"] .hero_banner__heading,
-.hero_banner[data-text-color="light"] .hero_banner__subheading {
-    color: var(--inverted_text);
-}
-
-/* dark variant: dark text (for light or custom backgrounds) */
-.hero_banner[data-text-color="dark"] .hero_banner__heading,
-.hero_banner[data-text-color="dark"] .hero_banner__subheading {
-    color: var(--text);
+/* background image: add shadow on top of dark overlay for extra contrast */
+.hero_banner[data-has-image="true"] .hero_banner__heading,
+.hero_banner[data-has-image="true"] .hero_banner__subheading {
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 640px) {

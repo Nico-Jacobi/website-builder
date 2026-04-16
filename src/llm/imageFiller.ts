@@ -56,7 +56,7 @@ export async function fillImages(spec: SiteSpec): Promise<SiteSpec> {
     log('info', `${slots.length} Bild-Slot(s) gefunden — Provider: Pixabay`);
 
     const results = await Promise.allSettled(
-        slots.map((slot, idx) => resolveSlot(slot, idx, key)),
+        slots.map((slot) => resolveSlot(slot, key)),
     );
 
     results.forEach((result, idx) => {
@@ -76,11 +76,10 @@ export async function fillImages(spec: SiteSpec): Promise<SiteSpec> {
 
 async function resolveSlot(
     slot: ImageSlot,
-    idx: number,
     pixabayApiKey: string,
 ): Promise<{ url: string; query: string }> {
     const query = slot.imageQuery || 'photography';
-    const url = await fetchPixabay(query, idx, pixabayApiKey);
+    const url = await fetchPixabay(query, pixabayApiKey);
     return { url, query };
 }
 
@@ -198,7 +197,6 @@ function collectFromBlock(block: BlockSpec, slots: ImageSlot[], path: string[]):
  */
 async function fetchPixabay(
     query: string,
-    slotIndex: number,
     apiKey: string,
 ): Promise<string> {
     const params = new URLSearchParams({
@@ -207,18 +205,17 @@ async function fetchPixabay(
         image_type: 'photo',
         orientation: 'horizontal',
         safesearch: 'true',
-        per_page: '20',
+        per_page: '3',
         page: '1',
     });
     const resp = await fetch(`https://pixabay.com/api/?${params}`);
     if (!resp.ok) throw new Error(`Pixabay ${resp.status}`);
 
-    const data = await resp.json() as { hits?: { webformatURL: string; largeImageURL: string }[] };
+    const data = await resp.json() as { hits?: { webformatURL: string }[] };
     const hits = data.hits ?? [];
     if (hits.length === 0) {
         throw new Error(`Pixabay: keine Ergebnisse für "${query}"`);
     }
 
-    const pick = hits[slotIndex % hits.length];
-    return pick.webformatURL;
+    return hits[0].webformatURL;
 }

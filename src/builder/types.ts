@@ -49,6 +49,8 @@ export interface ModuleLLMDescriptor {
  * Top-Level-Spec-Shape als JSON Schema.
  */
 export interface RegistryLLMSurface {
+    /** JSON Schema dialect — applies to all schemas in this surface. */
+    $schema: string;
     /** Descriptors in registry insertion order. */
     modules: ModuleLLMDescriptor[];
     /** JSON Schema for the full SiteSpec (shape only). */

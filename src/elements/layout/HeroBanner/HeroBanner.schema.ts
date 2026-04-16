@@ -34,14 +34,6 @@ export const HeroBannerPropsSchema = z.object({
      * overlay (from `background`) is layered on top so text stays legible.
      */
     backgroundImage: z.string().optional(),
-
-    /**
-     * Controls text contrast against the background.
-     * 'light' renders white text (for dark backgrounds).
-     * 'dark' renders dark text (for light backgrounds).
-     * Drives the data-text-color attribute; CSS attribute selectors apply the colour.
-     */
-    textColor: z.enum(['light', 'dark']).default('light'),
 });
 
 export type HeroBannerProps = z.infer<typeof HeroBannerPropsSchema>;
@@ -51,7 +43,6 @@ export const HeroBannerDefaults: HeroBannerProps = {
     subheading: 'Everything you need to build and ship faster.',
     ctaLabel: 'Get Started',
     ctaHref: '#',
-    textColor: 'light',
 };
 
 export const HeroBannerMeta: ModuleMeta = {

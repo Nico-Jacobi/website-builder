@@ -10,7 +10,6 @@ export default function HeroBanner({
     ctaHref,
     background,
     backgroundImage,
-    textColor,
 }: HeroBannerProps) {
     const headingEdit = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
@@ -34,7 +33,7 @@ export default function HeroBanner({
     return (
         <section
             className="hero_banner"
-            data-text-color={textColor}
+            data-has-image={backgroundImage ? 'true' : undefined}
             style={rootStyle}
         >
             <div className="hero_banner__inner">

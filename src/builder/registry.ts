@@ -77,17 +77,26 @@ export function listModules(): AnyModule[] {
  * Schema surface. The LLM call layer (not part of this feature) composes
  * this into its system prompt.
  */
+function stripSchema(raw: Record<string, unknown>): Record<string, unknown> {
+    const { $schema, ...rest } = raw;
+    void $schema;
+    return rest;
+}
+
 export function getRegistryLLMSurface(): RegistryLLMSurface {
     const modules: ModuleLLMDescriptor[] = listModules().map((m) => ({
         name:        m.meta.name,
         category:    m.meta.category,
         description: m.meta.description,
         ...(m.meta.tags ? { tags: m.meta.tags } : {}),
-        propsJSONSchema: z.toJSONSchema(m.propsSchema) as Record<string, unknown>,
+        propsJSONSchema: stripSchema(z.toJSONSchema(m.propsSchema) as Record<string, unknown>),
     }));
 
+    const siteSpec = z.toJSONSchema(SiteSpecSchema) as Record<string, unknown>;
+
     return {
+        $schema: siteSpec['$schema'] as string,
         modules,
-        siteSpecJSONSchema: z.toJSONSchema(SiteSpecSchema) as Record<string, unknown>,
+        siteSpecJSONSchema: stripSchema(siteSpec),
     };
 }
