@@ -16,6 +16,16 @@ export type GalleryImage = z.infer<typeof GalleryImageSchema>;
 
 export const GalleryPropsSchema = z.object({
     /**
+     * Optional heading displayed above the gallery grid.
+     */
+    heading: z.string().optional(),
+
+    /**
+     * Optional smaller subheading below the heading (e.g. descriptive text).
+     */
+    subheading: z.string().optional(),
+
+    /**
      * Images to display in the gallery grid.
      * Must contain at least 2 and at most 4 items.
      */
@@ -36,7 +46,9 @@ export const GalleryPropsSchema = z.object({
     gap: z.enum(['sm', 'md', 'lg']).default('md'),
 }).refine(
     (v) => v.images.length % v.columns === 0,
-    (v) => ({ message: `Anzahl der Bilder (${v.images.length}) muss ein Vielfaches der Spalten (${v.columns}) sein` }),
+    {
+        message: 'Anzahl der Bilder muss ein Vielfaches der Spalten sein',
+    },
 );
 
 export type GalleryProps = z.infer<typeof GalleryPropsSchema>;

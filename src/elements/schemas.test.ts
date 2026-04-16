@@ -162,7 +162,7 @@ describe('HeroBannerPropsSchema', () => {
     it('parses with all fields populated', () => {
         expect(parses(HeroBannerPropsSchema, {
             heading: 'Hi', subheading: 'Sub', ctaLabel: 'Go',
-            ctaHref: '/go', background: '#000', textColor: 'dark',
+            ctaHref: '/go', background: '#000', minHeight: 550,
         })).toBe(true);
     });
 
@@ -170,26 +170,30 @@ describe('HeroBannerPropsSchema', () => {
         expect(parses(HeroBannerPropsSchema, { heading: 'Hello' })).toBe(true);
     });
 
-    it('applies default textColor when omitted', () => {
+    it('applies default minHeight in component when omitted', () => {
         const result = HeroBannerPropsSchema.parse({ heading: 'Hello' });
-        expect(result.textColor).toBe('light');
+        expect(result.minHeight).toBeUndefined();
     });
 
     it('rejects missing heading', () => {
-        expect(fails(HeroBannerPropsSchema, { textColor: 'light' })).toBe(true);
+        expect(fails(HeroBannerPropsSchema, { minHeight: 480 })).toBe(true);
     });
 
-    it('rejects invalid textColor enum value', () => {
-        expect(fails(HeroBannerPropsSchema, { heading: 'H', textColor: 'blue' })).toBe(true);
+    it('rejects invalid minHeight (too low)', () => {
+        expect(fails(HeroBannerPropsSchema, { heading: 'H', minHeight: 100 })).toBe(true);
     });
 
-    it('accepts both valid textColor values', () => {
-        expect(parses(HeroBannerPropsSchema, { heading: 'H', textColor: 'light' })).toBe(true);
-        expect(parses(HeroBannerPropsSchema, { heading: 'H', textColor: 'dark' })).toBe(true);
+    it('rejects invalid minHeight (too high)', () => {
+        expect(fails(HeroBannerPropsSchema, { heading: 'H', minHeight: 1000 })).toBe(true);
     });
 
-    it('rejects numeric textColor', () => {
-        expect(fails(HeroBannerPropsSchema, { heading: 'H', textColor: 1 })).toBe(true);
+    it('accepts valid minHeight values', () => {
+        expect(parses(HeroBannerPropsSchema, { heading: 'H', minHeight: 400 })).toBe(true);
+        expect(parses(HeroBannerPropsSchema, { heading: 'H', minHeight: 600 })).toBe(true);
+    });
+
+    it('rejects numeric minHeight outside range', () => {
+        expect(fails(HeroBannerPropsSchema, { heading: 'H', minHeight: 100 })).toBe(true);
     });
 });
 

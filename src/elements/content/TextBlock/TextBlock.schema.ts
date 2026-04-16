@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { ModuleMeta } from '../../../builder/types';
 
 export const TextBlockPropsSchema = z.object({
+    eyebrow: z.string().optional(),
     heading: z.string().optional(),
     body:    z.string(),
     subtext: z.string().optional(),

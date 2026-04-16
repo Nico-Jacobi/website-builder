@@ -33,6 +33,8 @@
     border-radius: var(--radius_md);
     overflow: hidden;
     padding-bottom: var(--space_md);
+    background-color: var(--surface);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .card__img-wrap {

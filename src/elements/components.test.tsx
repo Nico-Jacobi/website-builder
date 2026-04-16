@@ -77,41 +77,35 @@ describe('Header', () => {
 // ---------------------------------------------------------------------------
 describe('HeroBanner', () => {
     it('renders the heading in an h1', () => {
-        renderInProvider(<HeroBanner heading="Welcome" textColor="light" />);
+        renderInProvider(<HeroBanner heading="Welcome" />);
         expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Welcome');
     });
 
     it('renders subheading when provided', () => {
-        renderInProvider(<HeroBanner heading="Welcome" subheading="Everything you need" textColor="light" />);
+        renderInProvider(<HeroBanner heading="Welcome" subheading="Everything you need" />);
         expect(screen.getByText('Everything you need')).toBeInTheDocument();
     });
 
     it('renders CTA link with correct href', () => {
         renderInProvider(
-            <HeroBanner heading="Welcome" ctaLabel="Get Started" ctaHref="/start" textColor="light" />
+            <HeroBanner heading="Welcome" ctaLabel="Get Started" ctaHref="/start" />
         );
         const cta = screen.getByText('Get Started');
         expect(cta).toHaveAttribute('href', '/start');
     });
 
     it('does not render CTA when ctaLabel is omitted', () => {
-        renderInProvider(<HeroBanner heading="Welcome" textColor="light" />);
+        renderInProvider(<HeroBanner heading="Welcome" />);
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    });
-
-    it('applies data-text-color attribute', () => {
-        const { container } = renderInProvider(
-            <HeroBanner heading="Welcome" textColor="dark" />
-        );
-        expect(container.querySelector('.hero_banner')).toHaveAttribute('data-text-color', 'dark');
     });
 
     it('applies background as inline style when provided', () => {
         const { container } = renderInProvider(
-            <HeroBanner heading="Welcome" textColor="light" background="red" />
+            <HeroBanner heading="Welcome" background="blue" />
         );
-        expect(container.querySelector('.hero_banner')).toHaveStyle({ background: 'red' });
+        expect(container.querySelector('.hero_banner')).toHaveStyle({ background: 'blue' });
     });
+
 });
 
 // ---------------------------------------------------------------------------
@@ -125,15 +119,6 @@ describe('Container', () => {
             </Container>
         );
         expect(screen.getByText('Child content')).toBeInTheDocument();
-    });
-
-    it('applies background as inline style', () => {
-        const { container } = renderInProvider(
-            <Container background="blue">
-                <p>Test</p>
-            </Container>
-        );
-        expect(container.querySelector('.container_block')).toHaveStyle({ background: 'blue' });
     });
 
     it('applies data-padding-y attribute', () => {

@@ -34,6 +34,13 @@ export const HeroBannerPropsSchema = z.object({
      * overlay (from `background`) is layered on top so text stays legible.
      */
     backgroundImage: z.string().optional(),
+
+    /**
+     * Minimum height in pixels. Applied as inline style.
+     * Useful when no background image is set — ensures the hero doesn't collapse.
+     * Accepts 200 (minimum) to 900 (maximum). Defaults to 480.
+     */
+    minHeight: z.number().min(200).max(900).optional(),
 });
 
 export type HeroBannerProps = z.infer<typeof HeroBannerPropsSchema>;
@@ -49,6 +56,6 @@ export const HeroBannerMeta: ModuleMeta = {
     name: 'HeroBanner',
     category: 'layout',
     description:
-        'Full-width centered hero section with headline, optional subheading, and optional CTA button. Place directly below the Header.',
+        'Full-width centered hero section with headline, optional subheading, optional CTA button, and configurable minimum height. Place directly below the Header.',
     tags: ['hero', 'banner', 'cta', 'layout', 'landing'],
 };

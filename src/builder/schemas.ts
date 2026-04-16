@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { Tone } from './types';
 
 /**
  * A single block inside a site spec.
@@ -10,6 +11,10 @@ import { z } from 'zod';
  * `id` is optional in authored JSON but filled in by `ensureBlockIds`
  * before rendering, so React keys stay stable across reorder/insert/delete.
  *
+ * `tone` is optional. When set, the Renderer wraps this block in a
+ * SectionShell that applies the corresponding background and text color.
+ * Modules do not receive or read `tone` — it is a layout-layer concern.
+ *
  * Recursive: a block's `props` may contain arrays of nested BlockSpecs
  * (e.g. Container.children). The recursion is expressed via `z.lazy`
  * so the type definition is a single source of truth.
@@ -19,6 +24,7 @@ export const BlockSpecSchema: z.ZodType<BlockSpec> = z.lazy(() =>
         id:    z.string().optional(),
         type:  z.string(),
         props: z.record(z.string(), z.unknown()),
+        tone:  z.enum(['surface', 'muted', 'primary', 'dark', 'accent']).optional(),
     }),
 );
 
@@ -26,6 +32,7 @@ export type BlockSpec = {
     id?: string;
     type: string;
     props: Record<string, unknown>;
+    tone?: Tone;
 };
 
 /**

@@ -10,6 +10,7 @@ export default function HeroBanner({
     ctaHref,
     background,
     backgroundImage,
+    minHeight,
 }: HeroBannerProps) {
     const headingEdit = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
@@ -20,14 +21,23 @@ export default function HeroBanner({
     // - Image + color: use color as the overlay tint.
     // - Color only: set as flat background.
     // - Neither: CSS var(--primary) takes effect naturally.
+    const defaultMinHeight = minHeight ?? 480;
     let rootStyle: CSSProperties | undefined;
     if (backgroundImage) {
         const overlay = background ?? 'rgba(0,0,0,0.45)';
         rootStyle = {
             background: `linear-gradient(${overlay}, ${overlay}), url('${backgroundImage}') center / cover no-repeat`,
+            minHeight: `${defaultMinHeight}px`,
         };
     } else if (background !== undefined) {
-        rootStyle = { background };
+        rootStyle = {
+            background,
+            minHeight: `${defaultMinHeight}px`,
+        };
+    } else {
+        rootStyle = {
+            minHeight: `${defaultMinHeight}px`,
+        };
     }
 
     return (

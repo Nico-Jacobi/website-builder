@@ -56,3 +56,15 @@ export interface RegistryLLMSurface {
     /** JSON Schema for the full SiteSpec (shape only). */
     siteSpecJSONSchema: Record<string, unknown>;
 }
+
+/**
+ * Visual tone for a block's SectionShell wrapper.
+ * Applied by the Renderer — modules do not read this value directly.
+ *
+ * surface → white background, dark text
+ * muted   → off-white/background-color, dark text  (alternates with surface)
+ * primary → --primary background, inverted text
+ * dark    → --secondary background, inverted text  (footer, dark CTAs)
+ * accent  → --accent background, inverted text     (highlights, callouts)
+ */
+export type Tone = 'surface' | 'muted' | 'primary' | 'dark' | 'accent';

@@ -2,6 +2,16 @@
 .text_block[data-align="center"] { text-align: center; }
 .text_block[data-align="right"]  { text-align: right; }
 
+.text_block__eyebrow {
+    display: block;
+    margin: 0 0 var(--space_sm) 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
 .text_block__heading {
     margin: 0 0 var(--space_md) 0;
     font-size: 2rem;

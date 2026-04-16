@@ -1,3 +1,26 @@
+/* Header section above the grid (heading + subheading) */
+.gallery__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_sm);
+    margin-bottom: var(--space_lg);
+    text-align: center;
+}
+
+.gallery__heading {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+.gallery__subheading {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--muted_text);
+    line-height: 1.5;
+}
+
 /* Column count → CSS custom property for grid-template-columns */
 .gallery__grid[data-columns="2"] { --gallery-cols: 2; }
 .gallery__grid[data-columns="3"] { --gallery-cols: 3; }

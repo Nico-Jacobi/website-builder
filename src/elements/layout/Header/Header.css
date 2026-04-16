@@ -3,7 +3,6 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--space_md) var(--space_xl);
-    background-color: var(--primary);
     color: var(--inverted_text);
 }
 
