@@ -276,8 +276,8 @@ describe('Renderer', () => {
             },
         );
 
-        it('has exactly 13 modules registered', () => {
-            expect(allModules).toHaveLength(13);
+        it('has exactly 14 modules registered', () => {
+            expect(allModules).toHaveLength(14);
         });
     });
 

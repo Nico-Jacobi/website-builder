@@ -8,12 +8,6 @@ export const HeroBannerPropsSchema = z.object({
     /** Smaller paragraph below the heading. */
     subheading: z.string().optional(),
 
-    /** Call-to-action button label. No button rendered when omitted. */
-    ctaLabel: z.string().optional(),
-
-    /** URL the CTA button links to. Falls back to '#' when ctaLabel is set but this is omitted. */
-    ctaHref: z.string().optional(),
-
     /**
      * Keywords describing the desired background photo (e.g. "cozy cafe interior warm light").
      * Filled automatically into backgroundImage — do not provide a URL.
@@ -48,14 +42,12 @@ export type HeroBannerProps = z.infer<typeof HeroBannerPropsSchema>;
 export const HeroBannerDefaults: HeroBannerProps = {
     heading: 'Welcome to Our Platform',
     subheading: 'Everything you need to build and ship faster.',
-    ctaLabel: 'Get Started',
-    ctaHref: '#',
 };
 
 export const HeroBannerMeta: ModuleMeta = {
     name: 'HeroBanner',
     category: 'layout',
     description:
-        'Full-width centered hero section with headline, optional subheading, optional CTA button, and configurable minimum height. Place directly below the Header.',
-    tags: ['hero', 'banner', 'cta', 'layout', 'landing'],
+        'Full-width centered hero section with headline, optional subheading, background image/color, and configurable minimum height. Text is centered both horizontally and vertically. Place directly below the Header.',
+    tags: ['hero', 'banner', 'layout', 'landing'],
 };

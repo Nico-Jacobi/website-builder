@@ -13,7 +13,12 @@ import { TextBlockPropsSchema, TextBlockDefaults } from './content/TextBlock/Tex
 import { MediaTextPropsSchema, MediaTextDefaults } from './content/MediaText/MediaText.schema';
 import { CardRowPropsSchema, CardRowDefaults } from './content/CardRow/CardRow.schema';
 import { CardGridPropsSchema, CardGridDefaults } from './content/CardGrid/CardGrid.schema';
-import { TestimonialPropsSchema, TestimonialDefaults } from './content/Testimonial/Testimonial.schema';
+import { SpotlightPropsSchema, SpotlightDefaults } from './content/Spotlight/Spotlight.schema';
+import {
+    RecommendationRowPropsSchema,
+    RecommendationRowDefaults,
+    RecommendationSchema,
+} from './content/RecommendationRow/RecommendationRow.schema';
 import { StatRowPropsSchema, StatRowDefaults, StatSchema } from './content/StatRow/StatRow.schema';
 import { ImageBlockPropsSchema, ImageBlockDefaults } from './media/ImageBlock/ImageBlock.schema';
 import { GalleryPropsSchema, GalleryDefaults, GalleryImageSchema } from './media/Gallery/Gallery.schema';
@@ -161,8 +166,8 @@ describe('HeroBannerPropsSchema', () => {
 
     it('parses with all fields populated', () => {
         expect(parses(HeroBannerPropsSchema, {
-            heading: 'Hi', subheading: 'Sub', ctaLabel: 'Go',
-            ctaHref: '/go', background: '#000', minHeight: 550,
+            heading: 'Hi', subheading: 'Sub',
+            background: '#000', minHeight: 550, backgroundImage: 'https://example.com/bg.jpg',
         })).toBe(true);
     });
 
@@ -545,74 +550,152 @@ describe('CardGridPropsSchema', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 10. Testimonial
+// 10. Spotlight
 // ---------------------------------------------------------------------------
 
-describe('TestimonialPropsSchema', () => {
+describe('SpotlightPropsSchema', () => {
+    const base = {
+        image: 'https://example.com/photo.jpg',
+        title: 'Our founder',
+        body: 'A short story.',
+    };
+
     it('parses defaults', () => {
-        expect(parses(TestimonialPropsSchema, TestimonialDefaults)).toBe(true);
+        expect(parses(SpotlightPropsSchema, SpotlightDefaults)).toBe(true);
     });
 
     it('parses with all fields populated', () => {
-        expect(parses(TestimonialPropsSchema, {
-            image: 'https://example.com/avatar.jpg',
-            quote: 'Great product!',
-            author: 'Jane Doe',
-            title: 'CEO',
+        expect(parses(SpotlightPropsSchema, {
+            ...base,
+            imageAlt: 'Portrait',
+            eyebrow: 'About us',
+            caption: '— Max Müller',
+            imagePosition: 'right',
         })).toBe(true);
     });
 
-    it('parses with only required fields (image, quote, author)', () => {
-        expect(parses(TestimonialPropsSchema, {
-            image: 'https://example.com/avatar.jpg',
-            quote: 'Great product!',
-            author: 'Jane Doe',
-        })).toBe(true);
+    it('parses with only required fields (image, title, body)', () => {
+        expect(parses(SpotlightPropsSchema, base)).toBe(true);
+    });
+
+    it('applies default imagePosition when omitted', () => {
+        const result = SpotlightPropsSchema.parse(base);
+        expect(result.imagePosition).toBe('left');
     });
 
     it('rejects missing image', () => {
-        expect(fails(TestimonialPropsSchema, {
-            quote: 'Great!',
-            author: 'Jane',
-        })).toBe(true);
+        expect(fails(SpotlightPropsSchema, { title: 'T', body: 'B' })).toBe(true);
     });
 
     it('rejects invalid image URL', () => {
-        expect(fails(TestimonialPropsSchema, {
-            image: 'not-a-url',
-            quote: 'Great!',
-            author: 'Jane',
+        expect(fails(SpotlightPropsSchema, { ...base, image: 'not-a-url' })).toBe(true);
+    });
+
+    it('rejects missing title', () => {
+        expect(fails(SpotlightPropsSchema, { image: base.image, body: 'B' })).toBe(true);
+    });
+
+    it('rejects missing body', () => {
+        expect(fails(SpotlightPropsSchema, { image: base.image, title: 'T' })).toBe(true);
+    });
+
+    it('accepts both valid imagePosition values', () => {
+        expect(parses(SpotlightPropsSchema, { ...base, imagePosition: 'left' })).toBe(true);
+        expect(parses(SpotlightPropsSchema, { ...base, imagePosition: 'right' })).toBe(true);
+    });
+
+    it('rejects invalid imagePosition', () => {
+        expect(fails(SpotlightPropsSchema, { ...base, imagePosition: 'center' })).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 10b. RecommendationRow
+// ---------------------------------------------------------------------------
+
+describe('RecommendationSchema', () => {
+    const base = { name: 'Alex', rating: 4.5, quote: 'Great.' };
+
+    it('parses with only required fields', () => {
+        expect(parses(RecommendationSchema, base)).toBe(true);
+    });
+
+    it('parses with all fields populated', () => {
+        expect(parses(RecommendationSchema, {
+            ...base,
+            source: 'Verified customer',
+            image: 'https://example.com/a.jpg',
+            imageAlt: 'Portrait of Alex',
         })).toBe(true);
+    });
+
+    it('rejects missing name', () => {
+        expect(fails(RecommendationSchema, { rating: 5, quote: 'Q' })).toBe(true);
+    });
+
+    it('rejects missing rating', () => {
+        expect(fails(RecommendationSchema, { name: 'A', quote: 'Q' })).toBe(true);
     });
 
     it('rejects missing quote', () => {
-        expect(fails(TestimonialPropsSchema, {
-            image: 'https://example.com/avatar.jpg',
-            author: 'Jane',
+        expect(fails(RecommendationSchema, { name: 'A', rating: 5 })).toBe(true);
+    });
+
+    it('rejects rating below 0', () => {
+        expect(fails(RecommendationSchema, { ...base, rating: -1 })).toBe(true);
+    });
+
+    it('rejects rating above 5', () => {
+        expect(fails(RecommendationSchema, { ...base, rating: 5.5 })).toBe(true);
+    });
+
+    it('accepts rating = 0 and rating = 5 (boundaries)', () => {
+        expect(parses(RecommendationSchema, { ...base, rating: 0 })).toBe(true);
+        expect(parses(RecommendationSchema, { ...base, rating: 5 })).toBe(true);
+    });
+
+    it('accepts half-star ratings', () => {
+        expect(parses(RecommendationSchema, { ...base, rating: 3.5 })).toBe(true);
+    });
+
+    it('rejects non-number rating', () => {
+        expect(fails(RecommendationSchema, { ...base, rating: '5' })).toBe(true);
+    });
+});
+
+describe('RecommendationRowPropsSchema', () => {
+    it('parses defaults', () => {
+        expect(parses(RecommendationRowPropsSchema, RecommendationRowDefaults)).toBe(true);
+    });
+
+    it('parses with heading and items', () => {
+        expect(parses(RecommendationRowPropsSchema, {
+            heading: 'Reviews',
+            items: [{ name: 'A', rating: 5, quote: 'Q' }],
         })).toBe(true);
     });
 
-    it('rejects missing author', () => {
-        expect(fails(TestimonialPropsSchema, {
-            image: 'https://example.com/avatar.jpg',
-            quote: 'Great!',
+    it('parses without heading (optional)', () => {
+        expect(parses(RecommendationRowPropsSchema, {
+            items: [{ name: 'A', rating: 5, quote: 'Q' }],
         })).toBe(true);
     });
 
-    it('rejects non-string quote', () => {
-        expect(fails(TestimonialPropsSchema, {
-            image: 'https://example.com/avatar.jpg',
-            quote: 123,
-            author: 'Jane',
-        })).toBe(true);
+    it('rejects empty items array (min 1)', () => {
+        expect(fails(RecommendationRowPropsSchema, { items: [] })).toBe(true);
     });
 
-    it('accepts title as optional field', () => {
-        expect(parses(TestimonialPropsSchema, {
-            image: 'https://example.com/avatar.jpg',
-            quote: 'Great!',
-            author: 'Jane',
-            title: 'Director',
+    it('rejects missing items', () => {
+        expect(fails(RecommendationRowPropsSchema, {})).toBe(true);
+    });
+
+    it('rejects items as non-array', () => {
+        expect(fails(RecommendationRowPropsSchema, { items: 'oops' })).toBe(true);
+    });
+
+    it('rejects item with invalid rating', () => {
+        expect(fails(RecommendationRowPropsSchema, {
+            items: [{ name: 'A', rating: 7, quote: 'Q' }],
         })).toBe(true);
     });
 });

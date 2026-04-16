@@ -1,0 +1,117 @@
+.recommendation_row__heading {
+    margin: 0 0 var(--space_lg);
+    font-size: 1.5rem;
+    color: var(--text);
+}
+
+.recommendation_row__scroll {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space_md);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted_text) transparent;
+    padding-bottom: var(--space_sm);
+}
+
+.recommendation {
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_md);
+    padding: var(--space_lg);
+    border-radius: var(--radius_md);
+    background-color: var(--surface);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.recommendation__header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space_md);
+}
+
+.recommendation__image-wrap {
+    position: relative;
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--background);
+}
+
+.recommendation__image-wrap--empty {
+    background-color: var(--background);
+}
+
+.recommendation__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.recommendation__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.recommendation__name {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recommendation__source {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--muted_text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Star row: two stacked star strings, the foreground is clipped to width% */
+.recommendation__stars {
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+.recommendation__stars-bg {
+    display: inline-block;
+    color: var(--muted_text);
+    opacity: 0.3;
+}
+
+.recommendation__stars-fg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--accent);
+}
+
+.recommendation__quote {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

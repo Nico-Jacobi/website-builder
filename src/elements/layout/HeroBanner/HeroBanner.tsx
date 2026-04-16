@@ -6,15 +6,12 @@ import type { HeroBannerProps } from './HeroBanner.schema';
 export default function HeroBanner({
     heading,
     subheading,
-    ctaLabel,
-    ctaHref,
     background,
     backgroundImage,
     minHeight,
 }: HeroBannerProps) {
     const headingEdit = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
-    const ctaLabelEdit = useEditableText('ctaLabel');
 
     // Build inline background style.
     // - Image only: dark overlay so text stays legible.
@@ -53,11 +50,6 @@ export default function HeroBanner({
                     <p className="hero_banner__subheading" {...subheadingEdit}>{subheading}</p>
                 )}
 
-                {ctaLabel && (
-                    <a className="hero_banner__cta" href={ctaHref ?? '#'} {...ctaLabelEdit}>
-                        {ctaLabel}
-                    </a>
-                )}
             </div>
         </section>
     );

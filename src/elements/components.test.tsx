@@ -17,7 +17,8 @@ import { TextBlock } from './content/TextBlock';
 import { MediaText } from './content/MediaText';
 import { CardRow } from './content/CardRow';
 import { CardGrid } from './content/CardGrid';
-import Testimonial from './content/Testimonial/Testimonial';
+import Spotlight from './content/Spotlight/Spotlight';
+import RecommendationRow from './content/RecommendationRow/RecommendationRow';
 import { StatRow } from './content/StatRow';
 
 // Media modules
@@ -86,18 +87,6 @@ describe('HeroBanner', () => {
         expect(screen.getByText('Everything you need')).toBeInTheDocument();
     });
 
-    it('renders CTA link with correct href', () => {
-        renderInProvider(
-            <HeroBanner heading="Welcome" ctaLabel="Get Started" ctaHref="/start" />
-        );
-        const cta = screen.getByText('Get Started');
-        expect(cta).toHaveAttribute('href', '/start');
-    });
-
-    it('does not render CTA when ctaLabel is omitted', () => {
-        renderInProvider(<HeroBanner heading="Welcome" />);
-        expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    });
 
     it('applies background as inline style when provided', () => {
         const { container } = renderInProvider(
@@ -343,41 +332,108 @@ describe('CardGrid', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 10. Testimonial
+// 10. Spotlight
 // ---------------------------------------------------------------------------
-describe('Testimonial', () => {
-    const testimonialProps = {
-        image: 'https://example.com/avatar.jpg',
-        quote: 'This is an amazing product!',
-        author: 'Jane Doe',
-        title: 'CEO',
+describe('Spotlight', () => {
+    const spotlightProps = {
+        image: 'https://example.com/photo.jpg',
+        eyebrow: 'About us',
+        title: 'Handcraft since 1987',
+        body: 'We care deeply about the work we put into every piece.',
+        caption: '— Max Müller, Owner',
+        imagePosition: 'left' as const,
     };
 
-    it('renders the quote', () => {
-        renderInProvider(<Testimonial {...testimonialProps} />);
-        expect(screen.getByText(/This is an amazing product!/)).toBeInTheDocument();
+    it('renders the title in an h2', () => {
+        renderInProvider(<Spotlight {...spotlightProps} />);
+        expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Handcraft since 1987');
     });
 
-    it('renders the author name', () => {
-        renderInProvider(<Testimonial {...testimonialProps} />);
-        expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    it('renders the body text', () => {
+        renderInProvider(<Spotlight {...spotlightProps} />);
+        expect(screen.getByText(/We care deeply/)).toBeInTheDocument();
     });
 
-    it('renders the author title when provided', () => {
-        renderInProvider(<Testimonial {...testimonialProps} />);
-        expect(screen.getByText('CEO')).toBeInTheDocument();
+    it('renders the eyebrow when provided', () => {
+        renderInProvider(<Spotlight {...spotlightProps} />);
+        expect(screen.getByText('About us')).toBeInTheDocument();
     });
 
-    it('renders the avatar image with correct src and alt', () => {
-        const { container } = renderInProvider(<Testimonial {...testimonialProps} />);
-        const img = container.querySelector('.testimonial__image');
-        expect(img).toHaveAttribute('src', 'https://example.com/avatar.jpg');
-        expect(img).toHaveAttribute('alt', 'Jane Doe');
+    it('renders the caption when provided', () => {
+        renderInProvider(<Spotlight {...spotlightProps} />);
+        expect(screen.getByText('— Max Müller, Owner')).toBeInTheDocument();
     });
 
-    it('does not render title when omitted', () => {
-        const { container } = renderInProvider(<Testimonial image={testimonialProps.image} quote={testimonialProps.quote} author={testimonialProps.author} />);
-        expect(container.querySelector('.testimonial__title')).not.toBeInTheDocument();
+    it('renders the image with correct src and falls back to title as alt', () => {
+        const { container } = renderInProvider(<Spotlight {...spotlightProps} />);
+        const img = container.querySelector('.spotlight__image');
+        expect(img).toHaveAttribute('src', 'https://example.com/photo.jpg');
+        expect(img).toHaveAttribute('alt', 'Handcraft since 1987');
+    });
+
+    it('does not render eyebrow or caption when omitted', () => {
+        const { container } = renderInProvider(
+            <Spotlight
+                image={spotlightProps.image}
+                title={spotlightProps.title}
+                body={spotlightProps.body}
+                imagePosition="left"
+            />
+        );
+        expect(container.querySelector('.spotlight__eyebrow')).not.toBeInTheDocument();
+        expect(container.querySelector('.spotlight__caption')).not.toBeInTheDocument();
+    });
+
+    it('applies data-image-position attribute', () => {
+        const { container } = renderInProvider(<Spotlight {...spotlightProps} imagePosition="right" />);
+        expect(container.querySelector('.spotlight')).toHaveAttribute('data-image-position', 'right');
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 10b. RecommendationRow
+// ---------------------------------------------------------------------------
+describe('RecommendationRow', () => {
+    const items = [
+        { name: 'Süddeutsche Zeitung', source: 'Feuilleton', rating: 4.5, quote: 'Ein erfrischender Ansatz.' },
+        { name: 'Anja Müller', source: 'Kundin', rating: 5, quote: 'Einfach großartig.' },
+        { name: 'techradar.de', rating: 4, quote: 'Solide Umsetzung.' },
+    ];
+
+    it('renders the correct number of recommendations', () => {
+        const { container } = renderInProvider(<RecommendationRow items={items} />);
+        expect(container.querySelectorAll('.recommendation')).toHaveLength(3);
+    });
+
+    it('renders the heading when provided', () => {
+        renderInProvider(<RecommendationRow heading="Was andere sagen" items={items} />);
+        expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Was andere sagen');
+    });
+
+    it('does not render heading when omitted', () => {
+        renderInProvider(<RecommendationRow items={items} />);
+        expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    });
+
+    it('renders each reviewer name, source and quote', () => {
+        renderInProvider(<RecommendationRow items={items} />);
+        expect(screen.getByText('Süddeutsche Zeitung')).toBeInTheDocument();
+        expect(screen.getByText('Feuilleton')).toBeInTheDocument();
+        expect(screen.getByText(/Ein erfrischender Ansatz/)).toBeInTheDocument();
+    });
+
+    it('exposes the rating via aria-label for accessibility', () => {
+        const { container } = renderInProvider(<RecommendationRow items={items} />);
+        const stars = container.querySelectorAll('.recommendation__stars');
+        expect(stars[0]).toHaveAttribute('aria-label', '4.5 von 5 Sternen');
+        expect(stars[1]).toHaveAttribute('aria-label', '5 von 5 Sternen');
+    });
+
+    it('renders the reviewer image with correct src when provided', () => {
+        const withImage = [{ name: 'N', rating: 5, quote: 'Q', image: 'https://example.com/a.jpg' }];
+        const { container } = renderInProvider(<RecommendationRow items={withImage} />);
+        const img = container.querySelector('.recommendation__image');
+        expect(img).toHaveAttribute('src', 'https://example.com/a.jpg');
     });
 });
 

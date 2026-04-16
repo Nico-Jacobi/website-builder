@@ -9,13 +9,14 @@ import { ContainerModule   } from '../elements/layout/Container';
 import { FooterModule      } from '../elements/layout/Footer';
 import { FooterSimpleModule } from '../elements/layout/FooterSimple';
 
-// ── Content (6) ───────────────────────────────────────────────────────────────
-import { TextBlockModule   } from '../elements/content/TextBlock';
-import { MediaTextModule   } from '../elements/content/MediaText';
-import { CardRowModule     } from '../elements/content/CardRow';
-import { TestimonialModule } from '../elements/content/Testimonial';
-import { StatRowModule     } from '../elements/content/StatRow';
-import { CardGridModule    } from '../elements/content/CardGrid';
+// ── Content (7) ───────────────────────────────────────────────────────────────
+import { TextBlockModule          } from '../elements/content/TextBlock';
+import { MediaTextModule          } from '../elements/content/MediaText';
+import { CardRowModule            } from '../elements/content/CardRow';
+import { SpotlightModule          } from '../elements/content/Spotlight';
+import { RecommendationRowModule  } from '../elements/content/RecommendationRow';
+import { StatRowModule            } from '../elements/content/StatRow';
+import { CardGridModule           } from '../elements/content/CardGrid';
 
 // ── Media (2) ─────────────────────────────────────────────────────────────────
 import { ImageBlockModule  } from '../elements/media/ImageBlock';
@@ -44,7 +45,8 @@ const modules: AnyModule[] = [
     TextBlockModule,
     MediaTextModule,
     CardRowModule,
-    TestimonialModule,
+    SpotlightModule,
+    RecommendationRowModule,
     StatRowModule,
     CardGridModule,
     // Media

@@ -3,6 +3,9 @@
     background: var(--primary);   /* overridden by inline style when background prop is set */
     padding: var(--space_xl) var(--space_lg);
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hero_banner__inner {
