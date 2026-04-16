@@ -35,7 +35,6 @@ function GalleryItem({
     image: GalleryImage;
     index: number;
 }) {
-    const captionEdit = useEditableText(`images[${index}].caption`);
     return (
         <figure className="gallery__item">
             <EditableImage
@@ -45,11 +44,6 @@ function GalleryItem({
                 wrapperClassName="gallery__img-wrap"
                 imgClassName="gallery__img"
             />
-            {image.caption && (
-                <figcaption className="gallery__caption" {...captionEdit}>
-                    {image.caption}
-                </figcaption>
-            )}
         </figure>
     );
 }

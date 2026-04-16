@@ -6,23 +6,22 @@ import { SiteSpecSchema } from '@website-builder/shared';
  * VITE_API_BASE (default: http://localhost:3001).
  *
  * Phase 1 covers:
- *   - fetchSiteSpec: GET /api/sites/:slug/spec?path=/about
+ *   - fetchSiteSpec: GET /api/sites/:identifier/spec?path=/about
  *   - publishSpec:   POST /api/_seed — upsert a site + single page
  */
 
 const apiBase: string = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:3001';
 
 export interface PublishPayload {
-    slug: string;
+    identifier: string;
     name: string;
     path?: string;
-    title: string;
     spec: SiteSpec;
 }
 
 export interface PublishResult {
     ok: true;
-    slug: string;
+    identifier: string;
     path: string;
     siteId: string;
     pageId: string;
@@ -43,8 +42,8 @@ export async function publishSpec(payload: PublishPayload): Promise<PublishResul
     return data as PublishResult;
 }
 
-export async function fetchSiteSpec(slug: string, path: string = '/'): Promise<SiteSpec> {
-    const url = new URL(`${apiBase}/api/sites/${encodeURIComponent(slug)}/spec`);
+export async function fetchSiteSpec(identifier: string, path: string = '/'): Promise<SiteSpec> {
+    const url = new URL(`${apiBase}/api/sites/${encodeURIComponent(identifier)}/spec`);
     url.searchParams.set('path', path);
     const resp = await fetch(url);
     if (!resp.ok) {

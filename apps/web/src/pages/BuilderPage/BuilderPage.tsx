@@ -1,5 +1,6 @@
 import { useSyncExternalStore, useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import type { SiteSpec } from '@website-builder/shared';
 import './BuilderPage.css';
 import { generateSpec } from '../../llm/generateSpec';
 import { loadState, savePrompt, saveSpec } from '../../state/specStore';
@@ -7,6 +8,7 @@ import { clearLog, getLogSnapshot, subscribeLog, type LogEntry } from '../../llm
 import type { GenerateResult } from '../../llm/types';
 import { listModules, getRegistryLLMSurface } from '../../builder/registry';
 import { subscribeTrace, getTrace } from '../../llm/llmTrace';
+import { publishSpec } from '../../data/siteClient';
 
 type UIStatus = 'idle' | 'loading' | 'done';
 
@@ -117,6 +119,7 @@ function ResultView({ result }: { result: GenerateResult }) {
                     <Link to="/site" className="builder_page__view-button">
                         Website ansehen
                     </Link>
+                    <PublishPanel spec={result.spec} />
                 </div>
             );
         case 'missing_key':
@@ -149,6 +152,121 @@ function ResultView({ result }: { result: GenerateResult }) {
             return _exhaustive;
         }
     }
+}
+
+type PublishStatus =
+    | { kind: 'idle' }
+    | { kind: 'publishing' }
+    | { kind: 'ok'; identifier: string; path: string; wasUpdate: boolean }
+    | { kind: 'err'; message: string };
+
+function slugify(text: string): string {
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 64);
+}
+
+function PublishPanel({ spec }: { spec: SiteSpec }) {
+    const [name, setName] = useState('Demo Site');
+    const [identifier, setIdentifier] = useState(() => slugify('Demo Site'));
+    const [identifierEdited, setIdentifierEdited] = useState(false);
+    const [exists, setExists] = useState<boolean | null>(null);
+    const [status, setStatus] = useState<PublishStatus>({ kind: 'idle' });
+
+    // Check if identifier already exists (debounced)
+    useEffect(() => {
+        if (!identifier) { setExists(null); return; }
+        setExists(null);
+        const timer = setTimeout(async () => {
+            try {
+                const res = await fetch(
+                    `${(import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:3001'}/api/sites/${encodeURIComponent(identifier)}/spec`,
+                );
+                setExists(res.ok);
+            } catch {
+                setExists(null);
+            }
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [identifier]);
+
+    function onNameChange(next: string) {
+        setName(next);
+        if (!identifierEdited) {
+            setIdentifier(slugify(next));
+        }
+    }
+
+    function onIdentifierChange(next: string) {
+        setIdentifier(next);
+        setIdentifierEdited(true);
+    }
+
+    async function onPublish() {
+        if (status.kind === 'publishing') return;
+        setStatus({ kind: 'publishing' });
+        try {
+            const res = await publishSpec({ identifier, name, path: '/', spec });
+            setStatus({ kind: 'ok', identifier: res.identifier, path: res.path, wasUpdate: exists === true });
+        } catch (err) {
+            setStatus({ kind: 'err', message: err instanceof Error ? err.message : String(err) });
+        }
+    }
+
+    const identifierInvalid = identifier.length > 0 && !/^[a-z0-9-]+$/.test(identifier);
+
+    return (
+        <div className="builder_page__publish">
+            <div className="builder_page__publish-row">
+                <label>
+                    name{' '}
+                    <input value={name} onChange={(e) => onNameChange(e.target.value)} />
+                </label>
+                <label>
+                    identifier{' '}
+                    <input
+                        value={identifier}
+                        onChange={(e) => onIdentifierChange(e.target.value)}
+                        className={identifierInvalid ? 'builder_page__input--invalid' : undefined}
+                    />
+                </label>
+                <button
+                    className="builder_page__button"
+                    onClick={onPublish}
+                    disabled={status.kind === 'publishing' || !identifier || !name || identifierInvalid}
+                >
+                    {status.kind === 'publishing'
+                        ? 'Publiziere…'
+                        : exists
+                          ? 'Überschreiben & pushen'
+                          : 'Ins Backend pushen'}
+                </button>
+            </div>
+            {exists === true && status.kind !== 'ok' && (
+                <p className="builder_page__publish-warn">
+                    Identifier „{identifier}" existiert bereits — wird beim Pushen überschrieben.
+                </p>
+            )}
+            {identifierInvalid && (
+                <p className="builder_page__publish-warn">
+                    Nur Kleinbuchstaben, Ziffern und Bindestriche erlaubt.
+                </p>
+            )}
+            {status.kind === 'ok' && (
+                <p className="builder_page__publish-ok">
+                    {status.wasUpdate ? 'Aktualisiert.' : 'Erstellt.'} Jetzt live unter{' '}
+                    <Link to={`/site?identifier=${encodeURIComponent(status.identifier)}&path=${encodeURIComponent(status.path)}`}>
+                        /site?identifier={status.identifier}
+                    </Link>
+                </p>
+            )}
+            {status.kind === 'err' && (
+                <p className="builder_page__publish-err">Fehler: {status.message}</p>
+            )}
+        </div>
+    );
 }
 
 function ErrorPanel({
