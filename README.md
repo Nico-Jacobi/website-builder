@@ -1,73 +1,44 @@
-# React + TypeScript + Vite
+# Website Builder
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+KI-gestützter Website-Builder: Prompt → Website generieren → Backend publishen.
 
-Currently, two official plugins are available:
+**Stack:** React + Vite · Hono (Node) · PostgreSQL 16 · Drizzle ORM · Zod · pnpm Workspaces
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Setup
 
-## React Compiler
+**Voraussetzungen:** Node ≥ 20, pnpm (`npm i -g pnpm`), Docker Desktop
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm install                        # Abhängigkeiten
+docker compose up -d                # Postgres auf Port 5434
+cp apps/api/.env.example apps/api/.env   # Env-Datei anlegen
+pnpm --filter api db:migrate        # DB-Schema migrieren
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Für das Frontend optional `apps/web/.env.local` anlegen:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+VITE_GOOGLE_API_KEY=...
+VITE_PIXABAY_API_KEY=...
+VITE_API_BASE=http://localhost:3001
+```
+
+## Starten
+
+```bash
+pnpm dev        # Frontend  → http://localhost:5173
+pnpm dev:api    # Backend   → http://localhost:3001
+```
+
+## Nutzung
+
+1. Prompt eingeben → **Generieren** → Vorschau erscheint
+2. Im Publish-Panel Slug + Name eingeben → **Ins Backend pushen**
+3. Site abrufbar unter `/site?slug=<slug>` (lädt aus DB)
+
+## API
+
+| | Pfad | |
+|---|---|---|
+| GET | `/api/sites/:slug/spec?path=/` | SiteSpec für den Renderer |
+| POST | `/api/_seed` | SiteSpec in DB schreiben (dev) |

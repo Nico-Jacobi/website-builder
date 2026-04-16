@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: website_builder_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: website_builder
+      POSTGRES_USER: website_builder
+      POSTGRES_PASSWORD: website_builder
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U website_builder -d website_builder"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
