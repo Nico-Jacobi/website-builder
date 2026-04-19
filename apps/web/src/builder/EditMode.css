@@ -1,3 +1,88 @@
+/* ── Layout-Neutral Patterns ─────────────────────────────────────────────── */
+
+/* Leere optionale Felder: in View Mode komplett ausblenden */
+[data-empty] {
+    display: none;
+}
+
+/* Im Edit Mode: leer aber sichtbar, Placeholder via CSS */
+[data-edit-mode="true"] [data-empty] {
+    display: revert; /* stellt browser-default wieder her (block/inline je Element) */
+    min-height: 1.2em;
+    min-width: 4ch;
+}
+
+[data-edit-mode="true"] [data-empty]::before {
+    content: attr(data-placeholder);
+    color: var(--muted_text);
+    opacity: 0.5;
+    font-style: italic;
+    pointer-events: none;
+}
+
+/* Edit-only Elemente: nur im Edit Mode sichtbar ("+"-Button, Placeholder-Wrapper) */
+[data-edit-only] {
+    display: none;
+}
+
+[data-edit-mode="true"] [data-edit-only] {
+    display: revert;
+}
+
+/* ── Bild-Placeholder (fehlende imageSrc) ────────────────────────────────── */
+
+.edit__img-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    border: 2px dashed var(--primary);
+    border-radius: var(--radius_sm);
+    color: var(--muted_text);
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-height: 120px;
+    width: 100%;
+    transition: background 0.15s;
+}
+
+.edit__img-placeholder:hover {
+    background: color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+/* ── Drag-over Feedback ──────────────────────────────────────────────────── */
+
+[data-drag-over="true"] {
+    outline: 3px dashed var(--primary);
+    outline-offset: -3px;
+    background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+}
+
+/* ── "Item hinzufügen" Button ────────────────────────────────────────────── */
+
+.edit__add-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--muted_text);
+    border-radius: var(--radius_md);
+    color: var(--muted_text);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    background: transparent;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    min-height: 80px;
+    min-width: 80px;
+    padding: var(--space_md);
+}
+
+.edit__add-item:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+
 /* ── Text Editing ─────────────────────────────────────────────────────────── */
 
 [data-edit-mode="text"] {
@@ -67,6 +152,77 @@
     padding: var(--space_md);
     box-shadow: 0 8px 32px rgb(0 0 0 / 24%);
     min-width: 360px;
+}
+
+.edit__image-panel--vertical {
+    flex-direction: column;
+    gap: var(--space_md);
+}
+
+.edit__image-file-section {
+    display: flex;
+    justify-content: center;
+}
+
+.edit__image-file-input {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space_sm);
+    background: var(--primary);
+    color: var(--inverted_text);
+    border: none;
+    border-radius: var(--radius_sm);
+    padding: var(--space_sm) var(--space_md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    min-height: 44px;
+    width: 100%;
+    transition: opacity 0.15s;
+}
+
+.edit__image-file-input:hover {
+    opacity: 0.85;
+}
+
+.edit__image-upload-status {
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.edit__image-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space_sm);
+    color: var(--muted_text);
+    font-size: 0.8rem;
+}
+
+.edit__image-divider::before,
+.edit__image-divider::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--muted_text);
+    opacity: 0.4;
+}
+
+.edit__image-url-section {
+    display: flex;
+    gap: var(--space_sm);
+}
+
+.edit__image-alt-section {
+    display: flex;
+}
+
+.edit__image-alt-section .edit__image-input {
+    width: 100%;
+}
+
+.edit__image-actions {
+    display: flex;
+    gap: var(--space_sm);
+    justify-content: flex-end;
 }
 
 .edit__image-input {

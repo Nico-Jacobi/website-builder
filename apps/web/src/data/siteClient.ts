@@ -4,13 +4,16 @@ import { SiteSpecSchema } from '@website-builder/shared';
 /**
  * Client to the website-builder API. Base URL is configurable via
  * VITE_API_BASE (default: http://localhost:3001).
- *
- * Phase 1 covers:
- *   - fetchSiteSpec: GET /api/sites/:identifier/spec?path=/about
- *   - publishSpec:   POST /api/_seed — upsert a site + single page
  */
 
 const apiBase: string = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:3001';
+
+async function ensureOk(resp: Response, label: string): Promise<void> {
+    if (resp.ok) return;
+    const data = await resp.json().catch(() => ({}));
+    const msg = (data as { error?: string }).error ?? `HTTP ${resp.status}`;
+    throw new Error(`${label} failed: ${msg}`);
+}
 
 export interface PublishPayload {
     identifier: string;
@@ -34,24 +37,66 @@ export async function publishSpec(payload: PublishPayload): Promise<PublishResul
         headers: { 'content-type': 'application/json' },
         body:    JSON.stringify({ path: '/', ...payload }),
     });
-    const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) {
-        const msg = (data as { error?: string }).error ?? `HTTP ${resp.status}`;
-        throw new Error(`publish failed: ${msg}`);
-    }
-    return data as PublishResult;
+    await ensureOk(resp, 'publish');
+    return resp.json() as Promise<PublishResult>;
+}
+
+export async function uploadAsset(
+    identifier: string,
+    file: File,
+): Promise<{ id: string; url: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/assets`,
+        { method: 'POST', body: form },
+    );
+    await ensureOk(resp, 'uploadAsset');
+    return resp.json() as Promise<{ id: string; url: string }>;
+}
+
+export async function patchBlockContent(
+    identifier: string,
+    blockId: string,
+    fieldPath: string,
+    value: string | null,
+): Promise<void> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/blocks/${encodeURIComponent(blockId)}/content`,
+        {
+            method: 'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ fieldPath, value }),
+        },
+    );
+    await ensureOk(resp, 'patchBlockContent');
+}
+
+export interface SiteListItem {
+    id: string;
+    identifier: string;
+    name: string;
+    createdAt: string;
+}
+
+export async function listSites(): Promise<SiteListItem[]> {
+    const resp = await fetch(`${apiBase}/api/sites`);
+    await ensureOk(resp, 'listSites');
+    return resp.json() as Promise<SiteListItem[]>;
+}
+
+export async function deleteSite(identifier: string): Promise<void> {
+    const resp = await fetch(`${apiBase}/api/sites/${encodeURIComponent(identifier)}`, {
+        method: 'DELETE',
+    });
+    await ensureOk(resp, 'deleteSite');
 }
 
 export async function fetchSiteSpec(identifier: string, path: string = '/'): Promise<SiteSpec> {
     const url = new URL(`${apiBase}/api/sites/${encodeURIComponent(identifier)}/spec`);
     url.searchParams.set('path', path);
     const resp = await fetch(url);
-    if (!resp.ok) {
-        const data = await resp.json().catch(() => ({}));
-        throw new Error(
-            `fetchSiteSpec failed: ${(data as { error?: string }).error ?? `HTTP ${resp.status}`}`,
-        );
-    }
+    await ensureOk(resp, 'fetchSiteSpec');
     const raw = await resp.json();
     const parsed = SiteSpecSchema.safeParse(raw);
     if (!parsed.success) {

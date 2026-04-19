@@ -244,6 +244,124 @@
     outline: 2px solid #c03030;
 }
 
+/* ── Sites list ── */
+.sites_list {
+    border: 1px solid var(--muted_text);
+    border-radius: var(--radius_sm);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.sites_list__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space_sm) var(--space_md);
+    background: var(--background);
+    border-bottom: 1px solid var(--muted_text);
+}
+
+.sites_list__title {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.sites_list__refresh {
+    padding: var(--space_xs) var(--space_sm);
+    border: 1px solid var(--muted_text);
+    border-radius: var(--radius_sm);
+    background: transparent;
+    color: var(--muted_text);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.sites_list__refresh:hover {
+    color: var(--text);
+    border-color: var(--text);
+}
+
+.sites_list__empty {
+    margin: 0;
+    padding: var(--space_md);
+    color: var(--muted_text);
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+.sites_list__error {
+    margin: 0;
+    padding: var(--space_sm) var(--space_md);
+    color: #c03030;
+    font-size: 0.9rem;
+}
+
+.sites_list__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.sites_list__table th {
+    text-align: left;
+    padding: var(--space_xs) var(--space_md);
+    color: var(--muted_text);
+    border-bottom: 1px solid var(--muted_text);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.sites_list__table td {
+    padding: var(--space_xs) var(--space_md);
+    border-bottom: 1px solid var(--muted_text);
+    vertical-align: middle;
+}
+
+.sites_list__table tr:last-child td {
+    border-bottom: none;
+}
+
+.sites_list__actions {
+    display: flex;
+    gap: var(--space_xs);
+    justify-content: flex-end;
+}
+
+.sites_list__btn {
+    display: inline-block;
+    padding: var(--space_xs) var(--space_sm);
+    border-radius: var(--radius_sm);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+}
+
+.sites_list__btn--open {
+    background: var(--primary);
+    color: var(--inverted_text);
+}
+
+.sites_list__btn--open:hover {
+    opacity: 0.85;
+}
+
+.sites_list__btn--delete {
+    background: transparent;
+    color: #c03030;
+    border: 1px solid #c03030;
+}
+
+.sites_list__btn--delete:hover:not(:disabled) {
+    background: #c03030;
+    color: #fff;
+}
+
+.sites_list__btn--delete:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* ── Debug panel ── */
 .debug_panel {
     border: 1px solid var(--muted_text);

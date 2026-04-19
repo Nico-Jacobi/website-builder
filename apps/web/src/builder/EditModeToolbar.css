@@ -33,3 +33,31 @@
     background: var(--accent);
     border-color: var(--accent);
 }
+
+/* ── Save-Status-Badge ───────────────────────────────────────────────────── */
+
+.edit-toolbar__status {
+    display: inline-block;
+    margin-right: var(--space_sm);
+    padding: var(--space_xs) var(--space_sm);
+    border-radius: var(--radius_sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: var(--surface);
+    color: var(--muted_text);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+    vertical-align: middle;
+}
+
+.edit-toolbar__status--saving {
+    color: var(--primary);
+}
+
+.edit-toolbar__status--saved {
+    color: var(--accent);
+}
+
+.edit-toolbar__status--error {
+    color: var(--alt_primary);
+    background: color-mix(in srgb, var(--alt_primary) 10%, transparent);
+}

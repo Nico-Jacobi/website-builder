@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { FocusEvent } from 'react';
 import { useEditableField } from './useEditableField';
 
@@ -6,12 +7,16 @@ import { useEditableField } from './useEditableField';
  *   Normal mode: {} (no overhead).
  *   Edit mode: contentEditable + blur handler that commits the new text.
  *
+ * Skips commit when the text is unchanged (avoids a no-op spec replace
+ * and a PATCH over the wire on every tab-through).
+ *
  * Usage:
  *   const editProps = useEditableText('heading');
  *   <h2 {...editProps}>{heading}</h2>
  */
 export function useEditableText(propPath: string) {
     const { isEditMode, commit } = useEditableField(propPath);
+    const originalRef = useRef<string | null>(null);
 
     if (!isEditMode) return {};
 
@@ -19,8 +24,12 @@ export function useEditableText(propPath: string) {
         contentEditable: true as const,
         suppressContentEditableWarning: true,
         'data-edit-mode': 'text' as const,
+        onFocus: (e: FocusEvent<HTMLElement>) => {
+            originalRef.current = e.currentTarget.textContent ?? '';
+        },
         onBlur: (e: FocusEvent<HTMLElement>) => {
-            commit(e.currentTarget.textContent ?? '');
+            const next = e.currentTarget.textContent ?? '';
+            if (next !== originalRef.current) commit(next);
         },
     };
 }

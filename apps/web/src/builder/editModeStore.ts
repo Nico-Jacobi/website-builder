@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import type { AutoSaveAdapter } from './autoSaveTypes';
 
 // ── State Context (isEditMode) ────────────────────────────────────────────────
 // Separated from actions so consumers that only need the flag don't re-render
@@ -21,11 +22,13 @@ export function useEditModeState(): EditModeStateValue {
 export interface EditModeActionsValue {
     updateBlock: (blockIndex: number, propPath: string, value: unknown) => void;
     setIsEditMode: (value: boolean) => void;
+    addItem: (blockIndex: number, listPath: string, defaultItem: unknown) => void;
 }
 
 export const EditModeActionsContext = createContext<EditModeActionsValue>({
     updateBlock: () => {},
     setIsEditMode: () => {},
+    addItem: () => {},
 });
 
 export function useEditModeActions(): EditModeActionsValue {
@@ -40,4 +43,12 @@ export const BlockIndexContext = createContext<number>(-1);
 
 export function useBlockIndex(): number {
     return useContext(BlockIndexContext);
+}
+
+// ── Auto-Save Context ─────────────────────────────────────────────────────────
+
+export const AutoSaveContext = createContext<AutoSaveAdapter | null>(null);
+
+export function useAutoSave(): AutoSaveAdapter | null {
+    return useContext(AutoSaveContext);
 }
