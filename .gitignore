@@ -21,6 +21,9 @@ test-results
 .claude/
 docs/features/
 
+# Uploaded assets (local dev storage)
+apps/api/uploads/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

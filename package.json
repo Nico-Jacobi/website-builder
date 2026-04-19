@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "pnpm --filter @website-builder/web dev",
     "dev:api": "pnpm --filter @website-builder/api dev",
+    "dev:full": "concurrently -n api,web -c cyan,magenta \"pnpm dev:api\" \"pnpm dev\"",
+    "setup": "docker-compose up -d && docker-compose exec postgres sh -c 'until pg_isready -U website_builder; do sleep 1; done' && pnpm --filter @website-builder/api db:push",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "pnpm --filter @website-builder/web lint"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",

@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { sitesRouter } from './routes/sites';
@@ -14,6 +15,8 @@ app.use(
         credentials: true,
     }),
 );
+
+app.use('/uploads/*', serveStatic({ root: './' }));
 
 app.get('/health', (c) => c.json({ ok: true }));
 app.route('/api/sites', sitesRouter);

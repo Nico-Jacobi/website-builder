@@ -9,13 +9,12 @@ KI-gestützter Website-Builder: Prompt → Website generieren → Backend publis
 **Voraussetzungen:** Node ≥ 20, pnpm (`npm i -g pnpm`), Docker Desktop
 
 ```bash
-pnpm install                        # Abhängigkeiten
-docker compose up -d                # Postgres auf Port 5434
+pnpm install                             # Abhängigkeiten
 cp apps/api/.env.example apps/api/.env   # Env-Datei anlegen
-pnpm --filter api db:migrate        # DB-Schema migrieren
+pnpm setup                               # Docker-Postgres starten + DB-Schema anlegen
 ```
 
-Für das Frontend optional `apps/web/.env.local` anlegen:
+Optional `apps/web/.env.local`:
 
 ```
 VITE_GOOGLE_API_KEY=...
@@ -26,19 +25,22 @@ VITE_API_BASE=http://localhost:3001
 ## Starten
 
 ```bash
-pnpm dev        # Frontend  → http://localhost:5173
-pnpm dev:api    # Backend   → http://localhost:3001
+pnpm dev:full   # API + Frontend parallel
+pnpm dev        # Nur Frontend → http://localhost:5173
+pnpm dev:api    # Nur Backend  → http://localhost:3001
 ```
 
 ## Nutzung
 
 1. Prompt eingeben → **Generieren** → Vorschau erscheint
 2. Im Publish-Panel Slug + Name eingeben → **Ins Backend pushen**
-3. Site abrufbar unter `/site?slug=<slug>` (lädt aus DB)
+3. Site abrufbar unter `/site?identifier=<slug>` (lädt aus DB)
 
 ## API
 
-| | Pfad | |
+| Methode | Pfad | Zweck |
 |---|---|---|
-| GET | `/api/sites/:slug/spec?path=/` | SiteSpec für den Renderer |
-| POST | `/api/_seed` | SiteSpec in DB schreiben (dev) |
+| GET  | `/api/sites/:identifier/spec?path=/` | SiteSpec für den Renderer |
+| POST | `/api/_seed` | SiteSpec in DB schreiben |
+| PATCH | `/api/sites/:identifier/blocks/:blockId/content` | Einzelnes Content-Feld patchen |
+| POST | `/api/sites/:identifier/assets` | Bild-Upload |
