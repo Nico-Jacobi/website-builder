@@ -1,13 +1,20 @@
 /* ── Layout-Neutral Patterns ─────────────────────────────────────────────── */
+/*
+ * The hiding selectors below use the `[data-edit-mode="false"]` ancestor
+ * (emitted by EditModeProvider) deliberately — that gives them specificity
+ * (0,2,0), which beats the component classes (e.g. `.edit__add-item`,
+ * `.edit__img-placeholder`) that set `display: flex`. A bare `[data-empty]`
+ * / `[data-edit-only]` rule would tie on specificity and lose on source
+ * order, leaving edit-only UI visible outside edit mode.
+ */
 
-/* Leere optionale Felder: in View Mode komplett ausblenden */
-[data-empty] {
+/* Leere optionale Felder: außerhalb Edit Mode komplett ausblenden */
+[data-edit-mode="false"] [data-empty] {
     display: none;
 }
 
 /* Im Edit Mode: leer aber sichtbar, Placeholder via CSS */
 [data-edit-mode="true"] [data-empty] {
-    display: revert; /* stellt browser-default wieder her (block/inline je Element) */
     min-height: 1.2em;
     min-width: 4ch;
 }
@@ -20,13 +27,9 @@
     pointer-events: none;
 }
 
-/* Edit-only Elemente: nur im Edit Mode sichtbar ("+"-Button, Placeholder-Wrapper) */
-[data-edit-only] {
+/* Edit-only Elemente: außerhalb Edit Mode ausblenden ("+"-Button, Placeholder-Wrapper) */
+[data-edit-mode="false"] [data-edit-only] {
     display: none;
-}
-
-[data-edit-mode="true"] [data-edit-only] {
-    display: revert;
 }
 
 /* ── Bild-Placeholder (fehlende imageSrc) ────────────────────────────────── */

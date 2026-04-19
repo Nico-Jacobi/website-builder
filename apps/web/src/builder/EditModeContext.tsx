@@ -93,7 +93,7 @@ export function EditModeProvider({ children, spec, onSpecChange, autoSave }: Edi
             <EditModeActionsContext.Provider value={actionsValue}>
                 <AutoSaveContext.Provider value={autoSave ?? null}>
                     <div
-                        data-edit-mode={isEditMode ? 'true' : undefined}
+                        data-edit-mode={isEditMode ? 'true' : 'false'}
                         style={{ display: 'contents' }}
                     >
                         {children}
