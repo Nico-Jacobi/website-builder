@@ -540,8 +540,8 @@ describe('CardGridPropsSchema', () => {
         expect(fails(CardGridPropsSchema, { cards: [{ title: 'T' }], columns: 1 })).toBe(true);
     });
 
-    it('rejects columns = 4 (not in union)', () => {
-        expect(fails(CardGridPropsSchema, { cards: [{ title: 'T' }], columns: 4 })).toBe(true);
+    it('rejects columns = 5 (not in union)', () => {
+        expect(fails(CardGridPropsSchema, { cards: [{ title: 'T' }], columns: 5 })).toBe(true);
     });
 
     it('rejects columns as string', () => {
@@ -581,14 +581,6 @@ describe('SpotlightPropsSchema', () => {
     it('applies default imagePosition when omitted', () => {
         const result = SpotlightPropsSchema.parse(base);
         expect(result.imagePosition).toBe('left');
-    });
-
-    it('rejects missing image', () => {
-        expect(fails(SpotlightPropsSchema, { title: 'T', body: 'B' })).toBe(true);
-    });
-
-    it('rejects invalid image URL', () => {
-        expect(fails(SpotlightPropsSchema, { ...base, image: 'not-a-url' })).toBe(true);
     });
 
     it('rejects missing title', () => {

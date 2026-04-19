@@ -1,6 +1,7 @@
 import './HeroBanner.css';
 import type { CSSProperties } from 'react';
 import { useEditableText } from '../../../builder/useEditableText';
+import { useEditableImage } from '../../../builder/useEditableImage';
 import type { HeroBannerProps } from './HeroBanner.schema';
 
 export default function HeroBanner({
@@ -12,13 +13,11 @@ export default function HeroBanner({
 }: HeroBannerProps) {
     const headingEdit = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
+    const { overlayElement, dragProps } = useEditableImage(backgroundImage ?? '', 'backgroundImage');
 
-    // Build inline background style.
-    // - Image only: dark overlay so text stays legible.
-    // - Image + color: use color as the overlay tint.
-    // - Color only: set as flat background.
-    // - Neither: CSS var(--primary) takes effect naturally.
     const defaultMinHeight = minHeight ?? 480;
+    // With image: overlay on top so text stays legible (background prop tints).
+    // Without image: plain color if given, else the CSS var(--primary) default.
     let rootStyle: CSSProperties | undefined;
     if (backgroundImage) {
         const overlay = background ?? 'rgba(0,0,0,0.45)';
@@ -42,14 +41,19 @@ export default function HeroBanner({
             className="hero_banner"
             data-has-image={backgroundImage ? 'true' : undefined}
             style={rootStyle}
+            {...dragProps}
         >
+            {overlayElement}
+
             <div className="hero_banner__inner">
                 <h1 className="hero_banner__heading" {...headingEdit}>{heading}</h1>
 
-                {subheading && (
-                    <p className="hero_banner__subheading" {...subheadingEdit}>{subheading}</p>
-                )}
-
+                <p
+                    className="hero_banner__subheading"
+                    data-empty={!subheading || undefined}
+                    data-placeholder="Unterüberschrift"
+                    {...subheadingEdit}
+                >{subheading}</p>
             </div>
         </section>
     );

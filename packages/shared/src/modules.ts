@@ -13,12 +13,14 @@ export const HeaderContentFields: ContentField[] = [
     { path: 'subtitle',      type: 'text' },
     { path: 'links[].label', type: 'text' },
     { path: 'links[].href',  type: 'url'  },
+    { path: 'icon',          type: 'image_ref' },
 ];
 
 export const HeroBannerContentFields: ContentField[] = [
-    { path: 'heading',    type: 'text' },
-    { path: 'subheading', type: 'text' },
-    { path: 'imageQuery', type: 'image_ref' },
+    { path: 'heading',         type: 'text' },
+    { path: 'subheading',      type: 'text' },
+    { path: 'imageQuery',      type: 'image_ref' },
+    { path: 'backgroundImage', type: 'image_ref' },
 ];
 
 export const FooterContentFields: ContentField[] = [
@@ -48,6 +50,7 @@ export const CardRowContentFields: ContentField[] = [
     { path: 'cards[].body',       type: 'text' },
     { path: 'cards[].imageAlt',   type: 'text' },
     { path: 'cards[].imageQuery', type: 'image_ref' },
+    { path: 'cards[].imageSrc',   type: 'image_ref' },
 ];
 
 export const CardGridContentFields: ContentField[] = [
@@ -55,6 +58,7 @@ export const CardGridContentFields: ContentField[] = [
     { path: 'cards[].body',       type: 'text' },
     { path: 'cards[].imageAlt',   type: 'text' },
     { path: 'cards[].imageQuery', type: 'image_ref' },
+    { path: 'cards[].imageSrc',   type: 'image_ref' },
 ];
 
 export const MediaTextContentFields: ContentField[] = [
@@ -62,6 +66,7 @@ export const MediaTextContentFields: ContentField[] = [
     { path: 'body',       type: 'text' },
     { path: 'imageAlt',   type: 'text' },
     { path: 'imageQuery', type: 'image_ref' },
+    { path: 'imageSrc',   type: 'image_ref' },
 ];
 
 export const SpotlightContentFields: ContentField[] = [
@@ -71,6 +76,7 @@ export const SpotlightContentFields: ContentField[] = [
     { path: 'caption',    type: 'text' },
     { path: 'imageAlt',   type: 'text' },
     { path: 'imageQuery', type: 'image_ref' },
+    { path: 'image',      type: 'image_ref' },
 ];
 
 export const StatRowContentFields: ContentField[] = [
@@ -91,6 +97,7 @@ export const ImageBlockContentFields: ContentField[] = [
     { path: 'alt',        type: 'text' },
     { path: 'caption',    type: 'text' },
     { path: 'imageQuery', type: 'image_ref' },
+    { path: 'src',        type: 'image_ref' },
 ];
 
 export const GalleryContentFields: ContentField[] = [
@@ -99,6 +106,7 @@ export const GalleryContentFields: ContentField[] = [
     { path: 'images[].alt',        type: 'text' },
     { path: 'images[].caption',    type: 'text' },
     { path: 'images[].imageQuery', type: 'image_ref' },
+    { path: 'images[].src',        type: 'image_ref' },
 ];
 
 /**

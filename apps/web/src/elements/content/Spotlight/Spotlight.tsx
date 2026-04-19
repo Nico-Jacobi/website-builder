@@ -23,18 +23,25 @@ export default function Spotlight({
                 path="image"
                 src={image}
                 alt={imageAlt ?? title}
+                altPath="imageAlt"
                 wrapperClassName="spotlight__image-wrap"
                 imgClassName="spotlight__image"
             />
             <div className="spotlight__body">
-                {eyebrow && (
-                    <p className="spotlight__eyebrow" {...eyebrowEdit}>{eyebrow}</p>
-                )}
+                <p
+                    className="spotlight__eyebrow"
+                    data-empty={!eyebrow || undefined}
+                    data-placeholder="Eyebrow"
+                    {...eyebrowEdit}
+                >{eyebrow}</p>
                 <h2 className="spotlight__title" {...titleEdit}>{title}</h2>
                 <p className="spotlight__text" {...bodyEdit}>{body}</p>
-                {caption && (
-                    <p className="spotlight__caption" {...captionEdit}>{caption}</p>
-                )}
+                <p
+                    className="spotlight__caption"
+                    data-empty={!caption || undefined}
+                    data-placeholder="Bildunterschrift"
+                    {...captionEdit}
+                >{caption}</p>
             </div>
         </div>
     );

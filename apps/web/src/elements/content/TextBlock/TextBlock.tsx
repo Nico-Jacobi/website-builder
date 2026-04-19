@@ -10,10 +10,25 @@ export default function TextBlock({ eyebrow, heading, body, subtext, align }: Te
 
     return (
         <div className="section text_block" data-align={align}>
-            {eyebrow && <span className="text_block__eyebrow" {...eyebrowEdit}>{eyebrow}</span>}
-            {heading && <h2 className="text_block__heading" {...headingEdit}>{heading}</h2>}
+            <span
+                className="text_block__eyebrow"
+                data-empty={!eyebrow || undefined}
+                data-placeholder="Eyebrow"
+                {...eyebrowEdit}
+            >{eyebrow}</span>
+            <h2
+                className="text_block__heading"
+                data-empty={!heading || undefined}
+                data-placeholder="Überschrift"
+                {...headingEdit}
+            >{heading}</h2>
             <p className="text_block__body" {...bodyEdit}>{body}</p>
-            {subtext && <p className="text_block__subtext" {...subtextEdit}>{subtext}</p>}
+            <p
+                className="text_block__subtext"
+                data-empty={!subtext || undefined}
+                data-placeholder="Untertext"
+                {...subtextEdit}
+            >{subtext}</p>
         </div>
     );
 }

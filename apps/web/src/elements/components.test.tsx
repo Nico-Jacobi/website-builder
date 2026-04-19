@@ -221,9 +221,11 @@ describe('TextBlock', () => {
         expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Title');
     });
 
-    it('does not render heading when omitted', () => {
-        renderInProvider(<TextBlock body="Body" align="left" />);
-        expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    it('marks heading as empty when omitted', () => {
+        const { container } = renderInProvider(<TextBlock body="Body" align="left" />);
+        const heading = container.querySelector('h2');
+        expect(heading).toBeInTheDocument();
+        expect(heading).toHaveAttribute('data-empty');
     });
 
     it('renders subtext when provided', () => {
@@ -371,7 +373,7 @@ describe('Spotlight', () => {
         expect(img).toHaveAttribute('alt', 'Handcraft since 1987');
     });
 
-    it('does not render eyebrow or caption when omitted', () => {
+    it('marks eyebrow and caption as empty when omitted', () => {
         const { container } = renderInProvider(
             <Spotlight
                 image={spotlightProps.image}
@@ -380,8 +382,12 @@ describe('Spotlight', () => {
                 imagePosition="left"
             />
         );
-        expect(container.querySelector('.spotlight__eyebrow')).not.toBeInTheDocument();
-        expect(container.querySelector('.spotlight__caption')).not.toBeInTheDocument();
+        const eyebrow = container.querySelector('.spotlight__eyebrow');
+        const caption = container.querySelector('.spotlight__caption');
+        expect(eyebrow).toBeInTheDocument();
+        expect(eyebrow).toHaveAttribute('data-empty');
+        expect(caption).toBeInTheDocument();
+        expect(caption).toHaveAttribute('data-empty');
     });
 
     it('applies data-image-position attribute', () => {
@@ -491,11 +497,13 @@ describe('ImageBlock', () => {
         expect(screen.getByText('A beautiful view')).toBeInTheDocument();
     });
 
-    it('does not render caption when omitted', () => {
+    it('marks caption as empty when omitted', () => {
         const { container } = renderInProvider(
             <ImageBlock imageQuery="workspace" src="https://example.com/photo.jpg" alt="Photo" objectFit="cover" maxHeight={400} />
         );
-        expect(container.querySelector('.image_block__caption')).not.toBeInTheDocument();
+        const caption = container.querySelector('.image_block__caption');
+        expect(caption).toBeInTheDocument();
+        expect(caption).toHaveAttribute('data-empty');
     });
 
     it('applies objectFit and maxHeight as inline styles on image', () => {

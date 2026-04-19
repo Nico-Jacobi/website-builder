@@ -1,4 +1,5 @@
 .hero_banner {
+    position: relative; /* needed for edit__image-wrap overlay */
     width: 100%;
     background: var(--primary);   /* overridden by inline style when background prop is set */
     padding: var(--space_xl) var(--space_lg);

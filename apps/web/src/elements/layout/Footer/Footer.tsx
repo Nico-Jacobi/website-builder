@@ -1,5 +1,6 @@
 import './Footer.css';
 import { useEditableText } from '../../../builder/useEditableText';
+import { EditableLink } from '../../shared/EditableLink';
 import type { FooterProps, FooterColumn } from './Footer.schema';
 
 export default function Footer({ tagline, copyright, columns }: FooterProps) {
@@ -45,9 +46,12 @@ function FooterColumnItem({
             <ul className="footer__links">
                 {col.links.map((link, i) => (
                     <li key={i}>
-                        <a className="footer__link" href={link.href}>
-                            {link.label}
-                        </a>
+                        <EditableLink
+                            className="footer__link"
+                            href={link.href}
+                            label={link.label}
+                            labelPath={`columns[${colIndex}].links[${i}].label`}
+                        />
                     </li>
                 ))}
             </ul>

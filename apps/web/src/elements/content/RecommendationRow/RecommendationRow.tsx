@@ -1,10 +1,14 @@
 import './RecommendationRow.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
+import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
+import { RecommendationRowDefaults } from './RecommendationRow.schema';
 import type { RecommendationRowProps, Recommendation } from './RecommendationRow.schema';
 
 export default function RecommendationRow({ heading, items }: RecommendationRowProps) {
     const headingEdit = useEditableText('heading');
+    const { addItem } = useEditModeActions();
+    const blockIndex = useBlockIndex();
 
     return (
         <div className="section recommendation_row">
@@ -21,6 +25,12 @@ export default function RecommendationRow({ heading, items }: RecommendationRowP
                         propPathPrefix={`items[${index}]`}
                     />
                 ))}
+                <button
+                    className="edit__add-item"
+                    data-edit-only=""
+                    onClick={() => addItem(blockIndex, 'items', RecommendationRowDefaults.items[0])}
+                    title="Empfehlung hinzufügen"
+                >+</button>
             </div>
         </div>
     );
@@ -42,17 +52,14 @@ function RecommendationCard({ item, propPathPrefix }: RecommendationCardProps) {
     return (
         <article className="recommendation">
             <header className="recommendation__header">
-                {item.image ? (
-                    <EditableImage
-                        path={`${propPathPrefix}.image`}
-                        src={item.image}
-                        alt={item.imageAlt ?? item.name}
-                        wrapperClassName="recommendation__image-wrap"
-                        imgClassName="recommendation__image"
-                    />
-                ) : (
-                    <div className="recommendation__image-wrap recommendation__image-wrap--empty" aria-hidden="true" />
-                )}
+                <EditableImage
+                    path={`${propPathPrefix}.image`}
+                    src={item.image}
+                    alt={item.imageAlt ?? item.name}
+                    altPath={`${propPathPrefix}.imageAlt`}
+                    wrapperClassName={`recommendation__image-wrap${!item.image ? ' recommendation__image-wrap--empty' : ''}`}
+                    imgClassName="recommendation__image"
+                />
                 <div className="recommendation__meta">
                     <p className="recommendation__name" {...nameEdit}>{item.name}</p>
                     {item.source && (

@@ -12,13 +12,17 @@ export default function ImageBlock({ src, alt, caption, objectFit, maxHeight }: 
                 path="src"
                 src={src}
                 alt={alt}
+                altPath="alt"
                 wrapperClassName="image_block__img-wrap"
                 imgClassName="image_block__img"
                 imgStyle={{ objectFit, maxHeight }}
             />
-            {caption && (
-                <figcaption className="image_block__caption" {...captionEdit}>{caption}</figcaption>
-            )}
+            <figcaption
+                className="image_block__caption"
+                data-empty={!caption || undefined}
+                data-placeholder="Bildunterschrift"
+                {...captionEdit}
+            >{caption}</figcaption>
         </figure>
     );
 }

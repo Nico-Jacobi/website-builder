@@ -1,5 +1,6 @@
 import './FooterSimple.css';
 import { useEditableText } from '../../../builder/useEditableText';
+import { EditableLink } from '../../shared/EditableLink';
 import type { FooterSimpleProps } from './FooterSimple.schema';
 
 export default function FooterSimple({ tagline, copyright, links }: FooterSimpleProps) {
@@ -17,9 +18,13 @@ export default function FooterSimple({ tagline, copyright, links }: FooterSimple
             {hasLinks && (
                 <nav className="footer_simple__links">
                     {links!.map((link, i) => (
-                        <a key={i} className="footer_simple__link" href={link.href}>
-                            {link.label}
-                        </a>
+                        <EditableLink
+                            key={i}
+                            className="footer_simple__link"
+                            href={link.href}
+                            label={link.label}
+                            labelPath={`links[${i}].label`}
+                        />
                     ))}
                 </nav>
             )}
