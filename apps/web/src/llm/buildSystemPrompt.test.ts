@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { getRegistryLLMSurface } from '../builder/registry';
 
-describe('buildSystemPrompt', () => {
+describe('buildSystemPrompt (initial mode)', () => {
     const surface = getRegistryLLMSurface();
-    const prompt = buildSystemPrompt(surface);
+    const prompt = buildSystemPrompt({ surface, mode: 'initial' });
 
     it('contains every registered module name', () => {
         const expectedNames = [
@@ -56,9 +56,47 @@ describe('buildSystemPrompt', () => {
         expect(prompt).toContain('single JSON object');
     });
 
+    it('does NOT include the Refinement Mode section', () => {
+        expect(prompt).not.toContain('Refinement Mode');
+    });
+
     it('is pure: identical surface yields identical output', () => {
-        const a = buildSystemPrompt(surface);
-        const b = buildSystemPrompt(surface);
+        const a = buildSystemPrompt({ surface, mode: 'initial' });
+        const b = buildSystemPrompt({ surface, mode: 'initial' });
+        expect(a).toBe(b);
+    });
+});
+
+describe('buildSystemPrompt (refine mode)', () => {
+    const surface = getRegistryLLMSurface();
+    const initialPrompt = buildSystemPrompt({ surface, mode: 'initial' });
+    const refinePrompt = buildSystemPrompt({ surface, mode: 'refine' });
+
+    it('starts with the full initial prompt (initial is a prefix of refine)', () => {
+        expect(refinePrompt.startsWith(initialPrompt)).toBe(true);
+    });
+
+    it('appends the Refinement Mode header', () => {
+        expect(refinePrompt).toContain('## Refinement Mode');
+    });
+
+    it('mentions CURRENT_SPEC, HISTORY and USER_MESSAGE sections', () => {
+        expect(refinePrompt).toContain('CURRENT_SPEC');
+        expect(refinePrompt).toContain('HISTORY');
+        expect(refinePrompt).toContain('USER_MESSAGE');
+    });
+
+    it('tells the model to preserve block ids for persisting blocks', () => {
+        expect(refinePrompt).toMatch(/id.*persist|persist.*id/i);
+    });
+
+    it('tells the model to omit removed blocks', () => {
+        expect(refinePrompt).toMatch(/omit/i);
+    });
+
+    it('is pure: identical inputs yield identical output', () => {
+        const a = buildSystemPrompt({ surface, mode: 'refine' });
+        const b = buildSystemPrompt({ surface, mode: 'refine' });
         expect(a).toBe(b);
     });
 });

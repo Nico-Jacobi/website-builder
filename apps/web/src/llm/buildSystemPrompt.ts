@@ -1,20 +1,37 @@
 import type { RegistryLLMSurface } from '../builder/types';
 
 /**
+ * Mode selector for {@link buildSystemPrompt}.
+ *
+ * - `initial` — one-shot generation from a free-text brief. Byte-identical
+ *   to the pre-refactor prompt.
+ * - `refine`  — iterative refinement of an existing `SiteSpec`. Appends
+ *   a dedicated "Refinement Mode" section with rules about id-preservation
+ *   and partial updates.
+ */
+export type BuildSystemPromptMode = 'initial' | 'refine';
+
+export interface BuildSystemPromptArgs {
+    surface: RegistryLLMSurface;
+    mode: BuildSystemPromptMode;
+}
+
+/**
  * Assembles the system instruction sent to the LLM.
  *
- * The prompt has three sections:
+ * The prompt has three sections (plus an optional refinement tail):
  *   1. Role + task ("you are a web-design assistant…").
  *   2. Constraint list + theme-token guidance.
  *   3. Module reference: each registered module's meta + its full
  *      propsJSONSchema, pretty-printed.
+ *   4. (refine only) Refinement-mode rules about id-preservation.
  *
  * The per-module props schemas live here as reference material so the
  * model can fill block.props correctly. If the model still produces bad
  * props, validateSpecAgainstRegistry catches it downstream — this prompt
  * is the optimistic side of that contract.
  */
-export function buildSystemPrompt(surface: RegistryLLMSurface): string {
+export function buildSystemPrompt({ surface, mode }: BuildSystemPromptArgs): string {
     const modulesSection = surface.modules
         .map((m) => {
             const tagsLine = m.tags ? `\n**Tags:** ${m.tags.join(', ')}` : '';
@@ -36,7 +53,7 @@ export function buildSystemPrompt(surface: RegistryLLMSurface): string {
         '```',
     ].join('\n');
 
-    return [
+    const initialPrompt = [
         'You are a web-design assistant that turns a short user brief',
         'into a structured JSON spec for a website. The spec is rendered',
         'verbatim by a data-driven site builder, so every field must be',
@@ -174,4 +191,29 @@ export function buildSystemPrompt(surface: RegistryLLMSurface): string {
         '',
         modulesSection,
     ].join('\n');
+
+    if (mode === 'initial') {
+        return initialPrompt;
+    }
+
+    const refineTail = [
+        '',
+        '## Refinement Mode',
+        '',
+        'You are refining an existing SiteSpec. The user will provide:',
+        '- `CURRENT_SPEC`: the current state (with block `id` fields)',
+        '- `HISTORY`: recent conversation (last turns)',
+        '- `USER_MESSAGE`: new instruction',
+        '',
+        'Rules for refinement:',
+        '1. Return the COMPLETE new SiteSpec — not a patch.',
+        '2. Keep each block\'s `id` field for blocks that semantically persist. A block whose heading was edited is still the same block; a replaced block gets a new (omitted) id.',
+        '3. New blocks: OMIT the `id` field. Backend/client assigns IDs.',
+        '4. Removed blocks: simply omit them from the output.',
+        '5. Respect user intent narrowly — don\'t redesign unchanged sections.',
+        '6. Preserve `tone`, `theme`, and field values for blocks not mentioned in the user message.',
+        '7. You MAY include a top-level `_explanation` string field with a one-sentence summary of the changes you made. It is optional; if present, it will be shown to the user and stripped from the stored spec.',
+    ].join('\n');
+
+    return initialPrompt + refineTail;
 }
