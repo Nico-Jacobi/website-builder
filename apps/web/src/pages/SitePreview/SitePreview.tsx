@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import type { SiteSpec } from '@website-builder/shared';
 import './SitePreview.css';
 import Renderer from '../../builder/Renderer';
 import { EditModeProvider } from '../../builder/EditModeContext';
 import { EditModeToolbar } from '../../builder/EditModeToolbar';
-import { loadState } from '../../state/specStore';
 import { fetchSiteSpec } from '../../data/siteClient';
 import { makeAutoSaveAdapter } from '../../data/autoSave';
 
 type FetchStatus =
     | { kind: 'loading' }
     | { kind: 'ok' }
-    | { kind: 'empty' }
     | { kind: 'error'; message: string };
 
 export function SitePreview() {
@@ -20,15 +18,8 @@ export function SitePreview() {
     const identifier = params.get('identifier');
     const path = params.get('path') ?? '/';
 
-    const [spec, setSpec] = useState<SiteSpec | null>(() => {
-        if (identifier) return null;
-        return loadState().spec ?? null;
-    });
-
-    const [fetchStatus, setFetchStatus] = useState<FetchStatus>(() => {
-        if (identifier) return { kind: 'loading' };
-        return spec ? { kind: 'ok' } : { kind: 'empty' };
-    });
+    const [spec, setSpec] = useState<SiteSpec | null>(null);
+    const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ kind: 'loading' });
 
     useEffect(() => {
         if (!identifier) return;
@@ -61,6 +52,10 @@ export function SitePreview() {
         return () => autoSave?.dispose();
     }, [autoSave]);
 
+    if (!identifier) {
+        return <Navigate to="/" replace />;
+    }
+
     if (fetchStatus.kind === 'loading') {
         return <div className="site_preview__empty"><p>Lade Website…</p></div>;
     }
@@ -69,16 +64,16 @@ export function SitePreview() {
         return (
             <div className="site_preview__empty">
                 <p>Fehler beim Laden: {fetchStatus.message}</p>
-                <Link to="/" className="site_preview__back-link">← Zurück zum Prompt</Link>
+                <Link to="/" className="site_preview__back-link">← Zurück zur Übersicht</Link>
             </div>
         );
     }
 
-    if (fetchStatus.kind === 'empty' || !spec) {
+    if (!spec) {
         return (
             <div className="site_preview__empty">
-                <p>Noch keine Website generiert.</p>
-                <Link to="/" className="site_preview__back-link">← Zurück zum Prompt</Link>
+                <p>Keine Daten.</p>
+                <Link to="/" className="site_preview__back-link">← Zurück zur Übersicht</Link>
             </div>
         );
     }
