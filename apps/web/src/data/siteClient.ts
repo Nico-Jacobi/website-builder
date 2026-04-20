@@ -1,4 +1,4 @@
-import type { SiteSpec } from '@website-builder/shared';
+import type { BlockSpec, SiteSpec, Tone } from '@website-builder/shared';
 import { SiteSpecSchema } from '@website-builder/shared';
 
 /**
@@ -15,31 +15,41 @@ async function ensureOk(resp: Response, label: string): Promise<void> {
     throw new Error(`${label} failed: ${msg}`);
 }
 
-export interface PublishPayload {
+// --- Sites CRUD -----------------------------------------------------------
+
+export interface CreateSiteInput {
+    name: string;
+}
+
+export interface CreateSiteResult {
+    id: string;
     identifier: string;
     name: string;
-    path?: string;
-    spec: SiteSpec;
 }
 
-export interface PublishResult {
-    ok: true;
-    identifier: string;
-    path: string;
-    siteId: string;
-    pageId: string;
-    blockCount: number;
-}
-
-export async function publishSpec(payload: PublishPayload): Promise<PublishResult> {
-    const resp = await fetch(`${apiBase}/api/_seed`, {
+export async function createSite(input: CreateSiteInput): Promise<CreateSiteResult> {
+    const resp = await fetch(`${apiBase}/api/sites`, {
         method:  'POST',
         headers: { 'content-type': 'application/json' },
-        body:    JSON.stringify({ path: '/', ...payload }),
+        body:    JSON.stringify(input),
     });
-    await ensureOk(resp, 'publish');
-    return resp.json() as Promise<PublishResult>;
+    await ensureOk(resp, 'createSite');
+    return resp.json() as Promise<CreateSiteResult>;
 }
+
+export async function renameSite(identifier: string, name: string): Promise<void> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}`,
+        {
+            method: 'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ name }),
+        },
+    );
+    await ensureOk(resp, 'renameSite');
+}
+
+// --- Assets ---------------------------------------------------------------
 
 export async function uploadAsset(
     identifier: string,
@@ -54,6 +64,8 @@ export async function uploadAsset(
     await ensureOk(resp, 'uploadAsset');
     return resp.json() as Promise<{ id: string; url: string }>;
 }
+
+// --- Block content patch --------------------------------------------------
 
 export async function patchBlockContent(
     identifier: string,
@@ -71,6 +83,133 @@ export async function patchBlockContent(
     );
     await ensureOk(resp, 'patchBlockContent');
 }
+
+// --- Block CRUD -----------------------------------------------------------
+
+export interface AddBlockInput {
+    identifier:     string;
+    pagePath?:      string;
+    parentBlockId?: string | null;
+    position:       number;
+    block:          BlockSpec;
+}
+
+export interface AddBlockResult {
+    id:       string;
+    position: number;
+}
+
+export async function addBlock(input: AddBlockInput): Promise<AddBlockResult> {
+    const { identifier, ...body } = input;
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/blocks`,
+        {
+            method:  'POST',
+            headers: { 'content-type': 'application/json' },
+            body:    JSON.stringify(body),
+        },
+    );
+    await ensureOk(resp, 'addBlock');
+    return resp.json() as Promise<AddBlockResult>;
+}
+
+export interface RemoveBlockInput {
+    identifier: string;
+    blockId:    string;
+}
+
+export async function removeBlock(input: RemoveBlockInput): Promise<void> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(input.identifier)}/blocks/${encodeURIComponent(input.blockId)}`,
+        { method: 'DELETE' },
+    );
+    await ensureOk(resp, 'removeBlock');
+}
+
+export interface MoveBlockInput {
+    identifier:        string;
+    blockId:           string;
+    newPosition:       number;
+    newParentBlockId?: string | null;
+}
+
+export async function moveBlock(input: MoveBlockInput): Promise<void> {
+    const body: Record<string, unknown> = { newPosition: input.newPosition };
+    if (input.newParentBlockId !== undefined) {
+        body['newParentBlockId'] = input.newParentBlockId;
+    }
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(input.identifier)}/blocks/${encodeURIComponent(input.blockId)}/position`,
+        {
+            method:  'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body:    JSON.stringify(body),
+        },
+    );
+    await ensureOk(resp, 'moveBlock');
+}
+
+export interface PatchBlockToneInput {
+    identifier: string;
+    blockId:    string;
+    tone:       Tone | null;
+}
+
+export async function patchBlockTone(input: PatchBlockToneInput): Promise<void> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(input.identifier)}/blocks/${encodeURIComponent(input.blockId)}/tone`,
+        {
+            method:  'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body:    JSON.stringify({ tone: input.tone }),
+        },
+    );
+    await ensureOk(resp, 'patchBlockTone');
+}
+
+// --- Messages -------------------------------------------------------------
+
+export type MessageRole = 'user' | 'assistant' | 'system';
+
+export interface MessageRow {
+    id:        string;
+    role:      MessageRole;
+    content:   string;
+    metadata:  Record<string, unknown> | null;
+    createdAt: string;
+}
+
+export interface PostMessageInput {
+    role:      MessageRole;
+    content:   string;
+    metadata?: Record<string, unknown> | null;
+}
+
+export async function listMessages(identifier: string): Promise<MessageRow[]> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/messages`,
+    );
+    await ensureOk(resp, 'listMessages');
+    return resp.json() as Promise<MessageRow[]>;
+}
+
+export async function postMessage(
+    identifier: string,
+    input: PostMessageInput,
+): Promise<MessageRow> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/messages`,
+        {
+            method:  'POST',
+            headers: { 'content-type': 'application/json' },
+            body:    JSON.stringify(input),
+        },
+    );
+    await ensureOk(resp, 'postMessage');
+    return resp.json() as Promise<MessageRow>;
+}
+
+// --- List / delete / fetch ------------------------------------------------
 
 export interface SiteListItem {
     id: string;
@@ -90,6 +229,22 @@ export async function deleteSite(identifier: string): Promise<void> {
         method: 'DELETE',
     });
     await ensureOk(resp, 'deleteSite');
+}
+
+export interface SiteMeta {
+    id:         string;
+    identifier: string;
+    name:       string;
+    theme:      Record<string, string> | null;
+    pages:      Array<{ path: string; metaDesc: string | null; published: boolean }>;
+}
+
+export async function fetchSiteMeta(identifier: string): Promise<SiteMeta> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}`,
+    );
+    await ensureOk(resp, 'fetchSiteMeta');
+    return resp.json() as Promise<SiteMeta>;
 }
 
 export async function fetchSiteSpec(identifier: string, path: string = '/'): Promise<SiteSpec> {

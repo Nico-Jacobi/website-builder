@@ -1,13 +1,45 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { and, eq } from 'drizzle-orm';
+import { z } from 'zod';
+import { BlockSpecSchema, moduleContentFields } from '@website-builder/shared';
 import { db, schema } from '../db/client';
 import { assembleSpec } from '../services/assembleSpec';
-import { moduleContentFields } from '@website-builder/shared';
+import { createSite } from '../services/sites/createSite';
+import {
+    ALLOWED_TONES,
+    BlockOpFailure,
+    addBlock,
+    moveBlock,
+    patchTone,
+    removeBlock,
+} from '../services/sites/blockOps';
+import { appendMessage, listMessages } from '../services/sites/messages';
 
 export const sitesRouter = new Hono();
+
+const CreateSiteBody = z.object({
+    name: z.string().trim().min(1).max(200),
+});
+
+/** Create a new draft site (empty spec + default page "/"). */
+sitesRouter.post('/', async (c) => {
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = CreateSiteBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    const site = await createSite({ name: parsed.data.name });
+    return c.json(site, 201);
+});
 
 /** List all sites. */
 sitesRouter.get('/', async (c) => {
@@ -22,7 +54,38 @@ sitesRouter.get('/', async (c) => {
     })));
 });
 
-/** Delete a site and all its pages/blocks (cascade). */
+const RenameSiteBody = z.object({
+    name: z.string().trim().min(1).max(200),
+});
+
+/** Rename a site. */
+sitesRouter.patch('/:identifier', async (c) => {
+    const identifier = c.req.param('identifier');
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = RenameSiteBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    const site = await db.query.sites.findFirst({
+        where: eq(schema.sites.identifier, identifier),
+    });
+    if (!site) return c.json({ error: 'site not found' }, 404);
+
+    await db
+        .update(schema.sites)
+        .set({ name: parsed.data.name })
+        .where(eq(schema.sites.id, site.id));
+
+    return c.body(null, 204);
+});
+
+/** Delete a site and all its pages/blocks/messages (cascade). */
 sitesRouter.delete('/:identifier', async (c) => {
     const identifier = c.req.param('identifier');
     const site = await db.query.sites.findFirst({
@@ -72,6 +135,118 @@ sitesRouter.get('/:identifier/spec', async (c) => {
     if (!spec) return c.json({ error: 'site or page not found' }, 404);
     return c.json(spec);
 });
+
+// --- Block CRUD ------------------------------------------------------------
+
+const AddBlockBody = z.object({
+    pagePath:       z.string().optional(),
+    parentBlockId:  z.string().uuid().nullable().optional(),
+    position:       z.number().int().nonnegative(),
+    block:          BlockSpecSchema,
+});
+
+sitesRouter.post('/:identifier/blocks', async (c) => {
+    const identifier = c.req.param('identifier');
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = AddBlockBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    try {
+        const result = await addBlock({
+            identifier,
+            pagePath:      parsed.data.pagePath,
+            parentBlockId: parsed.data.parentBlockId ?? null,
+            position:      parsed.data.position,
+            block:         parsed.data.block,
+        });
+        return c.json(result, 201);
+    } catch (err) {
+        return blockOpErrorResponse(c, err);
+    }
+});
+
+sitesRouter.delete('/:identifier/blocks/:blockId', async (c) => {
+    const identifier = c.req.param('identifier');
+    const blockId = c.req.param('blockId');
+
+    try {
+        await removeBlock({ identifier, blockId });
+        return c.body(null, 204);
+    } catch (err) {
+        return blockOpErrorResponse(c, err);
+    }
+});
+
+const MoveBlockBody = z.object({
+    newPosition:       z.number().int().nonnegative(),
+    newParentBlockId:  z.string().uuid().nullable().optional(),
+});
+
+sitesRouter.patch('/:identifier/blocks/:blockId/position', async (c) => {
+    const identifier = c.req.param('identifier');
+    const blockId = c.req.param('blockId');
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = MoveBlockBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    try {
+        await moveBlock({
+            identifier,
+            blockId,
+            newPosition:      parsed.data.newPosition,
+            newParentBlockId: parsed.data.newParentBlockId,
+        });
+        return c.body(null, 204);
+    } catch (err) {
+        return blockOpErrorResponse(c, err);
+    }
+});
+
+const ToneBody = z.object({
+    tone: z.enum(['surface', 'muted', 'primary', 'dark', 'accent']).nullable(),
+});
+
+sitesRouter.patch('/:identifier/blocks/:blockId/tone', async (c) => {
+    const identifier = c.req.param('identifier');
+    const blockId = c.req.param('blockId');
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = ToneBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    try {
+        await patchTone({
+            identifier,
+            blockId,
+            tone: parsed.data.tone,
+        });
+        return c.body(null, 204);
+    } catch (err) {
+        return blockOpErrorResponse(c, err);
+    }
+});
+
+// --- Block content patch (existing) ---------------------------------------
 
 sitesRouter.patch('/:identifier/blocks/:blockId/content', async (c) => {
     const identifier = c.req.param('identifier');
@@ -131,6 +306,53 @@ sitesRouter.patch('/:identifier/blocks/:blockId/content', async (c) => {
     return c.body(null, 204);
 });
 
+// --- Messages -------------------------------------------------------------
+
+const PostMessageBody = z.object({
+    role:     z.enum(['user', 'assistant', 'system']),
+    content:  z.string().min(1).max(50_000),
+    metadata: z.record(z.string(), z.unknown()).nullable().optional(),
+});
+
+sitesRouter.get('/:identifier/messages', async (c) => {
+    const identifier = c.req.param('identifier');
+    const site = await db.query.sites.findFirst({
+        where: eq(schema.sites.identifier, identifier),
+    });
+    if (!site) return c.json({ error: 'site not found' }, 404);
+
+    const messages = await listMessages(site.id);
+    return c.json(messages);
+});
+
+sitesRouter.post('/:identifier/messages', async (c) => {
+    const identifier = c.req.param('identifier');
+    const site = await db.query.sites.findFirst({
+        where: eq(schema.sites.identifier, identifier),
+    });
+    if (!site) return c.json({ error: 'site not found' }, 404);
+
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = PostMessageBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    const row = await appendMessage(site.id, {
+        role:     parsed.data.role,
+        content:  parsed.data.content,
+        metadata: parsed.data.metadata ?? null,
+    });
+    return c.json(row, 201);
+});
+
+// --- Assets (existing) ----------------------------------------------------
+
 const MIME_EXT: Record<string, string> = {
     'image/png': 'png',
     'image/jpeg': 'jpg',
@@ -188,3 +410,23 @@ sitesRouter.post('/:identifier/assets', async (c) => {
 
     return c.json({ id: row.id, url: `/${relPath}` }, 201);
 });
+
+// --- Helpers --------------------------------------------------------------
+
+function blockOpErrorResponse(c: Context, err: unknown) {
+    if (err instanceof BlockOpFailure) {
+        switch (err.detail.kind) {
+            case 'site_not_found':     return c.json({ error: 'site not found' }, 404);
+            case 'page_not_found':     return c.json({ error: 'page not found' }, 404);
+            case 'block_not_found':    return c.json({ error: 'block not found' }, 404);
+            case 'block_not_in_site':  return c.json({ error: 'block does not belong to this site' }, 403);
+            case 'parent_not_in_page': return c.json({ error: 'parent block does not belong to this page' }, 400);
+            case 'unknown_type':       return c.json({ error: `unknown module type: ${err.detail.type}` }, 400);
+            case 'invalid_position':   return c.json({ error: 'invalid position' }, 400);
+        }
+    }
+    throw err;
+}
+
+// Re-export a typed helper for tests.
+export { ALLOWED_TONES };

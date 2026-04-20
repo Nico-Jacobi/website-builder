@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
     type AnyPgColumn,
     boolean,
+    index,
     integer,
     jsonb,
     pgTable,
@@ -83,6 +84,25 @@ export const blockContent = pgTable(
     },
     (t) => ({
         pk: primaryKey({ columns: [t.blockId, t.fieldPath] }),
+    }),
+);
+
+/**
+ * Chat-Messages für den interaktiven Editor. Ein Eintrag pro User- oder
+ * Assistant-Turn (oder System-Hinweis). Cascade-Delete über `site_id`.
+ */
+export const siteMessages = pgTable(
+    'site_messages',
+    {
+        id:        uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+        siteId:    uuid('site_id').notNull().references(() => sites.id, { onDelete: 'cascade' }),
+        role:      text('role').notNull(), // 'user' | 'assistant' | 'system'
+        content:   text('content').notNull(),
+        metadata:  jsonb('metadata').$type<Record<string, unknown> | null>(),
+        createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    },
+    (t) => ({
+        siteIdIdx: index('site_messages_site_id_idx').on(t.siteId, t.createdAt),
     }),
 );
 
