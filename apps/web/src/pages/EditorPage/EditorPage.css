@@ -1,0 +1,145 @@
+/* ============================================================
+   EditorPage — Split-View: Chat (left) + Live-Preview (right).
+   Tokens-only. BEM scoped via `.editor_page*`.
+   ============================================================ */
+
+.editor_page {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    background: var(--background);
+    color: var(--text);
+}
+
+/* ── Header ── */
+.editor_page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space_md);
+    padding: var(--space_sm) var(--space_md);
+    border-bottom: 1px solid var(--muted_text);
+    background: var(--surface);
+}
+
+.editor_page__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space_md);
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.editor_page__back {
+    padding: var(--space_xs) var(--space_sm);
+    border: 1px solid var(--muted_text);
+    border-radius: var(--radius_sm);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.editor_page__back:hover {
+    background: var(--background);
+}
+
+.editor_page__name-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--space_xs) var(--space_sm);
+    border: 1px solid transparent;
+    border-radius: var(--radius_sm);
+    background: transparent;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.editor_page__name-input:hover {
+    border-color: var(--muted_text);
+}
+
+.editor_page__name-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--surface);
+}
+
+/* ── Save-Status-Dot ── */
+.editor_page__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space_xs);
+    padding: var(--space_xs) var(--space_sm);
+    border-radius: var(--radius_sm);
+    font-size: 0.85rem;
+    color: var(--muted_text);
+    white-space: nowrap;
+}
+
+.editor_page__status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted_text);
+}
+
+.editor_page__status--saving .editor_page__status-dot {
+    background: var(--primary);
+}
+
+.editor_page__status--saved .editor_page__status-dot {
+    background: var(--alt_primary);
+}
+
+.editor_page__status--error {
+    color: var(--accent);
+}
+
+.editor_page__status--error .editor_page__status-dot {
+    background: var(--accent);
+}
+
+/* ── Body: Chat-Slot | Preview ── */
+.editor_page__body {
+    display: grid;
+    grid-template-columns: minmax(360px, 40%) 1fr;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.editor_page__chat_slot {
+    border-right: 1px solid var(--muted_text);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.editor_page__placeholder {
+    margin: 0;
+    color: var(--muted_text);
+    font-style: italic;
+}
+
+.editor_page__preview {
+    overflow-y: auto;
+    background: var(--background);
+}
+
+/* ── Fallback-States (loading / error) ── */
+.editor_page__fallback {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_md);
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: var(--space_lg);
+    text-align: center;
+    background: var(--background);
+    color: var(--text);
+}

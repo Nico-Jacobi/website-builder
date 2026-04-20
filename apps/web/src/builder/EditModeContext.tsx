@@ -14,25 +14,49 @@ interface EditModeProviderProps {
     spec: SiteSpec;
     onSpecChange: (spec: SiteSpec) => void;
     autoSave?: AutoSaveAdapter;
+    initialEditMode?: boolean;
+    /**
+     * Wird bei jedem Inline-Edit aufgerufen, bevor der neue State publiziert
+     * wird. `key` folgt der `InlineEditedKey`-Konvention:
+     *   `${blockId}:${propPath}` — Feld-Edit
+     * Wird vom `useInlineEditTracker` der EditorPage konsumiert, um beim
+     * Konflikt-Handling (Plan 06) LLM-Ops gegen zeitgleiche User-Edits zu
+     * verteidigen.
+     */
+    onInlineEdit?: (key: string) => void;
 }
 
-export function EditModeProvider({ children, spec, onSpecChange, autoSave }: EditModeProviderProps) {
-    const [isEditMode, setIsEditMode] = useState(false);
+export function EditModeProvider({
+    children,
+    spec,
+    onSpecChange,
+    autoSave,
+    initialEditMode = false,
+    onInlineEdit,
+}: EditModeProviderProps) {
+    const [isEditMode, setIsEditMode] = useState(initialEditMode);
 
     // Refs so updateBlock keeps a stable identity. Without this, every blur
     // rebuilds actionsValue and re-renders every editable consumer.
     const specRef = useRef(spec);
     const onSpecChangeRef = useRef(onSpecChange);
     const autoSaveRef = useRef(autoSave);
+    const onInlineEditRef = useRef(onInlineEdit);
     useEffect(() => {
         specRef.current = spec;
         onSpecChangeRef.current = onSpecChange;
         autoSaveRef.current = autoSave;
+        onInlineEditRef.current = onInlineEdit;
     });
 
     const updateBlock = useCallback(
         (blockIndex: number, propPath: string, value: unknown) => {
             const current = specRef.current;
+            const blockId = current.blocks[blockIndex]?.id;
+            if (blockId) {
+                onInlineEditRef.current?.(`${blockId}:${propPath}`);
+            }
+
             onSpecChangeRef.current({
                 ...current,
                 blocks: current.blocks.map((block, i) => {
@@ -44,7 +68,6 @@ export function EditModeProvider({ children, spec, onSpecChange, autoSave }: Edi
                 }),
             });
 
-            const blockId = current.blocks[blockIndex]?.id;
             if (autoSaveRef.current && blockId) {
                 autoSaveRef.current.patchContent(blockId, propPath, value);
             }
@@ -63,6 +86,11 @@ export function EditModeProvider({ children, spec, onSpecChange, autoSave }: Edi
                 ? [...existingArray, defaultItem]
                 : [defaultItem];
 
+            const blockId = block.id;
+            if (blockId) {
+                onInlineEditRef.current?.(`${blockId}:${listPath}`);
+            }
+
             onSpecChangeRef.current({
                 ...current,
                 blocks: current.blocks.map((b, i) => {
@@ -74,7 +102,6 @@ export function EditModeProvider({ children, spec, onSpecChange, autoSave }: Edi
                 }),
             });
 
-            const blockId = block.id;
             if (autoSaveRef.current && blockId) {
                 autoSaveRef.current.patchContent(blockId, listPath, nextArray);
             }

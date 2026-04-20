@@ -56,7 +56,7 @@
 /* ── Drag-over Feedback ──────────────────────────────────────────────────── */
 
 [data-drag-over="true"] {
-    outline: 3px dashed var(--primary);
+    outline: 3px dashed transparent;
     outline-offset: -3px;
     background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
 }
@@ -89,11 +89,14 @@
 /* ── Text Editing ─────────────────────────────────────────────────────────── */
 
 [data-edit-mode="text"] {
-    outline: 2px dashed var(--primary);
-    outline-offset: 2px;
+    outline: 2px dashed transparent;
+    outline-offset: -2px;
     border-radius: var(--radius_sm);
     cursor: text;
     min-width: 1ch;
+    /* Klickfläche vergrößern, ohne Layout zu verschieben: padding + negativer margin */
+    padding: var(--space_xs) var(--space_sm);
+    margin: calc(-1 * var(--space_xs)) calc(-1 * var(--space_sm));
 }
 
 [data-edit-mode="text"]:focus {
@@ -240,7 +243,7 @@
 }
 
 .edit__image-input:focus {
-    outline: 2px solid var(--primary);
+    outline: 2px solid transparent;
     border-color: transparent;
 }
 
