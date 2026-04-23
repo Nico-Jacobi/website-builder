@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import type { SiteSpec } from '@website-builder/shared';
 import './EditorPage.css';
 import Renderer from '../../builder/Renderer';
 import { EditModeProvider } from '../../builder/EditModeContext';
-import { fetchSiteMeta, fetchSiteSpec } from '../../data/siteClient';
+import { fetchSiteMeta, fetchSiteSpec, renameSite } from '../../data/siteClient';
 import { makeAutoSaveAdapter } from '../../data/autoSave';
 import { makeBlockOpsAdapter } from '../../data/blockOps';
 import type { BlockOpsAdapter } from '../../data/blockOps';
@@ -90,6 +90,18 @@ export function EditorPage() {
     useEffect(() => {
         return () => blockOps?.dispose();
     }, [blockOps]);
+
+    // --- Debounced site rename --------------------------------------------
+    const renameTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const handleNameChange = useCallback((next: string) => {
+        setSiteName(next);
+        if (!identifier) return;
+        if (renameTimer.current) clearTimeout(renameTimer.current);
+        renameTimer.current = setTimeout(() => {
+            if (next.trim()) void renameSite(identifier, next.trim());
+        }, 600);
+    }, [identifier]);
+    useEffect(() => () => { if (renameTimer.current) clearTimeout(renameTimer.current); }, []);
 
     // --- Chat-History + Inline-Edit-Tracker -------------------------------
     const chat = useChatHistory(identifier ?? '');
@@ -180,7 +192,8 @@ export function EditorPage() {
         <div className="editor_page">
             <EditorHeader
                 name={siteName}
-                onNameChange={setSiteName}
+                onNameChange={handleNameChange}
+                identifier={identifier}
                 autoSave={autoSave}
                 blockOps={blockOps}
             />
@@ -214,12 +227,14 @@ export function EditorPage() {
 interface EditorHeaderProps {
     name:         string;
     onNameChange: (next: string) => void;
+    identifier:   string;
     autoSave:     AutoSaveAdapter | undefined;
     blockOps:     BlockOpsAdapter | undefined;
 }
 
-function EditorHeader({ name, onNameChange, autoSave, blockOps }: EditorHeaderProps) {
+function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: EditorHeaderProps) {
     const status = useCombinedSaveStatus(autoSave, blockOps);
+    const previewHref = `/site?identifier=${encodeURIComponent(identifier)}`;
 
     return (
         <header className="editor_page__header">
@@ -234,7 +249,17 @@ function EditorHeader({ name, onNameChange, autoSave, blockOps }: EditorHeaderPr
                     aria-label="Site-Name"
                 />
             </div>
-            <SaveStatusIndicator status={status} />
+            <div className="editor_page__header-actions">
+                <SaveStatusIndicator status={status} />
+                <a
+                    href={previewHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="editor_page__preview-link"
+                >
+                    Vorschau ↗
+                </a>
+            </div>
         </header>
     );
 }

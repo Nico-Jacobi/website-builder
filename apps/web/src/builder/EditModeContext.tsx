@@ -112,7 +112,7 @@ export function EditModeProvider({
     const stateValue = useMemo(() => ({ isEditMode }), [isEditMode]);
     const actionsValue = useMemo(
         () => ({ updateBlock, setIsEditMode, addItem }),
-        [updateBlock, addItem],
+        [updateBlock, setIsEditMode, addItem],
     );
 
     return (

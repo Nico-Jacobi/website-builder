@@ -1,12 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import type { SiteSpec } from '@website-builder/shared';
 import './SitePreview.css';
 import Renderer from '../../builder/Renderer';
-import { EditModeProvider } from '../../builder/EditModeContext';
-import { EditModeToolbar } from '../../builder/EditModeToolbar';
 import { fetchSiteSpec } from '../../data/siteClient';
-import { makeAutoSaveAdapter } from '../../data/autoSave';
 
 type FetchStatus =
     | { kind: 'loading' }
@@ -43,15 +40,6 @@ export function SitePreview() {
         return () => { cancelled = true; };
     }, [identifier, path]);
 
-    const autoSave = useMemo(
-        () => identifier ? makeAutoSaveAdapter({ identifier }) : undefined,
-        [identifier],
-    );
-
-    useEffect(() => {
-        return () => autoSave?.dispose();
-    }, [autoSave]);
-
     if (!identifier) {
         return <Navigate to="/" replace />;
     }
@@ -79,10 +67,9 @@ export function SitePreview() {
     }
 
     return (
-        <EditModeProvider spec={spec} onSpecChange={setSpec} autoSave={autoSave}>
+        <>
             <Link to="/" className="site_preview__back-overlay">← Zurück</Link>
             <Renderer spec={spec} />
-            <EditModeToolbar />
-        </EditModeProvider>
+        </>
     );
 }
