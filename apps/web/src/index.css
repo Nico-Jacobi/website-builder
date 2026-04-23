@@ -16,6 +16,9 @@
     --muted_text: #64748B;
     --inverted_text: #FFFFFF;
 
+    --danger: #C0392B;
+    --danger_bg: #FFF5F4;
+
     /* Dividers — translucent, sit on top of --primary-tinted backgrounds */
     --divider_inverted: rgba(255, 255, 255, 0.15);
 
@@ -37,6 +40,11 @@
 /* Global reset */
 *, *::before, *::after {
     box-sizing: border-box;
+}
+
+/* Form controls don't inherit font by default in browsers */
+button, input, textarea, select {
+    font-family: inherit;
 }
 
 html, body {

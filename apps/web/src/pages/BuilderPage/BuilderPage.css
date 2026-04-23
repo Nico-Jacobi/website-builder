@@ -86,7 +86,7 @@
 .sites_list__error {
     margin: 0;
     padding: var(--space_sm) var(--space_md);
-    color: #c03030;
+    color: var(--danger);
     font-size: 0.9rem;
 }
 
@@ -142,13 +142,13 @@
 
 .sites_list__btn--delete {
     background: transparent;
-    color: #c03030;
-    border: 1px solid #c03030;
+    color: var(--danger);
+    border: 1px solid var(--danger);
 }
 
 .sites_list__btn--delete:hover:not(:disabled) {
-    background: #c03030;
-    color: #fff;
+    background: var(--danger);
+    color: var(--inverted_text);
 }
 
 .sites_list__btn--delete:disabled {

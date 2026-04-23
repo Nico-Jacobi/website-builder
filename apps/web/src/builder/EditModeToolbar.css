@@ -12,7 +12,6 @@
     border-radius: var(--radius_md);
     padding: var(--space_sm) var(--space_md);
     cursor: pointer;
-    font-family: var(--font_family);
     font-size: 0.9rem;
     font-weight: 600;
     box-shadow: 0 4px 16px rgb(0 0 0 / 16%);
