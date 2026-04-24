@@ -16,7 +16,7 @@ function EditModeWrapper({ children }: { children: ReactNode }) {
     return (
         <EditModeStateContext.Provider value={{ isEditMode: true }}>
             <EditModeActionsContext.Provider
-                value={{ updateBlock: () => {}, setIsEditMode: () => {}, addItem: () => {} }}
+                value={{ updateBlock: () => {}, setIsEditMode: () => {}, addItem: () => {}, removeItem: () => {} }}
             >
                 <BlockIndexContext.Provider value={0}>
                     <AutoSaveContext.Provider value={null}>

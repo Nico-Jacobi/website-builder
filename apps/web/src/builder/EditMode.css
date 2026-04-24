@@ -86,6 +86,40 @@
     background: color-mix(in srgb, var(--primary) 6%, transparent);
 }
 
+/* ── "Item entfernen" Button ─────────────────────────────────────────────── */
+
+.edit__remove-item {
+    position: absolute;
+    top: var(--space_xs);
+    left: var(--space_xs);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--inverted_text);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+}
+
+.edit__remove-item:hover,
+.edit__remove-item:focus-visible {
+    background: color-mix(in srgb, var(--primary) 80%, black);
+    opacity: 1;
+}
+
+*:hover > .edit__remove-item,
+*:focus-within > .edit__remove-item {
+    opacity: 1;
+}
+
 /* ── Text Editing ─────────────────────────────────────────────────────────── */
 
 [data-edit-mode="text"] {
