@@ -1,7 +1,7 @@
 import './ImageBlock.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
-import type { ImageBlockProps } from './ImageBlock.schema';
+import type { ImageBlockProps } from '@website-builder/shared';
 
 export default function ImageBlock({ src, alt, caption, objectFit, maxHeight }: ImageBlockProps) {
     const captionEdit = useEditableText('caption');

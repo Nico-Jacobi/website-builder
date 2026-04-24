@@ -1,6 +1,6 @@
 import './StatRow.css';
 import { useEditableText } from '../../../builder/useEditableText';
-import type { StatRowProps, Stat } from './StatRow.schema';
+import type { StatRowProps, Stat } from '@website-builder/shared';
 
 export default function StatRow({ stats, align }: StatRowProps) {
     return (

@@ -1,6 +1,6 @@
 import './TextBlock.css';
 import { useEditableText } from '../../../builder/useEditableText';
-import type { TextBlockProps } from './TextBlock.schema';
+import type { TextBlockProps } from '@website-builder/shared';
 
 export default function TextBlock({ eyebrow, heading, body, subtext, align }: TextBlockProps) {
     const eyebrowEdit = useEditableText('eyebrow');

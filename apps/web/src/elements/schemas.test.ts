@@ -1,27 +1,23 @@
 import { describe, expect, it } from 'vitest';
 
-// ---- Shared schemas ----
-import { LinkSchema, CardSchema } from './shared/schemas';
-
-// ---- Module schemas + defaults ----
-import { HeaderPropsSchema, HeaderDefaults } from './layout/Header/Header.schema';
-import { HeroBannerPropsSchema, HeroBannerDefaults } from './layout/HeroBanner/HeroBanner.schema';
-import { ContainerPropsSchema, ContainerDefaults } from './layout/Container/Container.schema';
-import { FooterPropsSchema, FooterDefaults, FooterColumnSchema } from './layout/Footer/Footer.schema';
-import { FooterSimplePropsSchema, FooterSimpleDefaults } from './layout/FooterSimple/FooterSimple.schema';
-import { TextBlockPropsSchema, TextBlockDefaults } from './content/TextBlock/TextBlock.schema';
-import { MediaTextPropsSchema, MediaTextDefaults } from './content/MediaText/MediaText.schema';
-import { CardRowPropsSchema, CardRowDefaults } from './content/CardRow/CardRow.schema';
-import { CardGridPropsSchema, CardGridDefaults } from './content/CardGrid/CardGrid.schema';
-import { SpotlightPropsSchema, SpotlightDefaults } from './content/Spotlight/Spotlight.schema';
+// ---- All schemas + defaults from shared (source of truth) ----
 import {
-    RecommendationRowPropsSchema,
-    RecommendationRowDefaults,
-    RecommendationSchema,
-} from './content/RecommendationRow/RecommendationRow.schema';
-import { StatRowPropsSchema, StatRowDefaults, StatSchema } from './content/StatRow/StatRow.schema';
-import { ImageBlockPropsSchema, ImageBlockDefaults } from './media/ImageBlock/ImageBlock.schema';
-import { GalleryPropsSchema, GalleryDefaults, GalleryImageSchema } from './media/Gallery/Gallery.schema';
+    LinkSchema, CardSchema,
+    HeaderPropsSchema, HeaderDefaults,
+    HeroBannerPropsSchema, HeroBannerDefaults,
+    ContainerPropsSchema, ContainerDefaults,
+    FooterPropsSchema, FooterDefaults, FooterColumnSchema,
+    FooterSimplePropsSchema, FooterSimpleDefaults,
+    TextBlockPropsSchema, TextBlockDefaults,
+    MediaTextPropsSchema, MediaTextDefaults,
+    CardRowPropsSchema, CardRowDefaults,
+    CardGridPropsSchema, CardGridDefaults,
+    SpotlightPropsSchema, SpotlightDefaults,
+    RecommendationRowPropsSchema, RecommendationRowDefaults, RecommendationSchema,
+    StatRowPropsSchema, StatRowDefaults, StatSchema,
+    ImageBlockPropsSchema, ImageBlockDefaults,
+    GalleryPropsSchema, GalleryDefaults, GalleryImageSchema,
+} from '@website-builder/shared';
 
 // ---------------------------------------------------------------------------
 // Helpers

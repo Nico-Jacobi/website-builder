@@ -2,7 +2,7 @@ import './Header.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import { EditableLink } from '../../shared/EditableLink';
-import type { HeaderProps } from './Header.schema';
+import type { HeaderProps } from '@website-builder/shared';
 
 export default function Header({ title, subtitle, icon, links }: HeaderProps) {
     const titleEdit = useEditableText('title');

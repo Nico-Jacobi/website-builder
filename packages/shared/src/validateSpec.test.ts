@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { validateSpecAgainstRegistry } from './validateSpec';
-import { specFromTypes } from './specHelpers';
+import { HeaderDefaults, TextBlockDefaults, FooterSimpleDefaults } from './modules/index';
 
 describe('validateSpecAgainstRegistry', () => {
-    it('accepts a valid demo spec from specFromTypes', () => {
-        const spec = specFromTypes(['Header', 'TextBlock', 'FooterSimple']);
+    it('accepts a valid demo spec built from shared defaults', () => {
+        const spec = {
+            blocks: [
+                { type: 'Header',       props: HeaderDefaults       },
+                { type: 'TextBlock',    props: TextBlockDefaults    },
+                { type: 'FooterSimple', props: FooterSimpleDefaults },
+            ],
+        };
         const result = validateSpecAgainstRegistry(spec);
         expect(result.ok).toBe(true);
         if (result.ok) {
@@ -73,7 +79,6 @@ describe('validateSpecAgainstRegistry', () => {
         });
         expect(result.ok).toBe(false);
         if (!result.ok) {
-            // Two unknown modules + at least one Header-prop error = >= 3.
             expect(result.errors.length).toBeGreaterThanOrEqual(3);
         }
     });

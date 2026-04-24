@@ -2,8 +2,8 @@ import './Gallery.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
-import { GalleryDefaults } from './Gallery.schema';
-import type { GalleryProps, GalleryImage } from './Gallery.schema';
+import { GalleryDefaults } from '@website-builder/shared';
+import type { GalleryProps, GalleryImage } from '@website-builder/shared';
 
 export default function Gallery({ heading, subheading, images, columns, gap }: GalleryProps) {
     const headingEdit = useEditableText('heading');

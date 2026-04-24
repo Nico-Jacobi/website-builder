@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-
-export { RecommendationRowContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
 
 /** A single review entry: who said it, how many stars, and the excerpt. */
 export const RecommendationSchema = z.object({
@@ -64,3 +63,18 @@ export const RecommendationRowMeta: ModuleMeta = {
     tags: ['reviews', 'ratings', 'press', 'social-proof', 'recommendations', 'testimonials'],
 };
 
+export const RecommendationRowContentFields: ContentField[] = [
+    { path: 'heading',          type: 'text' },
+    { path: 'items[].name',     type: 'text' },
+    { path: 'items[].source',   type: 'text' },
+    { path: 'items[].quote',    type: 'text' },
+    { path: 'items[].imageAlt', type: 'text' },
+    { path: 'items[].image',    type: 'image_ref' },
+];
+
+export const RecommendationRowModuleSpec: ModuleSpec<RecommendationRowProps> = {
+    meta:          RecommendationRowMeta,
+    propsSchema:   RecommendationRowPropsSchema,
+    defaults:      RecommendationRowDefaults,
+    contentFields: RecommendationRowContentFields,
+};

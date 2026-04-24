@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-
-export { TextBlockContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
 
 export const TextBlockPropsSchema = z.object({
     eyebrow: z.string().optional(),
@@ -25,3 +24,16 @@ export const TextBlockMeta: ModuleMeta = {
     tags:        ['text', 'heading', 'copy', 'paragraph', 'content'],
 };
 
+export const TextBlockContentFields: ContentField[] = [
+    { path: 'eyebrow', type: 'text' },
+    { path: 'heading', type: 'text' },
+    { path: 'body',    type: 'text' },
+    { path: 'subtext', type: 'text' },
+];
+
+export const TextBlockModuleSpec: ModuleSpec<TextBlockProps> = {
+    meta:          TextBlockMeta,
+    propsSchema:   TextBlockPropsSchema,
+    defaults:      TextBlockDefaults,
+    contentFields: TextBlockContentFields,
+};

@@ -2,8 +2,8 @@ import './RecommendationRow.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
-import { RecommendationRowDefaults } from './RecommendationRow.schema';
-import type { RecommendationRowProps, Recommendation } from './RecommendationRow.schema';
+import { RecommendationRowDefaults } from '@website-builder/shared';
+import type { RecommendationRowProps, Recommendation } from '@website-builder/shared';
 
 export default function RecommendationRow({ heading, items }: RecommendationRowProps) {
     const headingEdit = useEditableText('heading');

@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-
-export { GalleryContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
 
 /** A single image entry in the gallery. */
 export const GalleryImageSchema = z.object({
@@ -68,3 +67,18 @@ export const GalleryMeta: ModuleMeta = {
     tags: ['gallery', 'grid', 'images', 'photos', 'media', 'caption'],
 };
 
+export const GalleryContentFields: ContentField[] = [
+    { path: 'heading',             type: 'text' },
+    { path: 'subheading',          type: 'text' },
+    { path: 'images[].alt',        type: 'text' },
+    { path: 'images[].caption',    type: 'text' },
+    { path: 'images[].imageQuery', type: 'image_ref' },
+    { path: 'images[].src',        type: 'image_ref' },
+];
+
+export const GalleryModuleSpec: ModuleSpec<GalleryProps> = {
+    meta:          GalleryMeta,
+    propsSchema:   GalleryPropsSchema,
+    defaults:      GalleryDefaults,
+    contentFields: GalleryContentFields,
+};

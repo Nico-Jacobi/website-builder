@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-
-export { SpotlightContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
 
 export const SpotlightPropsSchema = z.object({
     /** Keywords describing the desired photo (e.g. "professional male portrait office"). Filled automatically into image — do not provide a URL. */
@@ -48,3 +47,19 @@ export const SpotlightMeta: ModuleMeta = {
     tags: ['about', 'owner', 'team', 'introduction', 'spotlight', 'profile', 'statement'],
 };
 
+export const SpotlightContentFields: ContentField[] = [
+    { path: 'eyebrow',    type: 'text' },
+    { path: 'title',      type: 'text' },
+    { path: 'body',       type: 'text' },
+    { path: 'caption',    type: 'text' },
+    { path: 'imageAlt',   type: 'text' },
+    { path: 'imageQuery', type: 'image_ref' },
+    { path: 'image',      type: 'image_ref' },
+];
+
+export const SpotlightModuleSpec: ModuleSpec<SpotlightProps> = {
+    meta:          SpotlightMeta,
+    propsSchema:   SpotlightPropsSchema,
+    defaults:      SpotlightDefaults,
+    contentFields: SpotlightContentFields,
+};

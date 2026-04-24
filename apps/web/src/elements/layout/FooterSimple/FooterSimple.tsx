@@ -1,7 +1,7 @@
 import './FooterSimple.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableLink } from '../../shared/EditableLink';
-import type { FooterSimpleProps } from './FooterSimple.schema';
+import type { FooterSimpleProps } from '@website-builder/shared';
 
 export default function FooterSimple({ tagline, copyright, links }: FooterSimpleProps) {
     const taglineEdit = useEditableText('tagline');

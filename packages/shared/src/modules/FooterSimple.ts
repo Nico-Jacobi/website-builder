@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-import { LinkSchema } from '../../shared/schemas';
-
-export { FooterSimpleContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
+import { LinkSchema } from '../schemas';
 
 export const FooterSimplePropsSchema = z.object({
     tagline:   z.string().optional(),
@@ -30,3 +29,16 @@ export const FooterSimpleMeta: ModuleMeta = {
     tags: ['footer', 'links', 'simple', 'minimal', 'layout'],
 };
 
+export const FooterSimpleContentFields: ContentField[] = [
+    { path: 'tagline',       type: 'text' },
+    { path: 'copyright',     type: 'text' },
+    { path: 'links[].label', type: 'text' },
+    { path: 'links[].href',  type: 'url'  },
+];
+
+export const FooterSimpleModuleSpec: ModuleSpec<FooterSimpleProps> = {
+    meta:          FooterSimpleMeta,
+    propsSchema:   FooterSimplePropsSchema,
+    defaults:      FooterSimpleDefaults,
+    contentFields: FooterSimpleContentFields,
+};

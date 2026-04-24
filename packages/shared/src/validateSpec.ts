@@ -1,6 +1,6 @@
 import type { ZodIssue } from 'zod';
 import { SiteSpecSchema, type BlockSpec, type SiteSpec } from './schemas';
-import { getModule } from './registry';
+import { getSharedModule } from './modules/index';
 
 /** Single validation failure. `path` is a dotted/indexed JSON pointer. */
 export interface SpecError {
@@ -44,11 +44,11 @@ export function validateSpecAgainstRegistry(input: unknown): ValidateResult {
 }
 
 function validateBlock(block: BlockSpec, path: string, errors: SpecError[]): void {
-    const module = getModule(block.type);
+    const module = getSharedModule(block.type);
     if (!module) {
         errors.push({
             path,
-            message: `Unknown module "${block.type}". Known modules are registered in src/builder/registry.ts.`,
+            message: `Unknown module "${block.type}". Known modules are registered in packages/shared/src/modules/index.ts.`,
         });
         return;
     }

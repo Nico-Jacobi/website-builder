@@ -3,21 +3,11 @@ import type { ZodType } from 'zod';
 import type { ModuleMeta, ContentField } from '@website-builder/shared';
 
 /**
- * Shared, React-independent types are defined in @website-builder/shared and
- * re-exported here so existing `../builder/types` imports keep working.
- */
-export type {
-    ModuleMeta,
-    ModuleLLMDescriptor,
-    RegistryLLMSurface,
-    Tone,
-    ContentField,
-    ContentFieldType,
-} from '@website-builder/shared';
-
-/**
  * A module is a self-contained, parameterized website part.
- * Each folder under src/elements/ produces exactly one ModuleDefinition.
+ * Each folder under src/elements/ produces a registered `ModuleDefinition`.
+ *
+ * Schema / meta / defaults / contentFields live in `@website-builder/shared`
+ * (React-independent). The web side adds the React component on top.
  */
 export interface ModuleDefinition<P = unknown> {
     meta: ModuleMeta;

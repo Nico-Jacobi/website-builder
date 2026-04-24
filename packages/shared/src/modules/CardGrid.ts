@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-import { CardSchema } from '../../shared/schemas';
-
-export { CardGridContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
+import { CardSchema } from '../schemas';
 
 export const CardGridPropsSchema = z.object({
     cards:   z.array(CardSchema).min(1),
@@ -28,3 +27,17 @@ export const CardGridMeta: ModuleMeta = {
     tags:        ['cards', 'grid', 'gallery', 'features', 'wrap'],
 };
 
+export const CardGridContentFields: ContentField[] = [
+    { path: 'cards[].title',      type: 'text' },
+    { path: 'cards[].body',       type: 'text' },
+    { path: 'cards[].imageAlt',   type: 'text' },
+    { path: 'cards[].imageQuery', type: 'image_ref' },
+    { path: 'cards[].imageSrc',   type: 'image_ref' },
+];
+
+export const CardGridModuleSpec: ModuleSpec<CardGridProps> = {
+    meta:          CardGridMeta,
+    propsSchema:   CardGridPropsSchema,
+    defaults:      CardGridDefaults,
+    contentFields: CardGridContentFields,
+};

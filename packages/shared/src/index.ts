@@ -2,3 +2,7 @@ export * from './types';
 export * from './schemas';
 export * from './content';
 export * from './modules';
+export * from './validateSpec';
+export { buildSystemPrompt } from './llm/buildSystemPrompt';
+export type { BuildSystemPromptMode, BuildSystemPromptArgs } from './llm/buildSystemPrompt';
+export { getRegistryLLMSurface } from './llm/registrySurface';

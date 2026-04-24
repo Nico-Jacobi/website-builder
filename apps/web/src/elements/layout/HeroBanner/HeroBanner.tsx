@@ -2,7 +2,7 @@ import './HeroBanner.css';
 import type { CSSProperties } from 'react';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditableImage } from '../../../builder/useEditableImage';
-import type { HeroBannerProps } from './HeroBanner.schema';
+import type { HeroBannerProps } from '@website-builder/shared';
 
 export default function HeroBanner({
     heading,

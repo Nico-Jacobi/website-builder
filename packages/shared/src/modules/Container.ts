@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-import { BlockSpecSchema } from '../../../builder/schemas';
+import type { ModuleMeta } from '../types';
+import type { ModuleSpec } from './index';
+import { BlockSpecSchema } from '../schemas';
 
 export const ContainerPropsSchema = z.object({
     children:   z.array(BlockSpecSchema).min(1),
@@ -23,4 +24,13 @@ export const ContainerMeta: ModuleMeta = {
     category:    'layout',
     description: 'Wraps one or more blocks in a section with configurable vertical padding, optional max-width, and optional vertical scrolling.',
     tags:        ['container', 'layout', 'section', 'wrapper'],
+};
+
+// Container hat kein `ContentFields` — alle Felder sind strukturell (layout,
+// scrollable, maxHeight) bzw. eine `BlockSpec[]`-Kindliste, die der Backend-
+// Spec-Split separat behandelt.
+export const ContainerModuleSpec: ModuleSpec<ContainerProps> = {
+    meta:        ContainerMeta,
+    propsSchema: ContainerPropsSchema,
+    defaults:    ContainerDefaults,
 };

@@ -1,7 +1,7 @@
 import './Spotlight.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
-import type { SpotlightProps } from './Spotlight.schema';
+import type { SpotlightProps } from '@website-builder/shared';
 
 export default function Spotlight({
     image,

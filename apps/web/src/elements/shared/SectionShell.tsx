@@ -1,6 +1,6 @@
 import './SectionShell.css';
 import type { ReactNode } from 'react';
-import type { Tone } from '../../builder/types';
+import type { Tone } from '@website-builder/shared';
 
 interface SectionShellProps {
     tone?: Tone;

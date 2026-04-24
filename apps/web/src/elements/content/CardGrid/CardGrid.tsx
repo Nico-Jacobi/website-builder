@@ -1,8 +1,8 @@
 import './CardGrid.css';
 import { Card } from '../../shared/Card';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
-import { CardGridDefaults } from './CardGrid.schema';
-import type { CardGridProps } from './CardGrid.schema';
+import { CardGridDefaults } from '@website-builder/shared';
+import type { CardGridProps } from '@website-builder/shared';
 
 export default function CardGrid({ cards, columns }: CardGridProps) {
     const { addItem } = useEditModeActions();

@@ -1,7 +1,7 @@
 import './MediaText.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
-import type { MediaTextProps } from './MediaText.schema';
+import type { MediaTextProps } from '@website-builder/shared';
 
 export default function MediaText({ imageSrc, imageAlt, heading, body, imagePosition }: MediaTextProps) {
     const headingEdit = useEditableText('heading');

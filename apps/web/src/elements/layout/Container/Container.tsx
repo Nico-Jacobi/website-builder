@@ -1,6 +1,6 @@
 import './Container.css';
 import type { ReactNode, CSSProperties } from 'react';
-import type { ContainerProps } from './Container.schema';
+import type { ContainerProps } from '@website-builder/shared';
 
 /**
  * At render time, Renderer.tsx materializes BlockSpec[] → ReactNode[] before

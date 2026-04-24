@@ -1,8 +1,8 @@
 import './CardRow.css';
 import { Card } from '../../shared/Card';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
-import { CardRowDefaults } from './CardRow.schema';
-import type { CardRowProps } from './CardRow.schema';
+import { CardRowDefaults } from '@website-builder/shared';
+import type { CardRowProps } from '@website-builder/shared';
 
 export default function CardRow({ cards }: CardRowProps) {
     const { addItem } = useEditModeActions();

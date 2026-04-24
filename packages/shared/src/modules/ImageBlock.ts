@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-
-export { ImageBlockContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
 
 export const ImageBlockPropsSchema = z.object({
     /** Keywords describing the desired image (e.g. "modern office workspace"). Filled automatically into src — do not provide a URL. */
@@ -31,3 +30,16 @@ export const ImageBlockMeta: ModuleMeta = {
     tags:        ['image', 'media', 'photo', 'caption'],
 };
 
+export const ImageBlockContentFields: ContentField[] = [
+    { path: 'alt',        type: 'text' },
+    { path: 'caption',    type: 'text' },
+    { path: 'imageQuery', type: 'image_ref' },
+    { path: 'src',        type: 'image_ref' },
+];
+
+export const ImageBlockModuleSpec: ModuleSpec<ImageBlockProps> = {
+    meta:          ImageBlockMeta,
+    propsSchema:   ImageBlockPropsSchema,
+    defaults:      ImageBlockDefaults,
+    contentFields: ImageBlockContentFields,
+};

@@ -1,58 +1,41 @@
-import { z } from 'zod';
-import { SiteSpecSchema } from './schemas';
-import type { ModuleDefinition, ModuleLLMDescriptor, RegistryLLMSurface } from './types';
-
-// ── Layout (5) ────────────────────────────────────────────────────────────────
-import { HeaderModule      } from '../elements/layout/Header';
-import { HeroBannerModule  } from '../elements/layout/HeroBanner';
-import { ContainerModule   } from '../elements/layout/Container';
-import { FooterModule      } from '../elements/layout/Footer';
-import { FooterSimpleModule } from '../elements/layout/FooterSimple';
-
-// ── Content (7) ───────────────────────────────────────────────────────────────
-import { TextBlockModule          } from '../elements/content/TextBlock';
-import { MediaTextModule          } from '../elements/content/MediaText';
-import { CardRowModule            } from '../elements/content/CardRow';
-import { SpotlightModule          } from '../elements/content/Spotlight';
-import { RecommendationRowModule  } from '../elements/content/RecommendationRow';
-import { StatRowModule            } from '../elements/content/StatRow';
-import { CardGridModule           } from '../elements/content/CardGrid';
-
-// ── Media (2) ─────────────────────────────────────────────────────────────────
-import { ImageBlockModule  } from '../elements/media/ImageBlock';
-import { GalleryModule     } from '../elements/media/Gallery';
+import { sharedModuleRegistry, type ModuleSpec } from '@website-builder/shared';
+import type { ModuleDefinition } from './types';
+import { componentMap } from './componentMap';
 
 /**
  * The module registry: every website part the builder knows about.
  *
- * To add a new module:
- *   1. Create src/elements/<category>/<Name>/ with Name.tsx, Name.css, Name.schema.ts, index.ts
- *      Categories: layout | content | media
- *   2. Import its <Name>Module here
- *   3. Add it to the `modules` array below — no other file needs to change
+ * Schema + Meta + Defaults + contentFields come from `@website-builder/shared`.
+ * The React components live in `./componentMap`. This file composes both
+ * into full `ModuleDefinition` objects at runtime.
+ *
+ * Adding a new module:
+ *   1. Create `packages/shared/src/modules/<Name>.ts` with schema + meta +
+ *      defaults + contentFields; register it in the shared module registry.
+ *   2. Write the React component in `apps/web/src/elements/<cat>/<Name>/<Name>.tsx`.
+ *   3. Add the component to `./componentMap` under the same name.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyModule = ModuleDefinition<any>;
 
-const modules: AnyModule[] = [
-    // Layout
-    HeaderModule,
-    HeroBannerModule,
-    ContainerModule,
-    FooterModule,
-    FooterSimpleModule,
-    // Content
-    TextBlockModule,
-    MediaTextModule,
-    CardRowModule,
-    SpotlightModule,
-    RecommendationRowModule,
-    StatRowModule,
-    CardGridModule,
-    // Media
-    ImageBlockModule,
-    GalleryModule,
-];
+function composeModule(spec: ModuleSpec): AnyModule {
+    const Component = componentMap[spec.meta.name];
+    if (!Component) {
+        throw new Error(
+            `No React component registered for module "${spec.meta.name}". ` +
+                `Add it to apps/web/src/builder/componentMap.ts.`,
+        );
+    }
+    return {
+        meta:          spec.meta,
+        propsSchema:   spec.propsSchema,
+        defaults:      spec.defaults,
+        Component,
+        ...(spec.contentFields ? { contentFields: spec.contentFields } : {}),
+    };
+}
+
+const modules: AnyModule[] = Object.values(sharedModuleRegistry).map(composeModule);
 
 export const registry: Record<string, AnyModule> = Object.fromEntries(
     modules.map((m) => [m.meta.name, m]),
@@ -64,41 +47,4 @@ export function getModule(name: string): AnyModule | undefined {
 
 export function listModules(): AnyModule[] {
     return modules;
-}
-
-/**
- * Projects the registry into a shape that an LLM (or any external consumer)
- * can use to produce valid SiteSpecs:
- *
- *   - One `ModuleLLMDescriptor` per registered module, each containing the
- *     module's meta fields and its propsSchema rendered as JSON Schema.
- *   - The full `SiteSpecSchema` rendered as JSON Schema, so the consumer
- *     knows the outer shape (theme + blocks array).
- *
- * This is the single place that couples "registry content" to the JSON
- * Schema surface. The LLM call layer (not part of this feature) composes
- * this into its system prompt.
- */
-function stripSchema(raw: Record<string, unknown>): Record<string, unknown> {
-    const { $schema, ...rest } = raw;
-    void $schema;
-    return rest;
-}
-
-export function getRegistryLLMSurface(): RegistryLLMSurface {
-    const modules: ModuleLLMDescriptor[] = listModules().map((m) => ({
-        name:        m.meta.name,
-        category:    m.meta.category,
-        description: m.meta.description,
-        ...(m.meta.tags ? { tags: m.meta.tags } : {}),
-        propsJSONSchema: stripSchema(z.toJSONSchema(m.propsSchema) as Record<string, unknown>),
-    }));
-
-    const siteSpec = z.toJSONSchema(SiteSpecSchema) as Record<string, unknown>;
-
-    return {
-        $schema: siteSpec['$schema'] as string,
-        modules,
-        siteSpecJSONSchema: stripSchema(siteSpec),
-    };
 }

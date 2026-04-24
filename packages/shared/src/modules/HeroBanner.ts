@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-
-export { HeroBannerContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
 
 export const HeroBannerPropsSchema = z.object({
     /** Large H1 headline displayed center-stage. */
@@ -54,3 +53,16 @@ export const HeroBannerMeta: ModuleMeta = {
     tags: ['hero', 'banner', 'layout', 'landing'],
 };
 
+export const HeroBannerContentFields: ContentField[] = [
+    { path: 'heading',         type: 'text' },
+    { path: 'subheading',      type: 'text' },
+    { path: 'imageQuery',      type: 'image_ref' },
+    { path: 'backgroundImage', type: 'image_ref' },
+];
+
+export const HeroBannerModuleSpec: ModuleSpec<HeroBannerProps> = {
+    meta:          HeroBannerMeta,
+    propsSchema:   HeroBannerPropsSchema,
+    defaults:      HeroBannerDefaults,
+    contentFields: HeroBannerContentFields,
+};

@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import type { ModuleMeta } from '../../../builder/types';
-
-export { StatRowContentFields } from '@website-builder/shared';
+import type { ModuleMeta, ContentField } from '../types';
+import type { ModuleSpec } from './index';
 
 /** A single statistic tile. */
 export const StatSchema = z.object({
@@ -44,3 +43,14 @@ export const StatRowMeta: ModuleMeta = {
     tags: ['stats', 'metrics', 'numbers', 'marketing', 'kpi'],
 };
 
+export const StatRowContentFields: ContentField[] = [
+    { path: 'stats[].value', type: 'text' },
+    { path: 'stats[].label', type: 'text' },
+];
+
+export const StatRowModuleSpec: ModuleSpec<StatRowProps> = {
+    meta:          StatRowMeta,
+    propsSchema:   StatRowPropsSchema,
+    defaults:      StatRowDefaults,
+    contentFields: StatRowContentFields,
+};
