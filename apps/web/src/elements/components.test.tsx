@@ -339,7 +339,7 @@ describe('CardGrid', () => {
 describe('Spotlight', () => {
     const spotlightProps = {
         image: 'https://example.com/photo.jpg',
-        eyebrow: 'About us',
+        overline: 'About us',
         title: 'Handcraft since 1987',
         body: 'We care deeply about the work we put into every piece.',
         caption: '— Max Müller, Owner',
@@ -356,7 +356,7 @@ describe('Spotlight', () => {
         expect(screen.getByText(/We care deeply/)).toBeInTheDocument();
     });
 
-    it('renders the eyebrow when provided', () => {
+    it('renders the overline when provided', () => {
         renderInProvider(<Spotlight {...spotlightProps} />);
         expect(screen.getByText('About us')).toBeInTheDocument();
     });
@@ -373,7 +373,7 @@ describe('Spotlight', () => {
         expect(img).toHaveAttribute('alt', 'Handcraft since 1987');
     });
 
-    it('marks eyebrow and caption as empty when omitted', () => {
+    it('marks overline and caption as empty when omitted', () => {
         const { container } = renderInProvider(
             <Spotlight
                 image={spotlightProps.image}
@@ -382,10 +382,10 @@ describe('Spotlight', () => {
                 imagePosition="left"
             />
         );
-        const eyebrow = container.querySelector('.spotlight__eyebrow');
+        const overline = container.querySelector('.spotlight__overline');
         const caption = container.querySelector('.spotlight__caption');
-        expect(eyebrow).toBeInTheDocument();
-        expect(eyebrow).toHaveAttribute('data-empty');
+        expect(overline).toBeInTheDocument();
+        expect(overline).toHaveAttribute('data-empty');
         expect(caption).toBeInTheDocument();
         expect(caption).toHaveAttribute('data-empty');
     });

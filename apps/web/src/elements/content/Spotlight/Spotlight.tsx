@@ -6,16 +6,16 @@ import type { SpotlightProps } from '@website-builder/shared';
 export default function Spotlight({
     image,
     imageAlt,
-    eyebrow,
+    overline,
     title,
     body,
     caption,
     imagePosition,
 }: SpotlightProps) {
-    const eyebrowEdit = useEditableText('eyebrow');
-    const titleEdit   = useEditableText('title');
-    const bodyEdit    = useEditableText('body');
-    const captionEdit = useEditableText('caption');
+    const overlineEdit = useEditableText('overline');
+    const titleEdit    = useEditableText('title');
+    const bodyEdit     = useEditableText('body');
+    const captionEdit  = useEditableText('caption');
 
     return (
         <div className="section spotlight" data-image-position={imagePosition}>
@@ -29,11 +29,11 @@ export default function Spotlight({
             />
             <div className="spotlight__body">
                 <p
-                    className="spotlight__eyebrow"
-                    data-empty={!eyebrow || undefined}
-                    data-placeholder="Eyebrow"
-                    {...eyebrowEdit}
-                >{eyebrow}</p>
+                    className="spotlight__overline"
+                    data-empty={!overline || undefined}
+                    data-placeholder="Kurztitel"
+                    {...overlineEdit}
+                >{overline}</p>
                 <h2 className="spotlight__title" {...titleEdit}>{title}</h2>
                 <p className="spotlight__text" {...bodyEdit}>{body}</p>
                 <p

@@ -2,8 +2,8 @@ import './TextBlock.css';
 import { useEditableText } from '../../../builder/useEditableText';
 import type { TextBlockProps } from '@website-builder/shared';
 
-export default function TextBlock({ eyebrow, heading, body, subtext, align }: TextBlockProps) {
-    const eyebrowEdit = useEditableText('eyebrow');
+export default function TextBlock({ overline, heading, body, subtext, align }: TextBlockProps) {
+    const overlineEdit = useEditableText('overline');
     const headingEdit = useEditableText('heading');
     const bodyEdit = useEditableText('body');
     const subtextEdit = useEditableText('subtext');
@@ -11,11 +11,11 @@ export default function TextBlock({ eyebrow, heading, body, subtext, align }: Te
     return (
         <div className="section text_block" data-align={align}>
             <span
-                className="text_block__eyebrow"
-                data-empty={!eyebrow || undefined}
-                data-placeholder="Eyebrow"
-                {...eyebrowEdit}
-            >{eyebrow}</span>
+                className="text_block__overline"
+                data-empty={!overline || undefined}
+                data-placeholder="Kurztitel"
+                {...overlineEdit}
+            >{overline}</span>
             <h2
                 className="text_block__heading"
                 data-empty={!heading || undefined}

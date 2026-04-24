@@ -13,7 +13,7 @@ export const SpotlightPropsSchema = z.object({
     imageAlt: z.string().optional(),
 
     /** Small label above the title (e.g. "Über uns", "Unser Gründer", "Das Team"). */
-    eyebrow: z.string().optional(),
+    overline: z.string().optional(),
 
     /** Main heading — a person's name, team label, or topic title. */
     title: z.string(),
@@ -33,7 +33,7 @@ export type SpotlightProps = z.infer<typeof SpotlightPropsSchema>;
 export const SpotlightDefaults: SpotlightProps = {
     imageQuery: 'professional portrait office',
     image: '',
-    eyebrow: 'Unser Gründer',
+    overline: 'Unser Gründer',
     title: 'Handwerk seit 1987',
     body: 'Wir glauben an den ruhigen, sorgfältigen Ton eines Ortes, an dem die Dinge mit Bedacht entstehen — jeden Tag aufs Neue, mit den gleichen Händen und denselben Überzeugungen.',
     caption: '— Max Müller, Inhaber',
@@ -43,12 +43,12 @@ export const SpotlightDefaults: SpotlightProps = {
 export const SpotlightMeta: ModuleMeta = {
     name: 'Spotlight',
     category: 'content',
-    description: 'A spotlight block introducing a person, team, or topic. Photo beside a short statement with optional eyebrow label and signature caption. Suitable for "about us", founder introductions, or team highlights.',
+    description: 'A spotlight block introducing a person, team, or topic. Photo beside a short statement with optional overline label and signature caption. Suitable for "about us", founder introductions, or team highlights.',
     tags: ['about', 'owner', 'team', 'introduction', 'spotlight', 'profile', 'statement'],
 };
 
 export const SpotlightContentFields: ContentField[] = [
-    { path: 'eyebrow',    type: 'text' },
+    { path: 'overline',   type: 'text' },
     { path: 'title',      type: 'text' },
     { path: 'body',       type: 'text' },
     { path: 'caption',    type: 'text' },

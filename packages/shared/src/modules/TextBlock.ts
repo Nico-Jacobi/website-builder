@@ -3,7 +3,7 @@ import type { ModuleMeta, ContentField } from '../types';
 import type { ModuleSpec } from './index';
 
 export const TextBlockPropsSchema = z.object({
-    eyebrow: z.string().optional(),
+    overline: z.string().optional(),
     heading: z.string().optional(),
     body:    z.string(),
     subtext: z.string().optional(),
@@ -25,7 +25,7 @@ export const TextBlockMeta: ModuleMeta = {
 };
 
 export const TextBlockContentFields: ContentField[] = [
-    { path: 'eyebrow', type: 'text' },
+    { path: 'overline', type: 'text' },
     { path: 'heading', type: 'text' },
     { path: 'body',    type: 'text' },
     { path: 'subtext', type: 'text' },

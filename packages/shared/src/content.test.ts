@@ -129,11 +129,11 @@ describe('splitProps / mergeProps', () => {
 
     it('handles missing optional content fields gracefully', () => {
         const fields: ContentField[] = [
-            { path: 'eyebrow', type: 'text' },
+            { path: 'overline', type: 'text' },
             { path: 'heading', type: 'text' },
             { path: 'body', type: 'text' },
         ];
-        // No eyebrow in props
+        // No overline in props
         const props = { heading: 'H', body: 'B', align: 'left' };
 
         const { struct, content } = splitProps(fields, props);

@@ -564,7 +564,7 @@ describe('SpotlightPropsSchema', () => {
         expect(parses(SpotlightPropsSchema, {
             ...base,
             imageAlt: 'Portrait',
-            eyebrow: 'About us',
+            overline: 'About us',
             caption: '— Max Müller',
             imagePosition: 'right',
         })).toBe(true);

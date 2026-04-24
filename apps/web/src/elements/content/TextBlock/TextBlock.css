@@ -2,7 +2,7 @@
 .text_block[data-align="center"] { text-align: center; }
 .text_block[data-align="right"]  { text-align: right; }
 
-.text_block__eyebrow {
+.text_block__overline {
     display: block;
     margin: 0 0 var(--space_sm) 0;
     font-size: 0.75rem;
