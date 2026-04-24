@@ -67,9 +67,9 @@ export function SitePreview() {
     }
 
     return (
-        <>
+        <div data-edit-mode="false" style={{ display: 'contents' }}>
             <Link to="/" className="site_preview__back-overlay">← Zurück</Link>
             <Renderer spec={spec} />
-        </>
+        </div>
     );
 }
