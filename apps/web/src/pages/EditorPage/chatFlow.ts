@@ -79,11 +79,16 @@ export interface ApplySummary {
  * Wenn das LLM eine eigene `explanation` mitgeschickt hat, wird die an den
  * Anfang der Assistant-Message gestellt; die automatisch berechnete
  * Ops-Zusammenfassung kommt als zweite Zeile.
+ *
+ * Bei der Erst-Generation (`initial`) ersetzen wir die Ops-Zahl durch eine
+ * nutzerfreundliche Gesamtlauf-Zeit — "9 Änderungen angewendet" ist für den
+ * ersten Turn keine nützliche Info, da ohnehin *alles* neu ist.
  */
 export function summarizeApply(
     apply:       ApplyResult,
     rejected:    RejectedOp[],
     explanation: string,
+    initial?:    { durationMs: number },
 ): ApplySummary {
     const parts: string[] = [];
     if (explanation.trim()) parts.push(explanation.trim());
@@ -91,6 +96,9 @@ export function summarizeApply(
     if (apply.kind === 'ok') {
         if (apply.applied === 0 && rejected.length === 0) {
             parts.push('Keine Änderungen angewendet.');
+        } else if (initial && apply.applied > 0) {
+            const seconds = Math.max(1, Math.round(initial.durationMs / 1000));
+            parts.push(`Website nach ${seconds}s generiert.`);
         } else if (apply.applied > 0) {
             parts.push(`Angewendet: ${apply.applied} Änderung${apply.applied === 1 ? '' : 'en'}.`);
         }

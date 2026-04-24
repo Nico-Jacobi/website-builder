@@ -131,6 +131,7 @@ export function EditorPage() {
             const isInitial = spec.blocks.length === 0;
             const historyEntries = toHistoryEntries(chat.messages);
 
+            const turnStart = performance.now();
             const llmResult = isInitial
                 ? adaptGenerateResult(await generateSpec(userMessage))
                 : await refineSpec({
@@ -163,7 +164,12 @@ export function EditorPage() {
 
             setSpec(applyResult.nextSpec);
 
-            const summary = summarizeApply(applyResult, rejected, llmResult.explanation);
+            const summary = summarizeApply(
+                applyResult,
+                rejected,
+                llmResult.explanation,
+                isInitial ? { durationMs: performance.now() - turnStart } : undefined,
+            );
             await chat.appendAssistant(summary.assistant, {
                 applied:  applyResult.applied,
                 rejected: rejected.length,
