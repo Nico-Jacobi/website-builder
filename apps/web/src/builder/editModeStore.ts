@@ -23,12 +23,14 @@ export interface EditModeActionsValue {
     updateBlock: (blockIndex: number, propPath: string, value: unknown) => void;
     setIsEditMode: (value: boolean) => void;
     addItem: (blockIndex: number, listPath: string, defaultItem: unknown) => void;
+    removeItem: (blockIndex: number, listPath: string, itemIndex: number) => void;
 }
 
 export const EditModeActionsContext = createContext<EditModeActionsValue>({
     updateBlock: () => {},
     setIsEditMode: () => {},
     addItem: () => {},
+    removeItem: () => {},
 });
 
 export function useEditModeActions(): EditModeActionsValue {

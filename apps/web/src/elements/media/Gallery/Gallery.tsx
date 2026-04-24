@@ -8,7 +8,7 @@ import type { GalleryProps, GalleryImage } from '@website-builder/shared';
 export default function Gallery({ heading, subheading, images, columns, gap }: GalleryProps) {
     const headingEdit = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
-    const { addItem } = useEditModeActions();
+    const { addItem, removeItem } = useEditModeActions();
     const blockIndex = useBlockIndex();
 
     return (
@@ -23,7 +23,12 @@ export default function Gallery({ heading, subheading, images, columns, gap }: G
                 data-gap={gap}
             >
                 {images.map((image, index) => (
-                    <GalleryItem key={index} image={image} index={index} />
+                    <GalleryItem
+                        key={index}
+                        image={image}
+                        index={index}
+                        onRemove={() => removeItem(blockIndex, 'images', index)}
+                    />
                 ))}
                 <button
                     className="edit__add-item"
@@ -39,14 +44,23 @@ export default function Gallery({ heading, subheading, images, columns, gap }: G
 function GalleryItem({
     image,
     index,
+    onRemove,
 }: {
     image: GalleryImage;
     index: number;
+    onRemove: () => void;
 }) {
     const captionEdit = useEditableText(`images[${index}].caption`);
 
     return (
         <figure className="gallery__item">
+            <button
+                className="edit__remove-item"
+                data-edit-only=""
+                onClick={onRemove}
+                title="Bild entfernen"
+                aria-label="Bild entfernen"
+            >×</button>
             <EditableImage
                 path={`images[${index}].src`}
                 src={image.src}

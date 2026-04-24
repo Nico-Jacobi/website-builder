@@ -109,10 +109,43 @@ export function EditModeProvider({
         [],
     );
 
+    const removeItem = useCallback(
+        (blockIndex: number, listPath: string, itemIndex: number) => {
+            const current = specRef.current;
+            const block = current.blocks[blockIndex];
+            if (!block) return;
+
+            const existingArray = getNestedProp(block.props, listPath);
+            if (!Array.isArray(existingArray)) return;
+            const nextArray = existingArray.filter((_, i) => i !== itemIndex);
+
+            const blockId = block.id;
+            if (blockId) {
+                onInlineEditRef.current?.(`${blockId}:${listPath}`);
+            }
+
+            onSpecChangeRef.current({
+                ...current,
+                blocks: current.blocks.map((b, i) => {
+                    if (i !== blockIndex) return b;
+                    return {
+                        ...b,
+                        props: setNestedProp(b.props, listPath, nextArray),
+                    };
+                }),
+            });
+
+            if (autoSaveRef.current && blockId) {
+                autoSaveRef.current.patchContent(blockId, listPath, nextArray);
+            }
+        },
+        [],
+    );
+
     const stateValue = useMemo(() => ({ isEditMode }), [isEditMode]);
     const actionsValue = useMemo(
-        () => ({ updateBlock, setIsEditMode, addItem }),
-        [updateBlock, setIsEditMode, addItem],
+        () => ({ updateBlock, setIsEditMode, addItem, removeItem }),
+        [updateBlock, setIsEditMode, addItem, removeItem],
     );
 
     return (
