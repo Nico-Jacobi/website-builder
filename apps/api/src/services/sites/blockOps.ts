@@ -247,6 +247,13 @@ export async function addBlock(input: AddBlockInput): Promise<AddBlockResult> {
             );
         }
 
+        // Nach dem ersten Block-Insert initial_prompt clearen, damit der
+        // Editor-Auto-Trigger beim Reload nicht erneut feuert. Idempotent.
+        await tx
+            .update(schema.sites)
+            .set({ initialPrompt: null })
+            .where(eq(schema.sites.id, site.id));
+
         return { id: inserted.id, position };
     });
 }

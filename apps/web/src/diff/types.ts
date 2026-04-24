@@ -35,6 +35,11 @@ export type PatchOp =
           blockId: string;
           newParentBlockId: string | null;
           newPosition: number;
+      }
+    | {
+          type: 'updateTheme';
+          theme: Record<string, string> | null;
+          previousTheme: Record<string, string> | null;
       };
 
 export interface RejectedOp {

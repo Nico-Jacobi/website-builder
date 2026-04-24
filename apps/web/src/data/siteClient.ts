@@ -18,7 +18,8 @@ async function ensureOk(resp: Response, label: string): Promise<void> {
 // --- Sites CRUD -----------------------------------------------------------
 
 export interface CreateSiteInput {
-    name: string;
+    name:          string;
+    initialPrompt: string;
 }
 
 export interface CreateSiteResult {
@@ -149,6 +150,21 @@ export async function moveBlock(input: MoveBlockInput): Promise<void> {
     await ensureOk(resp, 'moveBlock');
 }
 
+export async function patchSiteTheme(
+    identifier: string,
+    theme: Record<string, string> | null,
+): Promise<void> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/theme`,
+        {
+            method:  'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body:    JSON.stringify({ theme }),
+        },
+    );
+    await ensureOk(resp, 'patchSiteTheme');
+}
+
 export interface PatchBlockToneInput {
     identifier: string;
     blockId:    string;
@@ -232,11 +248,12 @@ export async function deleteSite(identifier: string): Promise<void> {
 }
 
 export interface SiteMeta {
-    id:         string;
-    identifier: string;
-    name:       string;
-    theme:      Record<string, string> | null;
-    pages:      Array<{ path: string; metaDesc: string | null; published: boolean }>;
+    id:            string;
+    identifier:    string;
+    name:          string;
+    theme:         Record<string, string> | null;
+    initialPrompt: string | null;
+    pages:         Array<{ path: string; metaDesc: string | null; published: boolean }>;
 }
 
 export async function fetchSiteMeta(identifier: string): Promise<SiteMeta> {

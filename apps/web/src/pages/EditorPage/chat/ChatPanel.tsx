@@ -45,9 +45,6 @@ export function ChatPanel({ messages, status, onSubmit, onRetry }: ChatPanelProp
     return (
         <section className="chat_panel">
             <div className="chat_panel__messages" ref={scrollRef}>
-                {messages.length === 0 && (
-                    <div className="chat_panel__empty">Beschreibe deine Website.</div>
-                )}
                 {messages.map((m) => (
                     <ChatMessageItem key={m.id} message={m} onRetry={onRetry} />
                 ))}

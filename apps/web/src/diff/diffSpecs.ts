@@ -21,7 +21,10 @@
  * headaches.
  *
  * Op order is stable and chosen so sequential application is safe:
- *   removeBlock → moveBlock → addBlock → updateTone → updateField.
+ *   updateTheme → removeBlock → moveBlock → addBlock → updateTone → updateField.
+ * Theme sits at the front because it's independent of block state — the server
+ * accepts/rejects it on its own, and we want the inline style to appear before
+ * any block ops render new content.
  */
 
 import type { BlockSpec, SiteSpec } from '@website-builder/shared';
@@ -39,11 +42,24 @@ export function diffSpecs(before: SiteSpec, after: SiteSpec): PatchOp[] {
     indexBlocks(before.blocks, null, beforeById);
     indexBlocks(after.blocks, null, afterById);
 
+    const themeUpdates: PatchOp[] = [];
     const removes: PatchOp[] = [];
     const moves: PatchOp[] = [];
     const adds: PatchOp[] = [];
     const toneUpdates: PatchOp[] = [];
     const fieldUpdates: PatchOp[] = [];
+
+    // --- theme: full-replace diff. Compared by canonical JSON so key-order
+    // noise doesn't register as a change.
+    const prevTheme = before.theme ?? null;
+    const nextTheme = after.theme ?? null;
+    if (!sameTheme(prevTheme, nextTheme)) {
+        themeUpdates.push({
+            type: 'updateTheme',
+            theme: nextTheme,
+            previousTheme: prevTheme,
+        });
+    }
 
     // --- removes: drop descendants that are already covered by an ancestor
     // removal so the backend cascade can do the heavy lifting.
@@ -121,7 +137,24 @@ export function diffSpecs(before: SiteSpec, after: SiteSpec): PatchOp[] {
         }
     });
 
-    return [...removes, ...moves, ...adds, ...toneUpdates, ...fieldUpdates];
+    return [...themeUpdates, ...removes, ...moves, ...adds, ...toneUpdates, ...fieldUpdates];
+}
+
+function sameTheme(
+    a: Record<string, string> | null,
+    b: Record<string, string> | null,
+): boolean {
+    if (a === b) return true;
+    if (a === null || b === null) return false;
+    const keysA = Object.keys(a).sort();
+    const keysB = Object.keys(b).sort();
+    if (keysA.length !== keysB.length) return false;
+    for (let i = 0; i < keysA.length; i++) {
+        const k = keysA[i]!;
+        if (k !== keysB[i]) return false;
+        if (a[k] !== b[k]) return false;
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------

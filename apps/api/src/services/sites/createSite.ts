@@ -1,7 +1,8 @@
 import { db, schema } from '../../db/client';
 
 export interface CreateSiteInput {
-    name: string;
+    name:          string;
+    initialPrompt: string;
 }
 
 export interface CreateSiteResult {
@@ -33,7 +34,12 @@ export async function createSite(input: CreateSiteInput): Promise<CreateSiteResu
         const result = await db.transaction(async (tx) => {
             const [site] = await tx
                 .insert(schema.sites)
-                .values({ identifier, name, theme: null })
+                .values({
+                    identifier,
+                    name,
+                    theme:         null,
+                    initialPrompt: input.initialPrompt,
+                })
                 .returning();
             if (!site) throw new Error('failed to insert site');
 

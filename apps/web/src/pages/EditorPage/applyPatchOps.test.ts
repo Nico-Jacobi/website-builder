@@ -17,6 +17,7 @@ function makeBlockOpsMock(overrides: Partial<BlockOpsAdapter> = {}): BlockOpsAda
         removeBlock: vi.fn(async () => {}),
         moveBlock:   vi.fn(async () => {}),
         patchTone:   vi.fn(async () => {}),
+        patchTheme:  vi.fn(async () => {}),
         subscribe:   vi.fn(() => () => {}),
         getStatus:   vi.fn((): 'idle' => 'idle'),
         dispose:     vi.fn(),
@@ -124,13 +125,14 @@ describe('applyPatchOps', () => {
         }
     });
 
-    it('enforces op order: remove → move → add → tone → field', async () => {
+    it('enforces op order: theme → remove → move → add → tone → field', async () => {
         const callOrder: string[] = [];
         const blockOps = makeBlockOpsMock({
             removeBlock: vi.fn(async () => { callOrder.push('remove'); }),
             moveBlock:   vi.fn(async () => { callOrder.push('move'); }),
             addBlock:    vi.fn(async () => { callOrder.push('add'); return { id: 'new', position: 0 }; }),
             patchTone:   vi.fn(async () => { callOrder.push('tone'); }),
+            patchTheme:  vi.fn(async () => { callOrder.push('theme'); }),
         });
         vi.mocked(patchBlockContent).mockImplementation(async () => {
             callOrder.push('field');
@@ -143,6 +145,7 @@ describe('applyPatchOps', () => {
             { type: 'addBlock',    block: { type: 'Header', props: {} }, parentBlockId: null, position: 0 },
             { type: 'moveBlock',   blockId: 'a', newParentBlockId: null, newPosition: 0 },
             { type: 'removeBlock', blockId: 'z' },
+            { type: 'updateTheme', theme: { primary: '#f06' }, previousTheme: null },
         ];
 
         const spec: SiteSpec = {
@@ -153,7 +156,7 @@ describe('applyPatchOps', () => {
         };
 
         await applyPatchOps({ ops, currentSpec: spec, identifier: 's', blockOps });
-        expect(callOrder).toEqual(['remove', 'move', 'add', 'tone', 'field']);
+        expect(callOrder).toEqual(['theme', 'remove', 'move', 'add', 'tone', 'field']);
     });
 
     it('returns partial when an op throws, stops further ops', async () => {
@@ -234,6 +237,92 @@ describe('applyPatchOps', () => {
         expect(result.kind).toBe('ok');
         if (result.kind === 'ok') {
             expect(result.nextSpec.blocks.map((b) => b.id)).toEqual(['b', 'c', 'a']);
+        }
+    });
+
+    it('serializes non-string updateField values before sending to backend', async () => {
+        const spec: SiteSpec = {
+            blocks: [{ id: 'a', type: 'HeroBanner', props: { minHeight: 400 } }],
+        };
+        const blockOps = makeBlockOpsMock();
+
+        await applyPatchOps({
+            ops: [
+                { type: 'updateField', blockId: 'a', path: 'minHeight', value: 550, previousValue: 400 },
+                { type: 'updateField', blockId: 'a', path: 'visible',   value: true, previousValue: false },
+                { type: 'updateField', blockId: 'a', path: 'subtitle',  value: null, previousValue: 'x' },
+                { type: 'updateField', blockId: 'a', path: 'tags',      value: ['a', 'b'], previousValue: [] },
+            ],
+            currentSpec: spec,
+            identifier:  's',
+            blockOps,
+        });
+
+        // number → stringified, boolean → 'true', null → null (not 'null'), array → JSON string
+        expect(patchBlockContent).toHaveBeenNthCalledWith(1, 's', 'a', 'minHeight', '550');
+        expect(patchBlockContent).toHaveBeenNthCalledWith(2, 's', 'a', 'visible', 'true');
+        expect(patchBlockContent).toHaveBeenNthCalledWith(3, 's', 'a', 'subtitle', null);
+        expect(patchBlockContent).toHaveBeenNthCalledWith(4, 's', 'a', 'tags', '["a","b"]');
+    });
+
+    it('returns partial when moveBlock targets an id not in the local spec', async () => {
+        const spec: SiteSpec = {
+            blocks: [{ id: 'a', type: 'Header', props: {} }],
+        };
+        const blockOps = makeBlockOpsMock();
+        const result = await applyPatchOps({
+            ops: [
+                {
+                    type:             'moveBlock',
+                    blockId:          'ghost',
+                    newParentBlockId: null,
+                    newPosition:      0,
+                },
+            ],
+            currentSpec: spec,
+            identifier:  's',
+            blockOps,
+        });
+        expect(result.kind).toBe('partial');
+        if (result.kind === 'partial') {
+            expect(result.failedAt.type).toBe('moveBlock');
+            expect(result.error).toContain('ghost');
+        }
+    });
+
+    it('updateTheme writes theme to nextSpec and forwards to adapter', async () => {
+        const spec: SiteSpec = { blocks: [] };
+        const blockOps = makeBlockOpsMock();
+        const theme = { primary: '#f06', secondary: '#0ff' };
+        const result = await applyPatchOps({
+            ops: [{ type: 'updateTheme', theme, previousTheme: null }],
+            currentSpec: spec,
+            identifier:  's',
+            blockOps,
+        });
+        expect(result.kind).toBe('ok');
+        expect(blockOps.patchTheme).toHaveBeenCalledWith({ theme });
+        if (result.kind === 'ok') {
+            expect(result.nextSpec.theme).toEqual(theme);
+        }
+    });
+
+    it('updateTheme with null clears the theme on nextSpec', async () => {
+        const spec: SiteSpec = {
+            theme:  { primary: '#f06' },
+            blocks: [],
+        };
+        const blockOps = makeBlockOpsMock();
+        const result = await applyPatchOps({
+            ops: [{ type: 'updateTheme', theme: null, previousTheme: { primary: '#f06' } }],
+            currentSpec: spec,
+            identifier:  's',
+            blockOps,
+        });
+        expect(result.kind).toBe('ok');
+        expect(blockOps.patchTheme).toHaveBeenCalledWith({ theme: null });
+        if (result.kind === 'ok') {
+            expect(result.nextSpec.theme).toBeUndefined();
         }
     });
 

@@ -23,12 +23,12 @@
  * und die Feld-Patches gehen typischerweise schnell durch).
  *
  * Image-Filling für neue Blöcke mit `imageQuery` ist bewusst NICHT Teil
- * dieser Funktion. Rationale: `fillImages` mutiert die Spec in-place und
- * müsste danach jedes gefüllte Feld per `patchBlockContent` nachreichen
- * (komplex, Asset-Refs etc.). Für v1 bleibt das eine bekannte Einschränkung
- * — der initiale `generateSpec`-Pfad füllt Bilder selbst, und Refine-Turns
- * ohne sofortige Bilder sind akzeptabel (User kann Bild-Slot manuell über
- * den Inline-Edit-Image-Picker wählen).
+ * dieser Funktion. `fillImages` läuft jetzt serverseitig im
+ * `/api/llm/generate`-Endpoint (siehe `apps/api/src/services/llm/imageFiller.ts`).
+ * Der initiale Generate-Pfad liefert deshalb eine bereits bildbefüllte Spec
+ * zurück. Refine-Turns bekommen weiterhin keine neuen Bilder vom Backend —
+ * neue Slots bleiben leer bis zum nächsten Generate-Turn bzw. bis der User
+ * via Inline-Image-Picker manuell eines zuweist.
  */
 
 import type { BlockSpec, SiteSpec } from '@website-builder/shared';
@@ -55,17 +55,19 @@ export type ApplyResult =
       };
 
 /**
- * Stable execution order: removes first (so free-up their positions), then
- * moves, then adds, then tone updates, then field updates. Matches what
- * `diffSpecs` emits but we re-sort defensively.
+ * Stable execution order: theme first (independent of block state), then
+ * removes (free up their positions), then moves, then adds, then tone
+ * updates, then field updates. Matches what `diffSpecs` emits but we re-sort
+ * defensively.
  */
 function opSortIndex(op: PatchOp): number {
     switch (op.type) {
-        case 'removeBlock': return 0;
-        case 'moveBlock':   return 1;
-        case 'addBlock':    return 2;
-        case 'updateTone':  return 3;
-        case 'updateField': return 4;
+        case 'updateTheme': return 0;
+        case 'removeBlock': return 1;
+        case 'moveBlock':   return 2;
+        case 'addBlock':    return 3;
+        case 'updateTone':  return 4;
+        case 'updateField': return 5;
     }
 }
 
@@ -136,6 +138,10 @@ async function applyOne(
         }
 
         case 'updateTone': {
+            // Cast first (narrow from generic `string | null` to the enum),
+            // then `?? null` peels `undefined` out of `BlockSpec['tone']`.
+            // Do NOT reorder — a plain `?? null` before the cast lets
+            // `undefined` back in via the target enum type.
             await blockOps.patchTone({
                 blockId: op.blockId,
                 tone:    op.tone as BlockSpec['tone'] | null ?? null,
@@ -143,18 +149,37 @@ async function applyOne(
             return updateToneInSpec(spec, op.blockId, op.tone);
         }
 
+        case 'updateTheme': {
+            await blockOps.patchTheme({ theme: op.theme });
+            return updateThemeInSpec(spec, op.theme);
+        }
+
         case 'updateField': {
             // Direkter Call ans Backend: umgeht den Debounce des
             // AutoSaveAdapters, damit eine LLM-Op sofort persistiert wird.
+            // Backend erwartet `string | null`; diffSpecs kann aber auch
+            // number/boolean/Sentinels liefern — serialisieren statt casten.
             await patchBlockContent(
                 identifier,
                 op.blockId,
                 op.path,
-                op.value as string | null,
+                serializeFieldValue(op.value),
             );
             return updateFieldInSpec(spec, op.blockId, op.path, op.value);
         }
     }
+}
+
+/**
+ * Normalize a leaf-value emitted by `diffSpecs` into the `string | null` shape
+ * that the backend content PATCH endpoint accepts. Primitives stringify as-is;
+ * arrays/objects (incl. empty-sentinels) become JSON text.
+ */
+function serializeFieldValue(value: unknown): string | null {
+    if (value === null || value === undefined) return null;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    return JSON.stringify(value);
 }
 
 // ---------------------------------------------------------------------------
@@ -204,6 +229,18 @@ function isBlockSpec(v: unknown): v is BlockSpec {
 function removeBlockFromSpec(spec: SiteSpec, blockId: string): SiteSpec {
     const blocks = mapBlocks(spec.blocks, (b) => (b.id === blockId ? null : b));
     return { ...spec, blocks };
+}
+
+function updateThemeInSpec(
+    spec:  SiteSpec,
+    theme: Record<string, string> | null,
+): SiteSpec {
+    if (theme === null) {
+        const { theme: _theme, ...rest } = spec;
+        void _theme;
+        return rest as SiteSpec;
+    }
+    return { ...spec, theme };
 }
 
 function updateToneInSpec(
@@ -268,7 +305,10 @@ function insertAt<T>(arr: readonly T[], item: T, index: number): T[] {
  * Move a block to a new parent/position. Works in two steps:
  *   - remove the block from its current location (by id)
  *   - insert it at the target location
- * If the block isn't found at all, the spec is returned unchanged (defensive).
+ * If the block isn't found, this is a structural invariant violation — the
+ * backend just accepted the move but our local spec doesn't know that block.
+ * We surface that as a thrown error so `applyPatchOps` returns a `partial`
+ * result instead of silently drifting from the server.
  */
 function moveBlockInSpec(
     spec:             SiteSpec,
@@ -277,7 +317,9 @@ function moveBlockInSpec(
     newPosition:      number,
 ): SiteSpec {
     const extracted = extractBlock(spec, blockId);
-    if (!extracted) return spec;
+    if (!extracted) {
+        throw new Error(`moveBlock: block "${blockId}" not found in local spec`);
+    }
     const { block, specWithoutBlock } = extracted;
     return insertBlockInSpec(specWithoutBlock, block, newParentBlockId, newPosition);
 }

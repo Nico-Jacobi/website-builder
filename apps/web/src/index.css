@@ -22,6 +22,9 @@
     /* Dividers — translucent, sit on top of --primary-tinted backgrounds */
     --divider_inverted: rgba(255, 255, 255, 0.15);
 
+    /* Modal overlays — translucent dark backdrop behind dialogs */
+    --modal_overlay: rgba(0, 0, 0, 0.5);
+
     /* Spacing scale */
     --space_xs: 4px;
     --space_sm: 8px;

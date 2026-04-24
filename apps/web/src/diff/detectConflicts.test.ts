@@ -119,6 +119,18 @@ describe('detectConflicts', () => {
         expect(rejected).toEqual([]);
     });
 
+    it('never rejects updateTheme — theme has no inline-edit surface', () => {
+        const op: PatchOp = {
+            type:          'updateTheme',
+            theme:         { primary: '#f06' },
+            previousTheme: null,
+        };
+        const edited = new Set(['a', 'a:title', 'b:__tone']);
+        const { apply, rejected } = detectConflicts([op], edited);
+        expect(apply).toEqual([op]);
+        expect(rejected).toEqual([]);
+    });
+
     it('does not match block ids by accidental prefix', () => {
         // "block" should not match "block10:title" by being a string prefix.
         const op: PatchOp = { type: 'removeBlock', blockId: 'block' };

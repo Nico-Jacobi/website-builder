@@ -439,4 +439,67 @@ describe('diffSpecs', () => {
             expect(pick(ops, 'updateTone')).toHaveLength(1);
         });
     });
+
+    describe('theme', () => {
+        it('emits no theme op when both specs have no theme', () => {
+            const ops = diffSpecs({ blocks: [] }, { blocks: [] });
+            expect(pick(ops, 'updateTheme')).toEqual([]);
+        });
+
+        it('emits no theme op when themes are deeply equal', () => {
+            const before: SiteSpec = {
+                theme:  { primary: '#f06', secondary: '#0ff' },
+                blocks: [],
+            };
+            const after: SiteSpec = {
+                theme:  { secondary: '#0ff', primary: '#f06' },
+                blocks: [],
+            };
+            expect(pick(diffSpecs(before, after), 'updateTheme')).toEqual([]);
+        });
+
+        it('emits updateTheme when theme is added', () => {
+            const before: SiteSpec = { blocks: [] };
+            const after: SiteSpec = { theme: { primary: '#f06' }, blocks: [] };
+            const ops = pick(diffSpecs(before, after), 'updateTheme');
+            expect(ops).toEqual([
+                {
+                    type:          'updateTheme',
+                    theme:         { primary: '#f06' },
+                    previousTheme: null,
+                },
+            ]);
+        });
+
+        it('emits updateTheme when theme is removed', () => {
+            const before: SiteSpec = { theme: { primary: '#f06' }, blocks: [] };
+            const after: SiteSpec = { blocks: [] };
+            const ops = pick(diffSpecs(before, after), 'updateTheme');
+            expect(ops).toEqual([
+                {
+                    type:          'updateTheme',
+                    theme:         null,
+                    previousTheme: { primary: '#f06' },
+                },
+            ]);
+        });
+
+        it('emits updateTheme when a value changes', () => {
+            const before: SiteSpec = { theme: { primary: '#f06' }, blocks: [] };
+            const after:  SiteSpec = { theme: { primary: '#0f6' }, blocks: [] };
+            expect(pick(diffSpecs(before, after), 'updateTheme')).toHaveLength(1);
+        });
+
+        it('places updateTheme before block ops', () => {
+            const before: SiteSpec = {
+                blocks: [{ id: 'a', type: 'Header', props: { title: 'x' } }],
+            };
+            const after: SiteSpec = {
+                theme:  { primary: '#f06' },
+                blocks: [{ id: 'a', type: 'Header', props: { title: 'y' } }],
+            };
+            const ops = diffSpecs(before, after);
+            expect(ops[0]?.type).toBe('updateTheme');
+        });
+    });
 });

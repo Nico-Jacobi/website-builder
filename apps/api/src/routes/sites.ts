@@ -16,12 +16,14 @@ import {
     patchTone,
     removeBlock,
 } from '../services/sites/blockOps';
+import { UpdateThemeFailure, updateTheme } from '../services/sites/updateTheme';
 import { appendMessage, listMessages } from '../services/sites/messages';
 
 export const sitesRouter = new Hono();
 
 const CreateSiteBody = z.object({
-    name: z.string().trim().min(1).max(200),
+    name:          z.string().trim().min(1).max(200),
+    initialPrompt: z.string().trim().min(1).max(2000),
 });
 
 /** Create a new draft site (empty spec + default page "/"). */
@@ -37,7 +39,10 @@ sitesRouter.post('/', async (c) => {
         return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
     }
 
-    const site = await createSite({ name: parsed.data.name });
+    const site = await createSite({
+        name:          parsed.data.name,
+        initialPrompt: parsed.data.initialPrompt,
+    });
     return c.json(site, 201);
 });
 
@@ -109,13 +114,14 @@ sitesRouter.get('/:identifier', async (c) => {
     });
 
     return c.json({
-        id: site.id,
-        identifier: site.identifier,
-        name: site.name,
-        theme: site.theme ?? null,
+        id:            site.id,
+        identifier:    site.identifier,
+        name:          site.name,
+        theme:         site.theme ?? null,
+        initialPrompt: site.initialPrompt ?? null,
         pages: pages.map((p) => ({
-            path: p.path,
-            metaDesc: p.metaDesc,
+            path:      p.path,
+            metaDesc:  p.metaDesc,
             published: p.published,
         })),
     });
@@ -243,6 +249,38 @@ sitesRouter.patch('/:identifier/blocks/:blockId/tone', async (c) => {
         return c.body(null, 204);
     } catch (err) {
         return blockOpErrorResponse(c, err);
+    }
+});
+
+const ThemeBody = z.object({
+    theme: z.record(z.string(), z.string()).nullable(),
+});
+
+/**
+ * Full-replace the site's theme (CSS-variable overrides applied at :root).
+ * Passing `{"theme": null}` clears it back to the design-token defaults.
+ */
+sitesRouter.patch('/:identifier/theme', async (c) => {
+    const identifier = c.req.param('identifier');
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = ThemeBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    try {
+        await updateTheme({ identifier, theme: parsed.data.theme });
+        return c.body(null, 204);
+    } catch (err) {
+        if (err instanceof UpdateThemeFailure && err.detail.kind === 'site_not_found') {
+            return c.json({ error: 'site not found' }, 404);
+        }
+        throw err;
     }
 });
 

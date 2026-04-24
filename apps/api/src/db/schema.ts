@@ -16,12 +16,14 @@ import {
 // --- Phase 1: multi-site content storage -----------------------------------
 
 export const sites = pgTable('sites', {
-    id:        uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    identifier: text('identifier').notNull().unique(),
-    name:      text('name').notNull(),
+    id:            uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    identifier:    text('identifier').notNull().unique(),
+    name:          text('name').notNull(),
     /** CSS-variable overrides applied at :root (SiteSpec.theme). */
-    theme:     jsonb('theme').$type<Record<string, string> | null>(),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    theme:         jsonb('theme').$type<Record<string, string> | null>(),
+    /** Beim Create gesetzt, NULL nach erster Generation (Auto-Clear in addBlock). */
+    initialPrompt: text('initial_prompt'),
+    createdAt:     timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const pages = pgTable(

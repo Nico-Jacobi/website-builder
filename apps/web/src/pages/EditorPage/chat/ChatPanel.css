@@ -21,7 +21,6 @@
     gap:            var(--space_sm);
 }
 
-.chat_panel__empty,
 .chat_panel__thinking {
     align-self: center;
     color:      var(--muted_text);

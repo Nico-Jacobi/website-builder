@@ -8,25 +8,32 @@ interface NewSiteDialogProps {
 }
 
 export function NewSiteDialog({ isOpen, onClose }: NewSiteDialogProps) {
-    const [name, setName] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [name,        setName]        = useState('');
+    const [description, setDescription] = useState('');
+    const [submitting,  setSubmitting]  = useState(false);
+    const [error,       setError]       = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (isOpen) {
             setName('');
+            setDescription('');
             setSubmitting(false);
             setError(null);
         }
     }, [isOpen]);
 
     async function onSubmit() {
-        if (!name.trim() || submitting) return;
+        const trimmedName        = name.trim();
+        const trimmedDescription = description.trim();
+        if (!trimmedName || !trimmedDescription || submitting) return;
         setSubmitting(true);
         setError(null);
         try {
-            const { identifier } = await createSite({ name: name.trim() });
+            const { identifier } = await createSite({
+                name:          trimmedName,
+                initialPrompt: trimmedDescription,
+            });
             navigate(`/editor/${encodeURIComponent(identifier)}`);
         } catch (e) {
             setError(e instanceof Error ? e.message : String(e));
@@ -34,11 +41,8 @@ export function NewSiteDialog({ isOpen, onClose }: NewSiteDialogProps) {
         }
     }
 
-    function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            void onSubmit();
-        } else if (e.key === 'Escape') {
+    function onNameKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Escape') {
             e.preventDefault();
             onClose();
         }
@@ -55,8 +59,18 @@ export function NewSiteDialog({ isOpen, onClose }: NewSiteDialogProps) {
                         className="new_site_dialog__input"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        onKeyDown={onKeyDown}
+                        onKeyDown={onNameKeyDown}
                         autoFocus
+                    />
+                </label>
+                <label className="new_site_dialog__label">
+                    Beschreibung
+                    <textarea
+                        className="new_site_dialog__textarea"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={5}
+                        placeholder="z.B. Ein Online-Shop für Kettensägen mit Produktgalerie und Kontaktformular… — beschreibe möglichst genau, wie deine Seite aussehen soll."
                     />
                 </label>
                 {error && <p className="new_site_dialog__error">{error}</p>}
@@ -64,7 +78,7 @@ export function NewSiteDialog({ isOpen, onClose }: NewSiteDialogProps) {
                     <button onClick={onClose} disabled={submitting}>Abbrechen</button>
                     <button
                         onClick={() => void onSubmit()}
-                        disabled={submitting || !name.trim()}
+                        disabled={submitting || !name.trim() || !description.trim()}
                     >
                         {submitting ? 'Erstelle…' : 'Erstellen'}
                     </button>

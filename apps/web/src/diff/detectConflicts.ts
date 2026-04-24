@@ -16,6 +16,7 @@
  *   - `moveBlock`  : same rule as `removeBlock`.
  *   - `addBlock`   : never conflicts — the block didn't exist yet, so nobody
  *                    can have inline-edited it.
+ *   - `updateTheme`: never conflicts — the theme has no inline-edit surface.
  *
  * Op order is preserved in both output arrays.
  */
@@ -54,6 +55,7 @@ function isConflicting(op: PatchOp, keys: Set<InlineEditedKey>): boolean {
         case 'moveBlock':
             return hasAnyKeyFor(keys, op.blockId);
         case 'addBlock':
+        case 'updateTheme':
             return false;
     }
 }
@@ -79,5 +81,8 @@ function blockIdOf(op: PatchOp): string {
             // practice, but keep the function total for callers that inspect
             // `rejected` without narrowing first.
             return op.block.id ?? '';
+        case 'updateTheme':
+            // Theme ops aren't tied to a block; same total-function rationale.
+            return '';
     }
 }

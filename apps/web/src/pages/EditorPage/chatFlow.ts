@@ -50,9 +50,11 @@ export function adaptGenerateResult(r: GenerateResult): RefineResult {
 export function formatLLMError(r: RefineResult): string {
     switch (r.kind) {
         case 'missing_key':
-            return 'Kein API-Key gesetzt (VITE_GEMINI_API_KEY fehlt in .env).';
+            return 'Kein API-Key im Backend gesetzt (GOOGLE_API_KEY in apps/api/.env fehlt).';
         case 'api_error':
             return `LLM-Aufruf fehlgeschlagen: ${r.message}`;
+        case 'safety_block':
+            return `LLM-Antwort blockiert: ${r.message}`;
         case 'invalid_json':
             return `LLM hat kein gültiges JSON geliefert: ${r.message}`;
         case 'validation_failed': {

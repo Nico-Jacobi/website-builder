@@ -22,8 +22,11 @@ async function req(
     return app.request(path, init);
 }
 
-async function createDraftSite(name: string): Promise<{ id: string; identifier: string }> {
-    const resp = await req('POST', '/api/sites', { name });
+async function createDraftSite(
+    name: string,
+    initialPrompt: string = 'Test-Prompt',
+): Promise<{ id: string; identifier: string }> {
+    const resp = await req('POST', '/api/sites', { name, initialPrompt });
     expect(resp.status).toBe(201);
     const data = (await resp.json()) as { id: string; identifier: string };
     return data;
@@ -47,7 +50,10 @@ beforeEach(async () => {
 
 describe('POST /api/sites', () => {
     it('creates a draft site with auto-generated identifier', async () => {
-        const resp = await req('POST', '/api/sites', { name: 'My Draft' });
+        const resp = await req('POST', '/api/sites', {
+            name:          'My Draft',
+            initialPrompt: 'Beschreibung der Site',
+        });
         expect(resp.status).toBe(201);
         const data = (await resp.json()) as { id: string; identifier: string; name: string };
         expect(data.name).toBe('My Draft');
@@ -56,13 +62,65 @@ describe('POST /api/sites', () => {
     });
 
     it('rejects empty name', async () => {
-        const resp = await req('POST', '/api/sites', { name: '   ' });
+        const resp = await req('POST', '/api/sites', { name: '   ', initialPrompt: 'desc' });
         expect(resp.status).toBe(400);
     });
 
     it('rejects overly long name', async () => {
-        const resp = await req('POST', '/api/sites', { name: 'x'.repeat(201) });
+        const resp = await req('POST', '/api/sites', {
+            name:          'x'.repeat(201),
+            initialPrompt: 'desc',
+        });
         expect(resp.status).toBe(400);
+    });
+
+    it('rejects missing initialPrompt', async () => {
+        const resp = await req('POST', '/api/sites', { name: 'x' });
+        expect(resp.status).toBe(400);
+    });
+
+    it('rejects empty initialPrompt', async () => {
+        const resp = await req('POST', '/api/sites', { name: 'x', initialPrompt: '   ' });
+        expect(resp.status).toBe(400);
+    });
+
+    it('rejects overly long initialPrompt', async () => {
+        const resp = await req('POST', '/api/sites', {
+            name:          'x',
+            initialPrompt: 'a'.repeat(2001),
+        });
+        expect(resp.status).toBe(400);
+    });
+
+    it('trims initialPrompt and persists it on the meta endpoint', async () => {
+        const { identifier } = await createDraftSite('Site', '  hallo welt  ');
+        const get = await req('GET', `/api/sites/${identifier}`);
+        const data = (await get.json()) as { initialPrompt: string | null };
+        expect(data.initialPrompt).toBe('hallo welt');
+    });
+});
+
+describe('GET /api/sites/:identifier meta', () => {
+    it('returns initialPrompt on the meta endpoint', async () => {
+        const { identifier } = await createDraftSite('Site', 'beschreibung');
+        const resp = await req('GET', `/api/sites/${identifier}`);
+        expect(resp.status).toBe(200);
+        const data = (await resp.json()) as { initialPrompt: string | null };
+        expect(data.initialPrompt).toBe('beschreibung');
+    });
+
+    it('clears initialPrompt after the first addBlock', async () => {
+        const { identifier } = await createDraftSite('Site', 'beschreibung');
+
+        const ins = await req('POST', `/api/sites/${identifier}/blocks`, {
+            position: 0,
+            block:    { type: 'TextBlock', props: { heading: 'h', body: 'b' } },
+        });
+        expect(ins.status).toBe(201);
+
+        const resp = await req('GET', `/api/sites/${identifier}`);
+        const data = (await resp.json()) as { initialPrompt: string | null };
+        expect(data.initialPrompt).toBeNull();
     });
 });
 
@@ -79,6 +137,55 @@ describe('PATCH /api/sites/:identifier', () => {
 
     it('returns 404 for unknown site', async () => {
         const resp = await req('PATCH', '/api/sites/does-not-exist', { name: 'x' });
+        expect(resp.status).toBe(404);
+    });
+});
+
+describe('PATCH /api/sites/:identifier/theme', () => {
+    it('sets a theme and returns it on the spec and meta endpoints', async () => {
+        const { identifier } = await createDraftSite('Site');
+        const theme = { primary: '#f06', accent: '#0ff' };
+
+        const resp = await req('PATCH', `/api/sites/${identifier}/theme`, { theme });
+        expect(resp.status).toBe(204);
+
+        const meta = await req('GET', `/api/sites/${identifier}`);
+        const metaData = (await meta.json()) as { theme: Record<string, string> | null };
+        expect(metaData.theme).toEqual(theme);
+
+        const spec = await req('GET', `/api/sites/${identifier}/spec?path=/`);
+        const specData = (await spec.json()) as { theme?: Record<string, string> };
+        expect(specData.theme).toEqual(theme);
+    });
+
+    it('clears the theme when passed null', async () => {
+        const { identifier } = await createDraftSite('Site');
+        await req('PATCH', `/api/sites/${identifier}/theme`, { theme: { primary: '#f06' } });
+
+        const clear = await req('PATCH', `/api/sites/${identifier}/theme`, { theme: null });
+        expect(clear.status).toBe(204);
+
+        const meta = await req('GET', `/api/sites/${identifier}`);
+        const metaData = (await meta.json()) as { theme: Record<string, string> | null };
+        expect(metaData.theme).toBeNull();
+    });
+
+    it('rejects non-string values', async () => {
+        const { identifier } = await createDraftSite('Site');
+        const resp = await req('PATCH', `/api/sites/${identifier}/theme`, {
+            theme: { primary: 123 },
+        });
+        expect(resp.status).toBe(400);
+    });
+
+    it('rejects missing theme field', async () => {
+        const { identifier } = await createDraftSite('Site');
+        const resp = await req('PATCH', `/api/sites/${identifier}/theme`, {});
+        expect(resp.status).toBe(400);
+    });
+
+    it('returns 404 for unknown site', async () => {
+        const resp = await req('PATCH', '/api/sites/does-not-exist/theme', { theme: null });
         expect(resp.status).toBe(404);
     });
 });

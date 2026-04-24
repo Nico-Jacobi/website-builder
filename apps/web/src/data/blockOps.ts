@@ -16,6 +16,7 @@ import {
     removeBlock as removeBlockHttp,
     moveBlock as moveBlockHttp,
     patchBlockTone as patchBlockToneHttp,
+    patchSiteTheme as patchSiteThemeHttp,
 } from './siteClient';
 import type { BlockSpec, Tone } from '@website-builder/shared';
 import type { SaveStatus } from '../builder/autoSaveTypes';
@@ -36,6 +37,8 @@ export interface BlockOpsAdapter {
     }): Promise<void>;
 
     patchTone(opts: { blockId: string; tone: Tone | null }): Promise<void>;
+
+    patchTheme(opts: { theme: Record<string, string> | null }): Promise<void>;
 
     subscribe(cb: (s: SaveStatus) => void): () => void;
     getStatus(): SaveStatus;
@@ -129,6 +132,10 @@ export function makeBlockOpsAdapter({
                     tone:    opts.tone,
                 }),
             );
+        },
+
+        patchTheme(opts) {
+            return withStatus(() => patchSiteThemeHttp(identifier, opts.theme));
         },
 
         subscribe(cb) {

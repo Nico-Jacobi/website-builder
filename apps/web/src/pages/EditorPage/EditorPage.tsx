@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import type { SiteSpec } from '@website-builder/shared';
 import './EditorPage.css';
 import Renderer from '../../builder/Renderer';
 import { EditModeProvider } from '../../builder/EditModeContext';
+import { useEditModeActions, useEditModeState } from '../../builder/editModeStore';
 import { fetchSiteMeta, fetchSiteSpec, renameSite } from '../../data/siteClient';
 import { makeAutoSaveAdapter } from '../../data/autoSave';
 import { makeBlockOpsAdapter } from '../../data/blockOps';
@@ -35,8 +36,12 @@ export function EditorPage() {
     const { identifier } = useParams<{ identifier: string }>();
     const [spec, setSpec] = useState<SiteSpec | null>(null);
     const [siteName, setSiteName] = useState<string>('');
+    const [initialPrompt, setInitialPrompt] = useState<string | null>(null);
     const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ kind: 'loading' });
     const [chatBusy, setChatBusy] = useState<boolean>(false);
+    const [autoGenerating, setAutoGenerating] = useState<boolean>(false);
+    const inFlightRef = useRef<boolean>(false);
+    const autoTriggerRef = useRef<boolean>(false);
 
     // --- Site-Fetch -------------------------------------------------------
     useEffect(() => {
@@ -49,6 +54,7 @@ export function EditorPage() {
                 if (cancelled) return;
                 setSpec(loadedSpec);
                 setSiteName(meta.name);
+                setInitialPrompt(meta.initialPrompt);
                 setFetchStatus({ kind: 'ok' });
             })
             .catch((err: unknown) => {
@@ -71,25 +77,28 @@ export function EditorPage() {
     }, [identifier]);
 
     // --- Adapter: autoSave + blockOps -------------------------------------
-    const autoSave = useMemo<AutoSaveAdapter | undefined>(
-        () => (identifier ? makeAutoSaveAdapter({ identifier }) : undefined),
-        [identifier],
-    );
-
-    const blockOps = useMemo<BlockOpsAdapter | undefined>(
-        () => (identifier ? makeBlockOpsAdapter({ identifier }) : undefined),
-        [identifier],
-    );
-
-    useEffect(() => {
-        return () => {
-            (autoSave as unknown as { dispose?: () => void })?.dispose?.();
-        };
-    }, [autoSave]);
+    // Disposable Ressourcen dürfen NICHT in useMemo leben: React StrictMode
+    // simuliert in Dev einen mount/unmount-Zyklus, bei dem die Effect-Cleanup
+    // den Adapter disposed, während useMemo denselben Wert wiederverwendet —
+    // danach bleibt `disposed = true` hängen und der erste Chat-Turn schlägt
+    // mit "blockOps adapter disposed" fehl. useEffect erzeugt den Adapter
+    // zusammen mit seiner Cleanup, dann stimmt der Lifecycle wieder.
+    const [autoSave, setAutoSave] = useState<AutoSaveAdapter | undefined>(undefined);
+    const [blockOps, setBlockOps] = useState<BlockOpsAdapter | undefined>(undefined);
 
     useEffect(() => {
-        return () => blockOps?.dispose();
-    }, [blockOps]);
+        if (!identifier) { setAutoSave(undefined); return; }
+        const adapter = makeAutoSaveAdapter({ identifier });
+        setAutoSave(adapter);
+        return () => adapter.dispose();
+    }, [identifier]);
+
+    useEffect(() => {
+        if (!identifier) { setBlockOps(undefined); return; }
+        const adapter = makeBlockOpsAdapter({ identifier });
+        setBlockOps(adapter);
+        return () => adapter.dispose();
+    }, [identifier]);
 
     // --- Debounced site rename --------------------------------------------
     const renameTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -110,6 +119,8 @@ export function EditorPage() {
     // --- Chat-Submit: voller LLM-Turn -------------------------------------
     async function handleChatSubmit(userMessage: string): Promise<void> {
         if (!spec || !identifier || !blockOps) return;
+        if (inFlightRef.current) return;
+        inFlightRef.current = true;
 
         setChatBusy(true);
         try {
@@ -161,8 +172,28 @@ export function EditorPage() {
             }
         } finally {
             setChatBusy(false);
+            inFlightRef.current = false;
         }
     }
+
+    // --- Auto-Trigger: Erst-Generation beim Öffnen einer frisch erstellten Site.
+    // Feuert einmal pro Mount (autoTriggerRef), sobald Spec + Meta + BlockOps
+    // bereit sind und die Site einen initialPrompt hat. Nach erfolgreichem
+    // addBlock setzt das Backend initialPrompt=NULL → Reload triggert nicht mehr.
+    useEffect(() => {
+        if (fetchStatus.kind !== 'ok') return;
+        if (!spec || !identifier || !blockOps) return;
+        if (autoTriggerRef.current) return;
+        if (spec.blocks.length !== 0) return;
+        if (!initialPrompt) return;
+
+        autoTriggerRef.current = true;
+        setAutoGenerating(true);
+        void handleChatSubmit(initialPrompt).finally(() => {
+            setAutoGenerating(false);
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchStatus.kind, spec, identifier, blockOps, initialPrompt]);
 
     // --- Render-Guards ----------------------------------------------------
     if (!identifier) return <Navigate to="/" replace />;
@@ -189,36 +220,45 @@ export function EditorPage() {
     const chatStatus = chatBusy ? 'sending' : chat.status;
 
     return (
-        <div className="editor_page">
-            <EditorHeader
-                name={siteName}
-                onNameChange={handleNameChange}
-                identifier={identifier}
-                autoSave={autoSave}
-                blockOps={blockOps}
-            />
-            <div className="editor_page__body">
-                <aside className="editor_page__chat_slot">
-                    <ChatPanel
-                        messages={chat.messages}
-                        status={chatStatus}
-                        onSubmit={handleChatSubmit}
-                        onRetry={chat.retry}
-                    />
-                </aside>
-                <main className="editor_page__preview">
-                    <EditModeProvider
-                        spec={spec}
-                        onSpecChange={setSpec}
-                        autoSave={autoSave}
-                        initialEditMode={true}
-                        onInlineEdit={tracker.markEdited}
-                    >
-                        <Renderer spec={spec} />
-                    </EditModeProvider>
-                </main>
+        <EditModeProvider
+            spec={spec}
+            onSpecChange={setSpec}
+            autoSave={autoSave}
+            initialEditMode={true}
+            onInlineEdit={tracker.markEdited}
+        >
+            <div className="editor_page">
+                <EditorHeader
+                    name={siteName}
+                    onNameChange={handleNameChange}
+                    identifier={identifier}
+                    autoSave={autoSave}
+                    blockOps={blockOps}
+                />
+                <div className="editor_page__body">
+                    <aside className="editor_page__chat_slot">
+                        <ChatPanel
+                            messages={chat.messages}
+                            status={chatStatus}
+                            onSubmit={handleChatSubmit}
+                            onRetry={chat.retry}
+                        />
+                    </aside>
+                    <main className="editor_page__preview">
+                        {autoGenerating && spec.blocks.length === 0 ? (
+                            <div className="editor_page__preview-loading">
+                                <div className="editor_page__preview-loading-spinner" aria-hidden="true" />
+                                <p className="editor_page__preview-loading-text">
+                                    Generiere deine Website… ca. 18s
+                                </p>
+                            </div>
+                        ) : (
+                            <Renderer spec={spec} />
+                        )}
+                    </main>
+                </div>
             </div>
-        </div>
+        </EditModeProvider>
     );
 }
 
@@ -251,6 +291,7 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
             </div>
             <div className="editor_page__header-actions">
                 <SaveStatusIndicator status={status} />
+                <EditModeToggle />
                 <a
                     href={previewHref}
                     target="_blank"
@@ -261,6 +302,36 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
                 </a>
             </div>
         </header>
+    );
+}
+
+function EditModeToggle() {
+    const { isEditMode } = useEditModeState();
+    const { setIsEditMode } = useEditModeActions();
+
+    return (
+        <div
+            className="editor_page__mode-toggle"
+            role="group"
+            aria-label="Ansicht umschalten"
+        >
+            <button
+                type="button"
+                className={`editor_page__mode-btn${isEditMode ? ' editor_page__mode-btn--active' : ''}`}
+                aria-pressed={isEditMode}
+                onClick={() => setIsEditMode(true)}
+            >
+                Bearbeiten
+            </button>
+            <button
+                type="button"
+                className={`editor_page__mode-btn${!isEditMode ? ' editor_page__mode-btn--active' : ''}`}
+                aria-pressed={!isEditMode}
+                onClick={() => setIsEditMode(false)}
+            >
+                Vorschau
+            </button>
+        </div>
     );
 }
 
