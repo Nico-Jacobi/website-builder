@@ -14,13 +14,18 @@ cp apps/api/.env.example apps/api/.env   # Env-Datei anlegen
 pnpm setup                               # Docker-Postgres starten + DB-Schema anlegen
 ```
 
-Optional `apps/web/.env.local`:
+Die LLM- und Pixabay-Aufrufe laufen im Backend. `apps/api/.env` erweitern:
 
 ```
-VITE_GOOGLE_API_KEY=...
-VITE_PIXABAY_API_KEY=...
-VITE_API_BASE=http://localhost:3001
+GOOGLE_API_KEY=<dein Gemini-Key>     # https://aistudio.google.com/apikey
+PIXABAY_API_KEY=<dein Pixabay-Key>   # https://pixabay.com/api/docs/
 ```
+
+Ohne gesetzte Keys liefert der Editor die Chat-Meldung
+„Kein API-Key im Backend gesetzt…".
+
+Das Frontend braucht kein `.env`. Optional `VITE_API_BASE` setzen, falls
+der Backend-Port abweicht (Default: `http://localhost:3001`).
 
 ## Starten
 
@@ -63,3 +68,5 @@ pnpm dev:api    # Nur Backend  → http://localhost:3001
 | POST   | `/api/sites/:identifier/assets` | Bild-Upload |
 | GET    | `/api/sites/:identifier/messages` | Chat-Verlauf lesen |
 | POST   | `/api/sites/:identifier/messages` | Chat-Nachricht anhängen |
+| POST   | `/api/llm/generate` | One-shot-Spec aus freiem User-Prompt (ruft Gemini + Pixabay serverseitig) |
+| POST   | `/api/llm/refine`   | Refinement-Turn (aktueller Spec + History + neue User-Message → next-Spec) |

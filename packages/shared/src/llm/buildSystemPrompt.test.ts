@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildSystemPrompt } from './buildSystemPrompt';
-import { getRegistryLLMSurface } from '../builder/registry';
+import { getRegistryLLMSurface } from './registrySurface';
 
 describe('buildSystemPrompt (initial mode)', () => {
     const surface = getRegistryLLMSurface();
@@ -29,7 +29,6 @@ describe('buildSystemPrompt (initial mode)', () => {
     });
 
     it('embeds the siteSpecJSONSchema with a blocks property', () => {
-        // The rendered JSON schema must end up in the prompt verbatim.
         expect(prompt).toContain('"blocks"');
         expect(prompt).toContain(JSON.stringify(surface.siteSpecJSONSchema, null, 2));
     });

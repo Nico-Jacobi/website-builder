@@ -38,6 +38,20 @@ export function clearLog(): void {
     emit();
 }
 
+/**
+ * Ersetzt den aktuellen Log-Zustand durch eine extern gebildete Liste
+ * (z.B. aus einer Backend-Response). `id` und `ts` werden aus den Entries
+ * übernommen. `nextId` wird so erhöht, dass spätere `log()`-Aufrufe
+ * (rein theoretisch, im aktuellen Flow kaum relevant) kollisionsfrei sind.
+ */
+export function ingestLog(fromBackend: LogEntry[]): void {
+    entries = fromBackend.slice();
+    if (entries.length > 0) {
+        nextId = Math.max(...entries.map((e) => e.id)) + 1;
+    }
+    emit();
+}
+
 export function subscribeLog(fn: Listener): () => void {
     listeners.add(fn);
     return () => {

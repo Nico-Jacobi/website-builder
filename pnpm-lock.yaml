@@ -35,6 +35,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@google/genai':
+        specifier: ^1.50.1
+        version: 1.50.1
       '@hono/node-server':
         specifier: ^1.13.7
         version: 1.19.14(hono@4.12.14)
@@ -75,9 +78,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@google/genai':
-        specifier: ^1.50.1
-        version: 1.50.1
       '@website-builder/shared':
         specifier: workspace:*
         version: link:../../packages/shared

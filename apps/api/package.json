@@ -12,6 +12,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@google/genai": "^1.50.1",
     "@hono/node-server": "^1.13.7",
     "@website-builder/shared": "workspace:*",
     "dotenv": "^16.4.7",

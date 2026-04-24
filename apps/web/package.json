@@ -12,7 +12,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^1.50.1",
     "@website-builder/shared": "workspace:*",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

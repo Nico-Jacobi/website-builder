@@ -1,132 +1,77 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { GoogleGenAI } from '@google/genai';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { generateSpec } from './generateSpec';
-import { __resetClientForTests } from './client';
+import { clearLog, getLogSnapshot } from './logger';
+import { clearTrace, getTrace } from './llmTrace';
 
-/**
- * Builds a minimal GoogleGenAI-like mock whose `models.generateContent`
- * resolves or rejects as specified. The cast via `unknown as GoogleGenAI`
- * is intentional — we only exercise the one method.
- */
-function mockClient(
-    impl:
-        | { resolve: { text?: string } }
-        | { reject: unknown },
-): GoogleGenAI {
-    const generateContent =
-        'resolve' in impl
-            ? vi.fn().mockResolvedValue(impl.resolve)
-            : vi.fn().mockRejectedValue(impl.reject);
-    return { models: { generateContent } } as unknown as GoogleGenAI;
-}
+const originalFetch = globalThis.fetch;
 
-const VALID_SPEC = {
-    blocks: [
-        {
-            type: 'Header',
-            props: { title: 'Hello', subtitle: 'World' },
-        },
-    ],
-};
+beforeEach(() => {
+    clearLog();
+    clearTrace();
+});
 
-describe('generateSpec', () => {
-    beforeEach(() => {
-        // Make sure no cached production client leaks into a test.
-        __resetClientForTests();
-    });
+afterEach(() => {
+    globalThis.fetch = originalFetch;
+});
 
-    it('returns { kind: "ok" } on happy path with valid JSON response', async () => {
-        const client = mockClient({
-            resolve: { text: JSON.stringify(VALID_SPEC) },
-        });
+describe('generateSpec (frontend fetch wrapper)', () => {
+    it('returns ok and pushes log + trace into stores', async () => {
+        const fakeResp = {
+            kind:  'ok',
+            spec:  { blocks: [] },
+            log:   [{ id: 0, ts: 1, level: 'ok', message: 'Done' }],
+            trace: { systemPrompt: 'sys', userPrompt: 'usr', rawResponse: '{}' },
+        };
+        globalThis.fetch = vi
+            .fn()
+            .mockResolvedValue(new Response(JSON.stringify(fakeResp), { status: 200 })) as unknown as typeof fetch;
 
-        const result = await generateSpec('Build me a page', { client });
-
+        const result = await generateSpec('hi');
         expect(result.kind).toBe('ok');
-        if (result.kind === 'ok') {
-            expect(result.spec.blocks).toHaveLength(1);
-            expect(result.spec.blocks[0].type).toBe('Header');
-        }
+        if (result.kind === 'ok') expect(result.spec.blocks).toEqual([]);
+        expect(getLogSnapshot()).toHaveLength(1);
+        expect(getTrace()?.systemPrompt).toBe('sys');
     });
 
-    it('returns { kind: "missing_key" } when no client is available', async () => {
-        const result = await generateSpec('anything', { client: null });
-        expect(result).toEqual({ kind: 'missing_key' });
-    });
-
-    it('returns { kind: "api_error" } when generateContent throws', async () => {
-        const client = mockClient({ reject: new Error('401 unauthorized') });
-
-        const result = await generateSpec('hi', { client });
-
+    it('returns api_error when fetch rejects', async () => {
+        globalThis.fetch = vi.fn().mockRejectedValue(new Error('boom')) as unknown as typeof fetch;
+        const result = await generateSpec('hi');
         expect(result.kind).toBe('api_error');
-        if (result.kind === 'api_error') {
-            expect(result.message).toBe('401 unauthorized');
-        }
+        if (result.kind === 'api_error') expect(result.message).toContain('boom');
     });
 
-    it('returns { kind: "invalid_json" } when the response has no text', async () => {
-        const client = mockClient({
-            resolve: { text: '' },
-        });
-
-        const result = await generateSpec('hi', { client });
-
-        expect(result.kind).toBe('invalid_json');
-        if (result.kind === 'invalid_json') {
-            expect(result.message).toMatch(/no text/i);
-        }
+    it('returns api_error on non-2xx response', async () => {
+        globalThis.fetch = vi
+            .fn()
+            .mockResolvedValue(new Response('nope', { status: 500 })) as unknown as typeof fetch;
+        const result = await generateSpec('hi');
+        expect(result.kind).toBe('api_error');
     });
 
-    it('returns { kind: "invalid_json" } with rawText when response is not valid JSON', async () => {
-        const client = mockClient({
-            resolve: { text: 'not valid json {' },
-        });
-
-        const result = await generateSpec('hi', { client });
-
-        expect(result.kind).toBe('invalid_json');
-        if (result.kind === 'invalid_json') {
-            expect(result.message).toMatch(/not valid JSON/i);
-            expect(result.rawText).toBe('not valid json {');
-        }
+    it('passes userPrompt in the request body', async () => {
+        const spy = vi.fn().mockResolvedValue(
+            new Response(
+                JSON.stringify({ kind: 'ok', spec: { blocks: [] }, log: [], trace: null }),
+                { status: 200 },
+            ),
+        );
+        globalThis.fetch = spy as unknown as typeof fetch;
+        await generateSpec('my prompt');
+        expect(spy).toHaveBeenCalledWith(
+            expect.stringContaining('/api/llm/generate'),
+            expect.objectContaining({
+                method: 'POST',
+                body:   JSON.stringify({ userPrompt: 'my prompt' }),
+            }),
+        );
     });
 
-    it('returns { kind: "validation_failed" } for unknown module types', async () => {
-        const badInput = {
-            blocks: [{ type: 'DoesNotExist', props: {} }],
-        };
-        const client = mockClient({
-            resolve: { text: JSON.stringify(badInput) },
-        });
-
-        const result = await generateSpec('x', { client });
-
-        expect(result.kind).toBe('validation_failed');
-        if (result.kind === 'validation_failed') {
-            expect(result.errors.length).toBeGreaterThan(0);
-            expect(result.errors[0].path).toBe('blocks[0]');
-            expect(result.errors[0].message).toMatch(/DoesNotExist/);
-            expect(result.rawInput).toEqual(badInput);
-        }
-    });
-
-    it('returns { kind: "validation_failed" } when props do not match the module schema', async () => {
-        const badInput = {
-            // Header requires `title`
-            blocks: [{ type: 'Header', props: {} }],
-        };
-        const client = mockClient({
-            resolve: { text: JSON.stringify(badInput) },
-        });
-
-        const result = await generateSpec('x', { client });
-
-        expect(result.kind).toBe('validation_failed');
-        if (result.kind === 'validation_failed') {
-            expect(result.errors.length).toBeGreaterThan(0);
-            expect(result.errors.some((e) => e.path.includes('blocks[0].props'))).toBe(true);
-            expect(result.rawInput).toEqual(badInput);
-        }
+    it('propagates non-ok kinds (missing_key) without a spec field', async () => {
+        const fakeResp = { kind: 'missing_key', log: [], trace: null };
+        globalThis.fetch = vi
+            .fn()
+            .mockResolvedValue(new Response(JSON.stringify(fakeResp), { status: 200 })) as unknown as typeof fetch;
+        const result = await generateSpec('hi');
+        expect(result.kind).toBe('missing_key');
     });
 });
