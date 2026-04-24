@@ -3,60 +3,64 @@
     bottom: var(--space_xl);
     right: var(--space_xl);
     z-index: 9000;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space_xs);
+    padding: 6px;
+    border: 1px solid var(--ui_border);
+    border-radius: var(--ui_radius_pill);
+    background: var(--ui_bg);
+    box-shadow: var(--ui_shadow_panel);
 }
 
 .edit-toolbar__btn {
-    background: var(--surface);
-    color: var(--text);
-    border: 2px solid var(--primary);
-    border-radius: var(--radius_md);
-    padding: var(--space_sm) var(--space_md);
+    background: transparent;
+    color: var(--ui_text_muted);
+    border: none;
+    border-radius: var(--ui_radius_pill);
+    padding: 6px 14px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    box-shadow: 0 4px 16px rgb(0 0 0 / 16%);
-    transition: background 0.15s, color 0.15s;
+    letter-spacing: -0.01em;
+    transition: background var(--ui_dur) var(--ui_ease),
+                color var(--ui_dur) var(--ui_ease);
 }
 
 .edit-toolbar__btn:hover {
-    background: var(--primary);
-    color: var(--inverted_text);
+    color: var(--ui_text);
 }
 
-.edit-toolbar__btn--active {
-    background: var(--primary);
-    color: var(--inverted_text);
-}
-
+.edit-toolbar__btn--active,
 .edit-toolbar__btn--active:hover {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--ui_btn_primary_bg);
+    color: var(--ui_btn_primary_text);
 }
 
 /* ── Save-Status-Badge ───────────────────────────────────────────────────── */
 
 .edit-toolbar__status {
-    display: inline-block;
-    margin-right: var(--space_sm);
-    padding: var(--space_xs) var(--space_sm);
-    border-radius: var(--radius_sm);
-    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 4px;
+    padding: 4px 10px;
+    border-radius: var(--ui_radius_pill);
+    font-size: 0.75rem;
     font-weight: 500;
-    background: var(--surface);
-    color: var(--muted_text);
-    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
-    vertical-align: middle;
+    background: transparent;
+    color: var(--ui_text_subtle);
+    letter-spacing: 0.01em;
 }
 
 .edit-toolbar__status--saving {
-    color: var(--primary);
+    color: var(--ui_text_muted);
 }
 
 .edit-toolbar__status--saved {
-    color: var(--accent);
+    color: var(--ui_accent_success);
 }
 
 .edit-toolbar__status--error {
-    color: var(--alt_primary);
-    background: color-mix(in srgb, var(--alt_primary) 10%, transparent);
+    color: var(--ui_accent_danger);
+    background: rgba(248, 113, 113, 0.08);
 }

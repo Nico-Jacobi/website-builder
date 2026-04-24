@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
+import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
 import type { SiteSpec } from '@website-builder/shared';
 import './EditorPage.css';
 import Renderer from '../../builder/Renderer';
@@ -210,7 +211,10 @@ export function EditorPage() {
         return (
             <div className="editor_page__fallback">
                 <p>Fehler beim Laden: {fetchStatus.message}</p>
-                <Link to="/" className="editor_page__back">← Zurück zur Übersicht</Link>
+                <Link to="/" className="editor_page__back">
+                    <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+                    <span>Zurück</span>
+                </Link>
             </div>
         );
     }
@@ -241,19 +245,25 @@ export function EditorPage() {
                             messages={chat.messages}
                             status={chatStatus}
                             onSubmit={handleChatSubmit}
-                            onRetry={chat.retry}
                         />
                     </aside>
                     <main className="editor_page__preview">
                         {autoGenerating && spec.blocks.length === 0 ? (
                             <div className="editor_page__preview-loading">
-                                <div className="editor_page__preview-loading-spinner" aria-hidden="true" />
+                                <Loader2
+                                    className="editor_page__preview-loading-spinner"
+                                    size={40}
+                                    strokeWidth={1.75}
+                                    aria-hidden="true"
+                                />
                                 <p className="editor_page__preview-loading-text">
                                     Generiere deine Website… ca. 18s
                                 </p>
                             </div>
                         ) : (
-                            <Renderer spec={spec} />
+                            <div className="editor_page__preview-frame">
+                                <Renderer spec={spec} />
+                            </div>
                         )}
                     </main>
                 </div>
@@ -279,7 +289,10 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
     return (
         <header className="editor_page__header">
             <div className="editor_page__title-row">
-                <Link to="/" className="editor_page__back">← Zurück</Link>
+                <Link to="/" className="editor_page__back">
+                    <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+                    <span>Zurück</span>
+                </Link>
                 <input
                     type="text"
                     className="editor_page__name-input"
@@ -298,7 +311,8 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
                     rel="noopener noreferrer"
                     className="editor_page__preview-link"
                 >
-                    Vorschau ↗
+                    <span>In neuem Tab öffnen</span>
+                    <ExternalLink size={14} strokeWidth={1.75} aria-hidden="true" />
                 </a>
             </div>
         </header>

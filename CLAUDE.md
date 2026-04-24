@@ -106,6 +106,33 @@ automatically. Only add module-specific rules to the module's own CSS file.
 BEM-scoped classes for everything that is unique to this module. The module
 imports its own CSS (`import './Header.css'`), not the other way around.
 
+## Chrome vs. Module tokens
+
+The design system has **two parallel token scopes** in
+[apps/web/src/index.css](apps/web/src/index.css):
+
+| Scope | Prefix | Used by | Examples |
+|---|---|---|---|
+| **Module tokens** | `--primary`, `--background`, `--surface`, `--text`, `--muted_text`, `--accent`, … | Everything under `apps/web/src/elements/` (the generated website) | Header, HeroBanner, Card, Footer |
+| **Chrome tokens** | `--ui_*` | Editor shell: `apps/web/src/pages/`, `apps/web/src/builder/`, `apps/web/src/App.css` root scaffolding | EditorPage, ChatPanel, BuilderPage, EditModeToolbar |
+
+**Hard rule:** Modules **must never** read `--ui_*`, chrome **must never** read
+module tokens for core surfaces/text/accents. Breaking this couples the
+generated site's appearance to the editor's appearance, which is the one thing
+we never want.
+
+**Permitted exception:** the editor's preview-frame container
+(`.editor_page__preview-frame`) sets `background: var(--background)` because
+it literally *is* the module canvas — the site inside will be painted over it,
+and we want the correct blank-canvas color to show before the first module's
+own surface does. This is the only chrome CSS rule that consumes a module
+token, and it's load-bearing: don't replace it with `#FFFFFF` or `--ui_*`.
+
+Chrome tokens encode a fixed dark aesthetic (Vercel-style: pure black base,
+hairline borders, white pill CTAs, vibrant spectrum as art). Module tokens
+encode whatever the *site* wants to look like — and a SiteSpec's `theme`
+override only affects module tokens.
+
 ## Styling rules
 
 - **Never hardcode** colors, spacing, or fonts. Always use `var(--…)` tokens.

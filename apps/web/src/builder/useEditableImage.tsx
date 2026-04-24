@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ChangeEvent, DragEvent, KeyboardEvent, MouseEvent } from 'react';
+import { Pencil, X } from 'lucide-react';
 import './EditMode.css';
 import { useEditableField } from './useEditableField';
 import { useAutoSave } from './editModeStore';
@@ -116,7 +117,7 @@ export function useEditableImage(
                 onClick={openModal}
                 title="Bild tauschen"
             >
-                ✎
+                <Pencil size={13} strokeWidth={1.75} aria-hidden="true" />
             </button>
 
             {open && (
@@ -185,8 +186,9 @@ export function useEditableImage(
                             <button
                                 className="edit__image-cancel"
                                 onClick={() => setOpen(false)}
+                                aria-label="Abbrechen"
                             >
-                                ✕
+                                <X size={14} strokeWidth={1.75} aria-hidden="true" />
                             </button>
                         </div>
                     </div>

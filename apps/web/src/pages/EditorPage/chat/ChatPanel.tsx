@@ -1,11 +1,12 @@
 /* ============================================================
    ChatPanel — Verlauf + Eingabe-Textarea.
    State (draft) lokal; History kommt als Prop rein.
-   Cmd/Ctrl+Enter submitted das Formular.
+   Enter submitted, Shift+Enter fügt Zeilenumbruch ein.
    ============================================================ */
 
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, KeyboardEvent } from 'react';
+import { ArrowUp } from 'lucide-react';
 import './ChatPanel.css';
 import type { ChatMessage, ChatStatus } from './types';
 
@@ -13,10 +14,9 @@ export interface ChatPanelProps {
     messages: ChatMessage[];
     status:   ChatStatus;
     onSubmit: (userMessage: string) => Promise<void>;
-    onRetry?: (localId: string) => void;
 }
 
-export function ChatPanel({ messages, status, onSubmit, onRetry }: ChatPanelProps) {
+export function ChatPanel({ messages, status, onSubmit }: ChatPanelProps) {
     const [draft, setDraft] = useState<string>('');
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +35,7 @@ export function ChatPanel({ messages, status, onSubmit, onRetry }: ChatPanelProp
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>): void {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             const form = e.currentTarget.form;
             form?.requestSubmit();
@@ -46,17 +46,26 @@ export function ChatPanel({ messages, status, onSubmit, onRetry }: ChatPanelProp
         <section className="chat_panel">
             <div className="chat_panel__messages" ref={scrollRef}>
                 {messages.map((m) => (
-                    <ChatMessageItem key={m.id} message={m} onRetry={onRetry} />
+                    <ChatMessageItem key={m.id} message={m} />
                 ))}
                 {status === 'sending' && (
-                    <div className="chat_panel__thinking">LLM denkt…</div>
+                    <div
+                        className="chat_panel__thinking"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        <span className="chat_panel__thinking-dot" />
+                        <span className="chat_panel__thinking-dot" />
+                        <span className="chat_panel__thinking-dot" />
+                        <span className="chat_panel__thinking-label">denkt nach</span>
+                    </div>
                 )}
             </div>
             <form className="chat_panel__input" onSubmit={handleSubmit}>
                 <textarea
                     className="chat_panel__textarea"
                     rows={3}
-                    placeholder="Änderungen beschreiben… (⌘↵ zum Senden)"
+                    placeholder="Änderungen beschreiben… (↵ zum Senden, ⇧↵ für neue Zeile)"
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -67,8 +76,10 @@ export function ChatPanel({ messages, status, onSubmit, onRetry }: ChatPanelProp
                     type="submit"
                     className="chat_panel__submit"
                     disabled={status === 'sending' || !draft.trim()}
+                    aria-label="Senden"
                 >
-                    Senden
+                    <span>Senden</span>
+                    <ArrowUp size={14} strokeWidth={2} aria-hidden="true" />
                 </button>
             </form>
         </section>
@@ -78,11 +89,10 @@ export function ChatPanel({ messages, status, onSubmit, onRetry }: ChatPanelProp
 // --- Subcomponent --------------------------------------------------------
 
 interface ChatMessageItemProps {
-    message:  ChatMessage;
-    onRetry?: (localId: string) => void;
+    message: ChatMessage;
 }
 
-function ChatMessageItem({ message, onRetry }: ChatMessageItemProps) {
+function ChatMessageItem({ message }: ChatMessageItemProps) {
     const classes: string[] = [
         'chat_panel__message',
         `chat_panel__message--${message.role}`,
@@ -94,15 +104,6 @@ function ChatMessageItem({ message, onRetry }: ChatMessageItemProps) {
     return (
         <div className={classes.join(' ')}>
             <div className="chat_panel__message-content">{message.content}</div>
-            {message.status === 'error' && (
-                <button
-                    type="button"
-                    className="chat_panel__retry"
-                    onClick={() => onRetry?.(message.id)}
-                >
-                    ↻ Erneut senden
-                </button>
-            )}
         </div>
     );
 }
