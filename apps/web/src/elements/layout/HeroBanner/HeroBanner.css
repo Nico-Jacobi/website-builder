@@ -1,7 +1,8 @@
 .hero_banner {
-    position: relative; /* needed for edit__image-wrap overlay */
+    position: relative;
     width: 100%;
-    background: var(--primary);   /* overridden by inline style when background prop is set */
+    /* CSS-Gradient-Default; wird von inline style überschrieben wenn background/backgroundImage gesetzt */
+    background: var(--gradient_hero);
     padding: var(--space_xl) var(--space_lg);
     text-align: center;
     display: flex;
@@ -9,7 +10,23 @@
     justify-content: center;
 }
 
+/* Grid-Overlay via Pseudo-Element (nur aktiv wenn data-grid-overlay="true") */
+.hero_banner[data-grid-overlay="true"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.08) 1px,
+        transparent 1px
+    );
+    background-size: 28px 28px;
+}
+
 .hero_banner__inner {
+    position: relative; /* über dem Overlay */
+    z-index: 1;
     max-width: 720px;
     margin-inline: auto;
     display: flex;
@@ -20,38 +37,72 @@
 
 .hero_banner__heading {
     margin: 0;
-    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
     color: var(--inverted_text);
 }
 
 .hero_banner__subheading {
     margin: 0;
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-size: clamp(1.05rem, 2.5vw, 1.3rem);
     opacity: 0.85;
     max-width: 560px;
     color: var(--inverted_text);
 }
 
-.hero_banner__cta {
-    display: inline-block;
-    background: var(--accent);
-    color: var(--inverted_text);
-    border-radius: var(--radius_md);
-    padding: var(--space_sm) var(--space_lg);
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: opacity 0.2s;
+/* CTA-Bereich */
+.hero_banner__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space_sm);
+    justify-content: center;
     margin-top: var(--space_sm);
 }
 
-.hero_banner__cta:hover {
-    opacity: 0.85;
+/* Primary CTA: gefüllter Pill */
+.hero_banner__cta-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space_sm) var(--space_lg);
+    background: var(--inverted_text);
+    color: var(--primary);
+    border-radius: var(--radius_pill);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity var(--dur_normal) var(--ease),
+                transform var(--dur_normal) var(--ease);
 }
 
-/* background image: add shadow on top of dark overlay for extra contrast */
+.hero_banner__cta-primary:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+}
+
+/* Secondary CTA: Ghost-Pill */
+.hero_banner__cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space_sm) var(--space_lg);
+    background: transparent;
+    color: var(--inverted_text);
+    border: 1px solid var(--inverted_text);
+    border-radius: var(--radius_pill);
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity var(--dur_normal) var(--ease),
+                transform var(--dur_normal) var(--ease);
+}
+
+.hero_banner__cta-secondary:hover {
+    opacity: 0.7;
+    transform: translateY(-2px);
+}
+
+/* Mit Hintergrundbild: Text-Shadow für Lesbarkeit */
 .hero_banner[data-has-image="true"] .hero_banner__heading,
 .hero_banner[data-has-image="true"] .hero_banner__subheading {
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
@@ -60,5 +111,10 @@
 @media (max-width: 640px) {
     .hero_banner {
         padding: var(--space_lg) var(--space_md);
+    }
+
+    .hero_banner__ctas {
+        flex-direction: column;
+        align-items: center;
     }
 }

@@ -2,6 +2,7 @@ import './HeroBanner.css';
 import type { CSSProperties } from 'react';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditableImage } from '../../../builder/useEditableImage';
+import { useEditModeState } from '../../../builder/editModeStore';
 import type { HeroBannerProps } from '@website-builder/shared';
 
 export default function HeroBanner({
@@ -10,14 +11,28 @@ export default function HeroBanner({
     background,
     backgroundImage,
     minHeight,
+    gridOverlay,
+    ctaLabel,
+    ctaHref,
+    ctaSecondaryLabel,
+    ctaSecondaryHref,
 }: HeroBannerProps) {
-    const headingEdit = useEditableText('heading');
-    const subheadingEdit = useEditableText('subheading');
+    const { isEditMode }    = useEditModeState();
+    const headingEdit       = useEditableText('heading');
+    const subheadingEdit    = useEditableText('subheading');
+    const ctaLabelEdit      = useEditableText('ctaLabel');
+    const ctaSecLabelEdit   = useEditableText('ctaSecondaryLabel');
     const { overlayElement, dragProps } = useEditableImage(backgroundImage ?? '', 'backgroundImage');
 
+    const showPrimaryCta   = isEditMode || !!ctaLabel;
+    const showSecondaryCta = isEditMode || !!ctaSecondaryLabel;
+
     const defaultMinHeight = minHeight ?? 480;
-    // With image: overlay on top so text stays legible (background prop tints).
-    // Without image: plain color if given, else the CSS var(--primary) default.
+
+    // rootStyle logic:
+    // - With image: gradient overlay + cover image (unchanged)
+    // - With explicit background prop: color as inline (unchanged)
+    // - Without either: only minHeight → CSS default var(--gradient_hero) applies
     let rootStyle: CSSProperties | undefined;
     if (backgroundImage) {
         const overlay = background ?? 'rgba(0,0,0,0.45)';
@@ -31,15 +46,15 @@ export default function HeroBanner({
             minHeight: `${defaultMinHeight}px`,
         };
     } else {
-        rootStyle = {
-            minHeight: `${defaultMinHeight}px`,
-        };
+        rootStyle = { minHeight: `${defaultMinHeight}px` };
+        // No inline background → CSS class .hero_banner default var(--gradient_hero) applies
     }
 
     return (
         <section
             className="hero_banner"
             data-has-image={backgroundImage ? 'true' : undefined}
+            data-grid-overlay={gridOverlay ? 'true' : undefined}
             style={rootStyle}
             {...dragProps}
         >
@@ -54,6 +69,29 @@ export default function HeroBanner({
                     data-placeholder="Unterüberschrift"
                     {...subheadingEdit}
                 >{subheading}</p>
+
+                {(showPrimaryCta || showSecondaryCta) && (
+                    <div className="hero_banner__ctas">
+                        {showPrimaryCta && (
+                            <a
+                                className="hero_banner__cta-primary"
+                                href={ctaHref || '#'}
+                                data-empty={!ctaLabel || undefined}
+                                data-placeholder="Primary CTA"
+                                {...ctaLabelEdit}
+                            >{ctaLabel}</a>
+                        )}
+                        {showSecondaryCta && (
+                            <a
+                                className="hero_banner__cta-secondary"
+                                href={ctaSecondaryHref || '#'}
+                                data-empty={!ctaSecondaryLabel || undefined}
+                                data-placeholder="Secondary CTA"
+                                {...ctaSecLabelEdit}
+                            >{ctaSecondaryLabel}</a>
+                        )}
+                    </div>
+                )}
             </div>
         </section>
     );

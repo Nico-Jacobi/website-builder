@@ -5,9 +5,13 @@ import type { ModuleSpec } from './index';
 /** A single statistic tile. */
 export const StatSchema = z.object({
     /** The statistic value displayed large, e.g. '10k+' or '99%'. */
-    value: z.string(),
+    value:  z.string(),
     /** Short descriptive label below the value, e.g. 'Active Users'. */
-    label: z.string(),
+    label:  z.string(),
+    /** Optional character(s) before the value, e.g. "$" or "~". */
+    prefix: z.string().optional(),
+    /** Optional character(s) after the value, e.g. "+", "%" or "k". */
+    suffix: z.string().optional(),
 });
 export type Stat = z.infer<typeof StatSchema>;
 
@@ -44,8 +48,10 @@ export const StatRowMeta: ModuleMeta = {
 };
 
 export const StatRowContentFields: ContentField[] = [
-    { path: 'stats[].value', type: 'text' },
-    { path: 'stats[].label', type: 'text' },
+    { path: 'stats[].value',  type: 'text' },
+    { path: 'stats[].label',  type: 'text' },
+    { path: 'stats[].prefix', type: 'text' },
+    { path: 'stats[].suffix', type: 'text' },
 ];
 
 export const StatRowModuleSpec: ModuleSpec<StatRowProps> = {

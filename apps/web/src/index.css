@@ -16,12 +16,6 @@
     --muted_text: #64748B;
     --inverted_text: #FFFFFF;
 
-    --danger: #C0392B;
-    --danger_bg: #FFF5F4;
-
-    /* Dividers — translucent, sit on top of --primary-tinted backgrounds */
-    --divider_inverted: rgba(255, 255, 255, 0.15);
-
     /* Modal overlays — translucent dark backdrop behind dialogs */
     --modal_overlay: rgba(0, 0, 0, 0.5);
 
@@ -38,6 +32,24 @@
 
     /* Typography */
     --font_family: system-ui, sans-serif;
+
+    /* Borders */
+    --border_subtle: rgba(0, 0, 0, 0.08);
+
+    /* Elevated surface (slightly above --surface for card backgrounds) */
+    --surface_elevated: #FFFFFF;
+
+    /* Additional radii */
+    --radius_lg:   20px;
+    --radius_pill: 999px;
+
+    /* Hero gradient (default: primary → secondary diagonal) */
+    --gradient_hero: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+
+    /* Motion */
+    --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+    --dur_fast:   120ms;
+    --dur_normal: 200ms;
 
     /* ============================================================
        Chrome (tool UI) tokens — Vercel-inspired.
@@ -66,6 +78,10 @@
     /* Status accents */
     --ui_accent_success: #14B8A6;
     --ui_accent_danger:  #F87171;
+
+    /* Danger — nur für Builder-UI (Renderer.css), nicht für Module */
+    --ui_danger:    #C0392B;
+    --ui_danger_bg: #FFF5F4;
 
     /* Primary button — white pill, black text */
     --ui_btn_primary_bg:    #FFFFFF;

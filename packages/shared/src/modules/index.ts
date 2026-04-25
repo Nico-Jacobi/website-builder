@@ -18,39 +18,44 @@ export * from './Header';
 export * from './HeroBanner';
 export * from './Container';
 export * from './Footer';
-export * from './FooterSimple';
 export * from './TextBlock';
 export * from './MediaText';
 export * from './CardRow';
 export * from './CardGrid';
 export * from './Spotlight';
-export * from './RecommendationRow';
+export * from './Testimonial';
 export * from './StatRow';
 export * from './ImageBlock';
 export * from './Gallery';
+export * from './LogoStrip';
+export * from './FeatureGrid';
+export * from './CTABand';
 
 import { HeaderModuleSpec       } from './Header';
 import { HeroBannerModuleSpec   } from './HeroBanner';
 import { ContainerModuleSpec    } from './Container';
 import { FooterModuleSpec       } from './Footer';
-import { FooterSimpleModuleSpec } from './FooterSimple';
 import { TextBlockModuleSpec    } from './TextBlock';
 import { MediaTextModuleSpec    } from './MediaText';
 import { CardRowModuleSpec      } from './CardRow';
 import { CardGridModuleSpec     } from './CardGrid';
 import { SpotlightModuleSpec    } from './Spotlight';
-import { RecommendationRowModuleSpec } from './RecommendationRow';
+import { TestimonialModuleSpec  } from './Testimonial';
 import { StatRowModuleSpec      } from './StatRow';
 import { ImageBlockModuleSpec   } from './ImageBlock';
 import { GalleryModuleSpec      } from './Gallery';
+import { LogoStripModuleSpec    } from './LogoStrip';
+import { FeatureGridModuleSpec  } from './FeatureGrid';
+import { CTABandModuleSpec      } from './CTABand';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const allSpecs: ModuleSpec<any>[] = [
-    HeaderModuleSpec, HeroBannerModuleSpec, ContainerModuleSpec,
-    FooterModuleSpec, FooterSimpleModuleSpec, TextBlockModuleSpec,
-    MediaTextModuleSpec, CardRowModuleSpec, CardGridModuleSpec,
-    SpotlightModuleSpec, RecommendationRowModuleSpec, StatRowModuleSpec,
-    ImageBlockModuleSpec, GalleryModuleSpec,
+    HeaderModuleSpec,    HeroBannerModuleSpec, ContainerModuleSpec,
+    FooterModuleSpec,    TextBlockModuleSpec,  MediaTextModuleSpec,
+    CardRowModuleSpec,   CardGridModuleSpec,   SpotlightModuleSpec,
+    TestimonialModuleSpec, StatRowModuleSpec,  ImageBlockModuleSpec,
+    GalleryModuleSpec,   LogoStripModuleSpec,  FeatureGridModuleSpec,
+    CTABandModuleSpec,
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

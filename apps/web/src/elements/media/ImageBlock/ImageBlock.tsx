@@ -3,7 +3,7 @@ import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import type { ImageBlockProps } from '@website-builder/shared';
 
-export default function ImageBlock({ src, alt, caption, objectFit, maxHeight }: ImageBlockProps) {
+export default function ImageBlock({ src, alt, caption, objectFit, maxHeight, aspectRatio }: ImageBlockProps) {
     const captionEdit = useEditableText('caption');
 
     return (
@@ -16,6 +16,7 @@ export default function ImageBlock({ src, alt, caption, objectFit, maxHeight }: 
                 wrapperClassName="image_block__img-wrap"
                 imgClassName="image_block__img"
                 imgStyle={{ objectFit, maxHeight }}
+                imgProps={aspectRatio ? { 'data-aspect-ratio': aspectRatio } as Record<string, string> : undefined}
             />
             <figcaption
                 className="image_block__caption"

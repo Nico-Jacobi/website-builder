@@ -10,7 +10,6 @@ import { Header } from './layout/Header';
 import { HeroBanner } from './layout/HeroBanner';
 import { Container } from './layout/Container';
 import { Footer } from './layout/Footer';
-import { FooterSimple } from './layout/FooterSimple';
 
 // Content modules
 import { TextBlock } from './content/TextBlock';
@@ -18,12 +17,17 @@ import { MediaText } from './content/MediaText';
 import { CardRow } from './content/CardRow';
 import { CardGrid } from './content/CardGrid';
 import Spotlight from './content/Spotlight/Spotlight';
-import RecommendationRow from './content/RecommendationRow/RecommendationRow';
 import { StatRow } from './content/StatRow';
 
 // Media modules
 import { ImageBlock } from './media/ImageBlock';
 import { Gallery } from './media/Gallery';
+
+// New modules (Plans 02–06)
+import Testimonial from './content/Testimonial/Testimonial';
+import FeatureGrid from './content/FeatureGrid/FeatureGrid';
+import CTABand     from './content/CTABand/CTABand';
+import LogoStrip   from './media/LogoStrip/LogoStrip';
 
 const EMPTY_SPEC: SiteSpec = { blocks: [] };
 
@@ -174,36 +178,6 @@ describe('Footer', () => {
     it('does not render columns section when columns omitted', () => {
         const { container } = renderInProvider(<Footer tagline="Test" />);
         expect(container.querySelector('.footer__columns')).not.toBeInTheDocument();
-    });
-});
-
-// ---------------------------------------------------------------------------
-// 5. FooterSimple
-// ---------------------------------------------------------------------------
-describe('FooterSimple', () => {
-    it('renders tagline', () => {
-        renderInProvider(<FooterSimple tagline="Built with care." />);
-        expect(screen.getByText('Built with care.')).toBeInTheDocument();
-    });
-
-    it('renders copyright', () => {
-        renderInProvider(<FooterSimple copyright="© 2026 My Company" />);
-        expect(screen.getByText('© 2026 My Company')).toBeInTheDocument();
-    });
-
-    it('renders links', () => {
-        const links = [
-            { label: 'Privacy', href: '/privacy' },
-            { label: 'Terms', href: '/terms' },
-        ];
-        renderInProvider(<FooterSimple links={links} />);
-        expect(screen.getByText('Privacy')).toHaveAttribute('href', '/privacy');
-        expect(screen.getByText('Terms')).toHaveAttribute('href', '/terms');
-    });
-
-    it('does not render nav when links omitted', () => {
-        renderInProvider(<FooterSimple tagline="Test" />);
-        expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
     });
 });
 
@@ -397,53 +371,6 @@ describe('Spotlight', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 10b. RecommendationRow
-// ---------------------------------------------------------------------------
-describe('RecommendationRow', () => {
-    const items = [
-        { name: 'Süddeutsche Zeitung', source: 'Feuilleton', rating: 4.5, quote: 'Ein erfrischender Ansatz.' },
-        { name: 'Anja Müller', source: 'Kundin', rating: 5, quote: 'Einfach großartig.' },
-        { name: 'techradar.de', rating: 4, quote: 'Solide Umsetzung.' },
-    ];
-
-    it('renders the correct number of recommendations', () => {
-        const { container } = renderInProvider(<RecommendationRow items={items} />);
-        expect(container.querySelectorAll('.recommendation')).toHaveLength(3);
-    });
-
-    it('renders the heading when provided', () => {
-        renderInProvider(<RecommendationRow heading="Was andere sagen" items={items} />);
-        expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Was andere sagen');
-    });
-
-    it('does not render heading when omitted', () => {
-        renderInProvider(<RecommendationRow items={items} />);
-        expect(screen.queryByRole('heading')).not.toBeInTheDocument();
-    });
-
-    it('renders each reviewer name, source and quote', () => {
-        renderInProvider(<RecommendationRow items={items} />);
-        expect(screen.getByText('Süddeutsche Zeitung')).toBeInTheDocument();
-        expect(screen.getByText('Feuilleton')).toBeInTheDocument();
-        expect(screen.getByText(/Ein erfrischender Ansatz/)).toBeInTheDocument();
-    });
-
-    it('exposes the rating via aria-label for accessibility', () => {
-        const { container } = renderInProvider(<RecommendationRow items={items} />);
-        const stars = container.querySelectorAll('.recommendation__stars');
-        expect(stars[0]).toHaveAttribute('aria-label', '4.5 von 5 Sternen');
-        expect(stars[1]).toHaveAttribute('aria-label', '5 von 5 Sternen');
-    });
-
-    it('renders the reviewer image with correct src when provided', () => {
-        const withImage = [{ name: 'N', rating: 5, quote: 'Q', image: 'https://example.com/a.jpg' }];
-        const { container } = renderInProvider(<RecommendationRow items={withImage} />);
-        const img = container.querySelector('.recommendation__image');
-        expect(img).toHaveAttribute('src', 'https://example.com/a.jpg');
-    });
-});
-
-// ---------------------------------------------------------------------------
 // 11. StatRow
 // ---------------------------------------------------------------------------
 describe('StatRow', () => {
@@ -552,5 +479,146 @@ describe('Gallery', () => {
     it('applies data-gap attribute', () => {
         const { container } = renderInProvider(<Gallery images={images} columns={3} gap="lg" />);
         expect(container.querySelector('.gallery__grid')).toHaveAttribute('data-gap', 'lg');
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 14. Testimonial
+// ---------------------------------------------------------------------------
+describe('Testimonial', () => {
+    const items = [
+        {
+            quote: 'This changed how our team works.',
+            author: 'Sarah K.',
+            role: 'CTO, Acme Corp',
+        },
+    ];
+
+    it('renders without crashing with defaults', () => {
+        const { container } = renderInProvider(
+            <Testimonial layout="grid" items={items} />
+        );
+        expect(container.firstChild).toBeInTheDocument();
+    });
+
+    it('renders heading when provided', () => {
+        renderInProvider(
+            <Testimonial heading="What our customers say" layout="grid" items={items} />
+        );
+        expect(screen.getByText('What our customers say')).toBeInTheDocument();
+    });
+
+    it('renders the quote text', () => {
+        renderInProvider(<Testimonial layout="grid" items={items} />);
+        expect(screen.getByText(/This changed how our team works/)).toBeInTheDocument();
+    });
+
+    it('renders the author name', () => {
+        renderInProvider(<Testimonial layout="grid" items={items} />);
+        expect(screen.getByText('Sarah K.')).toBeInTheDocument();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 15. LogoStrip
+// ---------------------------------------------------------------------------
+describe('LogoStrip', () => {
+    const logos = [
+        { name: 'Stripe', alt: 'Stripe', imageQuery: 'stripe company logo' },
+        { name: 'Vercel', alt: 'Vercel', imageQuery: 'vercel company logo' },
+    ];
+
+    it('renders without crashing with minimal props', () => {
+        const { container } = renderInProvider(<LogoStrip logos={logos} />);
+        expect(container.firstChild).toBeInTheDocument();
+    });
+
+    it('renders heading when provided', () => {
+        renderInProvider(<LogoStrip heading="Trusted by" logos={logos} />);
+        expect(screen.getByText('Trusted by')).toBeInTheDocument();
+    });
+
+    it('renders all logo items', () => {
+        const { container } = renderInProvider(<LogoStrip logos={logos} />);
+        const items = container.querySelectorAll('.logo_strip__item');
+        expect(items.length).toBeGreaterThanOrEqual(2);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 16. FeatureGrid
+// ---------------------------------------------------------------------------
+describe('FeatureGrid', () => {
+    const features = [
+        { icon: '⚡', heading: 'Fast', body: 'Blazing fast performance.' },
+        { icon: '🔒', heading: 'Secure', body: 'Enterprise-grade security.' },
+    ];
+
+    it('renders without crashing with minimal props', () => {
+        const { container } = renderInProvider(
+            <FeatureGrid features={features} />
+        );
+        expect(container.firstChild).toBeInTheDocument();
+    });
+
+    it('renders heading when provided', () => {
+        renderInProvider(
+            <FeatureGrid heading="Everything you need" features={features} />
+        );
+        expect(screen.getByText('Everything you need')).toBeInTheDocument();
+    });
+
+    it('renders all feature headings', () => {
+        renderInProvider(<FeatureGrid features={features} />);
+        expect(screen.getByText('Fast')).toBeInTheDocument();
+        expect(screen.getByText('Secure')).toBeInTheDocument();
+    });
+
+    it('renders emoji icons', () => {
+        renderInProvider(<FeatureGrid features={features} />);
+        expect(screen.getByText('⚡')).toBeInTheDocument();
+        expect(screen.getByText('🔒')).toBeInTheDocument();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 17. CTABand
+// ---------------------------------------------------------------------------
+describe('CTABand', () => {
+    const baseProps = {
+        heading: 'Ready to get started?',
+        ctaLabel: 'Start for free',
+        ctaHref: '#signup',
+    };
+
+    it('renders without crashing with minimal props', () => {
+        const { container } = renderInProvider(<CTABand {...baseProps} />);
+        expect(container.firstChild).toBeInTheDocument();
+    });
+
+    it('renders the heading', () => {
+        renderInProvider(<CTABand {...baseProps} />);
+        expect(screen.getByText('Ready to get started?')).toBeInTheDocument();
+    });
+
+    it('renders the primary CTA link', () => {
+        renderInProvider(<CTABand {...baseProps} />);
+        expect(screen.getByRole('link', { name: 'Start for free' })).toHaveAttribute('href', '#signup');
+    });
+
+    it('renders subheading text when provided', () => {
+        renderInProvider(<CTABand {...baseProps} subheading="Join thousands of teams." />);
+        expect(screen.getByText('Join thousands of teams.')).toBeInTheDocument();
+    });
+
+    it('renders secondary CTA when provided', () => {
+        renderInProvider(
+            <CTABand
+                {...baseProps}
+                ctaSecondaryLabel="Talk to sales"
+                ctaSecondaryHref="#contact"
+            />
+        );
+        expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', '#contact');
     });
 });

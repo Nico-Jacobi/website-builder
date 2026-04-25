@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { validateSpecAgainstRegistry } from './validateSpec';
-import { HeaderDefaults, TextBlockDefaults, FooterSimpleDefaults } from './modules/index';
+import { HeaderDefaults, TextBlockDefaults, FooterDefaults } from './modules/index';
 
 describe('validateSpecAgainstRegistry', () => {
     it('accepts a valid demo spec built from shared defaults', () => {
         const spec = {
             blocks: [
-                { type: 'Header',       props: HeaderDefaults       },
-                { type: 'TextBlock',    props: TextBlockDefaults    },
-                { type: 'FooterSimple', props: FooterSimpleDefaults },
+                { type: 'Header',    props: HeaderDefaults                      },
+                { type: 'TextBlock', props: TextBlockDefaults                   },
+                { type: 'Footer',    props: { ...FooterDefaults, compact: true } },
             ],
         };
         const result = validateSpecAgainstRegistry(spec);

@@ -36,6 +36,24 @@ export const HeroBannerPropsSchema = z.object({
      * Accepts 200 (minimum) to 900 (maximum). Defaults to 480.
      */
     minHeight: z.number().min(200).max(900).optional(),
+
+    /**
+     * When true, renders a subtle dot-grid overlay over the hero background
+     * for extra visual texture. Defaults to false.
+     */
+    gridOverlay: z.boolean().optional(),
+
+    /** Label for the primary CTA pill button. */
+    ctaLabel: z.string().optional(),
+
+    /** Target URL for the primary CTA pill button. */
+    ctaHref: z.string().optional(),
+
+    /** Label for the secondary (ghost) CTA pill button. */
+    ctaSecondaryLabel: z.string().optional(),
+
+    /** Target URL for the secondary (ghost) CTA pill button. */
+    ctaSecondaryHref: z.string().optional(),
 });
 
 export type HeroBannerProps = z.infer<typeof HeroBannerPropsSchema>;
@@ -54,10 +72,14 @@ export const HeroBannerMeta: ModuleMeta = {
 };
 
 export const HeroBannerContentFields: ContentField[] = [
-    { path: 'heading',         type: 'text' },
-    { path: 'subheading',      type: 'text' },
-    { path: 'imageQuery',      type: 'image_ref' },
-    { path: 'backgroundImage', type: 'image_ref' },
+    { path: 'heading',            type: 'text'      },
+    { path: 'subheading',         type: 'text'      },
+    { path: 'imageQuery',         type: 'image_ref' },
+    { path: 'backgroundImage',    type: 'image_ref' },
+    { path: 'ctaLabel',           type: 'text'      },
+    { path: 'ctaHref',            type: 'url'       },
+    { path: 'ctaSecondaryLabel',  type: 'text'      },
+    { path: 'ctaSecondaryHref',   type: 'url'       },
 ];
 
 export const HeroBannerModuleSpec: ModuleSpec<HeroBannerProps> = {

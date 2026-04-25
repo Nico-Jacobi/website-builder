@@ -7,16 +7,18 @@ import {
     HeroBannerPropsSchema, HeroBannerDefaults,
     ContainerPropsSchema, ContainerDefaults,
     FooterPropsSchema, FooterDefaults, FooterColumnSchema,
-    FooterSimplePropsSchema, FooterSimpleDefaults,
     TextBlockPropsSchema, TextBlockDefaults,
     MediaTextPropsSchema, MediaTextDefaults,
     CardRowPropsSchema, CardRowDefaults,
     CardGridPropsSchema, CardGridDefaults,
     SpotlightPropsSchema, SpotlightDefaults,
-    RecommendationRowPropsSchema, RecommendationRowDefaults, RecommendationSchema,
     StatRowPropsSchema, StatRowDefaults, StatSchema,
     ImageBlockPropsSchema, ImageBlockDefaults,
     GalleryPropsSchema, GalleryDefaults, GalleryImageSchema,
+    TestimonialPropsSchema, TestimonialDefaults,
+    LogoStripPropsSchema,   LogoStripDefaults,
+    FeatureGridPropsSchema, FeatureGridDefaults,
+    CTABandPropsSchema,     CTABandDefaults,
 } from '@website-builder/shared';
 
 // ---------------------------------------------------------------------------
@@ -326,41 +328,6 @@ describe('FooterColumnSchema', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 5. FooterSimple
-// ---------------------------------------------------------------------------
-
-describe('FooterSimplePropsSchema', () => {
-    it('parses defaults', () => {
-        expect(parses(FooterSimplePropsSchema, FooterSimpleDefaults)).toBe(true);
-    });
-
-    it('parses with all fields populated', () => {
-        expect(parses(FooterSimplePropsSchema, {
-            tagline: 'Tag', copyright: '(c)',
-            links: [{ label: 'Privacy', href: '/p' }],
-        })).toBe(true);
-    });
-
-    it('parses with no fields (all optional)', () => {
-        expect(parses(FooterSimplePropsSchema, {})).toBe(true);
-    });
-
-    it('rejects invalid link in array', () => {
-        expect(fails(FooterSimplePropsSchema, {
-            links: [{ label: 'Missing href' }],
-        })).toBe(true);
-    });
-
-    it('accepts empty links array', () => {
-        expect(parses(FooterSimplePropsSchema, { links: [] })).toBe(true);
-    });
-
-    it('rejects non-string tagline', () => {
-        expect(fails(FooterSimplePropsSchema, { tagline: 42 })).toBe(true);
-    });
-});
-
-// ---------------------------------------------------------------------------
 // 6. TextBlock
 // ---------------------------------------------------------------------------
 
@@ -594,97 +561,6 @@ describe('SpotlightPropsSchema', () => {
 
     it('rejects invalid imagePosition', () => {
         expect(fails(SpotlightPropsSchema, { ...base, imagePosition: 'center' })).toBe(true);
-    });
-});
-
-// ---------------------------------------------------------------------------
-// 10b. RecommendationRow
-// ---------------------------------------------------------------------------
-
-describe('RecommendationSchema', () => {
-    const base = { name: 'Alex', rating: 4.5, quote: 'Great.' };
-
-    it('parses with only required fields', () => {
-        expect(parses(RecommendationSchema, base)).toBe(true);
-    });
-
-    it('parses with all fields populated', () => {
-        expect(parses(RecommendationSchema, {
-            ...base,
-            source: 'Verified customer',
-            image: 'https://example.com/a.jpg',
-            imageAlt: 'Portrait of Alex',
-        })).toBe(true);
-    });
-
-    it('rejects missing name', () => {
-        expect(fails(RecommendationSchema, { rating: 5, quote: 'Q' })).toBe(true);
-    });
-
-    it('rejects missing rating', () => {
-        expect(fails(RecommendationSchema, { name: 'A', quote: 'Q' })).toBe(true);
-    });
-
-    it('rejects missing quote', () => {
-        expect(fails(RecommendationSchema, { name: 'A', rating: 5 })).toBe(true);
-    });
-
-    it('rejects rating below 0', () => {
-        expect(fails(RecommendationSchema, { ...base, rating: -1 })).toBe(true);
-    });
-
-    it('rejects rating above 5', () => {
-        expect(fails(RecommendationSchema, { ...base, rating: 5.5 })).toBe(true);
-    });
-
-    it('accepts rating = 0 and rating = 5 (boundaries)', () => {
-        expect(parses(RecommendationSchema, { ...base, rating: 0 })).toBe(true);
-        expect(parses(RecommendationSchema, { ...base, rating: 5 })).toBe(true);
-    });
-
-    it('accepts half-star ratings', () => {
-        expect(parses(RecommendationSchema, { ...base, rating: 3.5 })).toBe(true);
-    });
-
-    it('rejects non-number rating', () => {
-        expect(fails(RecommendationSchema, { ...base, rating: '5' })).toBe(true);
-    });
-});
-
-describe('RecommendationRowPropsSchema', () => {
-    it('parses defaults', () => {
-        expect(parses(RecommendationRowPropsSchema, RecommendationRowDefaults)).toBe(true);
-    });
-
-    it('parses with heading and items', () => {
-        expect(parses(RecommendationRowPropsSchema, {
-            heading: 'Reviews',
-            items: [{ name: 'A', rating: 5, quote: 'Q' }],
-        })).toBe(true);
-    });
-
-    it('parses without heading (optional)', () => {
-        expect(parses(RecommendationRowPropsSchema, {
-            items: [{ name: 'A', rating: 5, quote: 'Q' }],
-        })).toBe(true);
-    });
-
-    it('rejects empty items array (min 1)', () => {
-        expect(fails(RecommendationRowPropsSchema, { items: [] })).toBe(true);
-    });
-
-    it('rejects missing items', () => {
-        expect(fails(RecommendationRowPropsSchema, {})).toBe(true);
-    });
-
-    it('rejects items as non-array', () => {
-        expect(fails(RecommendationRowPropsSchema, { items: 'oops' })).toBe(true);
-    });
-
-    it('rejects item with invalid rating', () => {
-        expect(fails(RecommendationRowPropsSchema, {
-            items: [{ name: 'A', rating: 7, quote: 'Q' }],
-        })).toBe(true);
     });
 });
 
@@ -925,5 +801,162 @@ describe('GalleryPropsSchema', () => {
         expect(fails(GalleryPropsSchema, {
             images: [img(1), { imageQuery: 'test', src: '/x.png' }],  // missing alt
         })).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 14. TestimonialPropsSchema
+// ---------------------------------------------------------------------------
+
+describe('TestimonialPropsSchema', () => {
+    it('parses defaults', () => {
+        expect(parses(TestimonialPropsSchema, TestimonialDefaults)).toBe(true);
+    });
+
+    it('parses with heading and items', () => {
+        expect(parses(TestimonialPropsSchema, {
+            heading: 'Reviews',
+            layout: 'grid',
+            items: [{ quote: 'Great.', author: 'Alex' }],
+        })).toBe(true);
+    });
+
+    it('parses without heading (optional)', () => {
+        expect(parses(TestimonialPropsSchema, {
+            layout: 'grid',
+            items: [{ quote: 'Great.', author: 'Alex' }],
+        })).toBe(true);
+    });
+
+    it('rejects empty items array (min 1)', () => {
+        expect(fails(TestimonialPropsSchema, { layout: 'grid', items: [] })).toBe(true);
+    });
+
+    it('rejects missing items', () => {
+        expect(fails(TestimonialPropsSchema, { layout: 'grid' })).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 15. LogoStripPropsSchema
+// ---------------------------------------------------------------------------
+
+describe('LogoStripPropsSchema', () => {
+    it('parses defaults', () => {
+        expect(parses(LogoStripPropsSchema, LogoStripDefaults)).toBe(true);
+    });
+
+    it('parses with heading and logos', () => {
+        expect(parses(LogoStripPropsSchema, {
+            heading: 'Trusted by',
+            logos: [
+                { name: 'Stripe', alt: 'Stripe', imageQuery: 'stripe logo' },
+                { name: 'Vercel', alt: 'Vercel', imageQuery: 'vercel logo' },
+            ],
+        })).toBe(true);
+    });
+
+    it('parses without heading (optional)', () => {
+        expect(parses(LogoStripPropsSchema, {
+            logos: [{ name: 'Acme', alt: 'Acme', imageQuery: 'acme logo' }],
+        })).toBe(true);
+    });
+
+    it('rejects empty logos array (min 1)', () => {
+        expect(fails(LogoStripPropsSchema, { logos: [] })).toBe(true);
+    });
+
+    it('rejects missing logos', () => {
+        expect(fails(LogoStripPropsSchema, {})).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 16. FeatureGridPropsSchema
+// ---------------------------------------------------------------------------
+
+describe('FeatureGridPropsSchema', () => {
+    const feature = { icon: '⚡', heading: 'Fast', body: 'Quick.' };
+
+    it('parses defaults', () => {
+        expect(parses(FeatureGridPropsSchema, FeatureGridDefaults)).toBe(true);
+    });
+
+    it('parses with all fields populated', () => {
+        expect(parses(FeatureGridPropsSchema, {
+            heading: 'Features',
+            columns: '3',
+            features: [feature],
+        })).toBe(true);
+    });
+
+    it('parses without heading (optional)', () => {
+        expect(parses(FeatureGridPropsSchema, { features: [feature] })).toBe(true);
+    });
+
+    it('accepts columns "2", "3", "4"', () => {
+        for (const c of ['2', '3', '4']) {
+            expect(parses(FeatureGridPropsSchema, { features: [feature], columns: c })).toBe(true);
+        }
+    });
+
+    it('rejects invalid columns value', () => {
+        expect(fails(FeatureGridPropsSchema, { features: [feature], columns: '5' })).toBe(true);
+    });
+
+    it('rejects empty features array (min 1)', () => {
+        expect(fails(FeatureGridPropsSchema, { features: [] })).toBe(true);
+    });
+
+    it('rejects missing features', () => {
+        expect(fails(FeatureGridPropsSchema, {})).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 17. CTABandPropsSchema
+// ---------------------------------------------------------------------------
+
+describe('CTABandPropsSchema', () => {
+    const base = { heading: 'Start today', ctaLabel: 'Sign up', ctaHref: '#' };
+
+    it('parses defaults', () => {
+        expect(parses(CTABandPropsSchema, CTABandDefaults)).toBe(true);
+    });
+
+    it('parses with all fields populated', () => {
+        expect(parses(CTABandPropsSchema, {
+            ...base,
+            subheading: 'Join us.',
+            ctaSecondaryLabel: 'Learn more',
+            ctaSecondaryHref: '#about',
+            style: 'gradient',
+        })).toBe(true);
+    });
+
+    it('parses with only required fields', () => {
+        expect(parses(CTABandPropsSchema, base)).toBe(true);
+    });
+
+    it('accepts all valid style values', () => {
+        for (const s of ['gradient', 'surface', 'primary']) {
+            expect(parses(CTABandPropsSchema, { ...base, style: s })).toBe(true);
+        }
+    });
+
+    it('rejects invalid style value', () => {
+        expect(fails(CTABandPropsSchema, { ...base, style: 'dark' })).toBe(true);
+    });
+
+    it('rejects missing heading', () => {
+        expect(fails(CTABandPropsSchema, { ctaLabel: 'Go', ctaHref: '#' })).toBe(true);
+    });
+
+    it('rejects missing ctaLabel', () => {
+        expect(fails(CTABandPropsSchema, { heading: 'H', ctaHref: '#' })).toBe(true);
+    });
+
+    it('rejects missing ctaHref', () => {
+        expect(fails(CTABandPropsSchema, { heading: 'H', ctaLabel: 'Go' })).toBe(true);
     });
 });

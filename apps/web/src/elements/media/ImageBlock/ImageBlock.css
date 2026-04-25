@@ -2,7 +2,8 @@
     margin: 0;          /* reset browser default figure margin */
     width: 100%;
     overflow: hidden;
-    border-radius: var(--radius_md);
+    border-radius: var(--radius_lg);
+    border: 1px solid var(--border_subtle);
 }
 
 .image_block__img-wrap {
@@ -16,9 +17,18 @@
     height: 100%;
 }
 
+/* Aspect-Ratio Varianten — gesteuert via data-aspect-ratio Attribut */
+.image_block__img[data-aspect-ratio="16/9"] { aspect-ratio: 16 / 9; object-fit: cover; }
+.image_block__img[data-aspect-ratio="4/3"]  { aspect-ratio: 4 / 3;  object-fit: cover; }
+.image_block__img[data-aspect-ratio="1/1"]  { aspect-ratio: 1 / 1;  object-fit: cover; }
+.image_block__img[data-aspect-ratio="3/2"]  { aspect-ratio: 3 / 2;  object-fit: cover; }
+/* data-aspect-ratio="auto" oder fehlendes Attribut → keine Regel → natürliche Höhe */
+
 .image_block__caption {
-    padding: var(--space_sm) var(--space_md);
-    font-size: 0.875rem;
+    padding: var(--space_xs) var(--space_md) var(--space_sm);
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
     color: var(--muted_text);
     text-align: center;
+    border-top: 1px solid var(--border_subtle);
 }

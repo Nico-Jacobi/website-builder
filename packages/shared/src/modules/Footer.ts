@@ -13,6 +13,7 @@ export const FooterPropsSchema = z.object({
     tagline:   z.string().optional(),
     copyright: z.string().optional(),
     columns:   z.array(FooterColumnSchema).optional(),
+    compact:   z.boolean().optional(),
 });
 
 export type FooterProps = z.infer<typeof FooterPropsSchema>;
@@ -36,12 +37,13 @@ export const FooterDefaults: FooterProps = {
             ],
         },
     ],
+    compact: false,
 };
 
 export const FooterMeta: ModuleMeta = {
     name:        'Footer',
     category:    'layout',
-    description: 'Page footer with optional tagline, copyright notice, and grouped link columns.',
+    description: 'Page footer with optional tagline, copyright notice, and grouped link columns. Set compact: true for a single-row minimal layout (replaces FooterSimple).',
     tags:        ['footer', 'links', 'nav', 'layout'],
 };
 

@@ -1,15 +1,29 @@
+/* Optional section heading above the scroll row */
+.card_row__heading {
+    margin: 0 0 var(--space_md);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+.card_row__subheading {
+    margin: calc(-1 * var(--space_sm)) 0 var(--space_lg);
+    color: var(--muted_text);
+}
+
 .card_row__scroll {
     display: flex;
     flex-direction: row;
-    gap: var(--space_md);
+    gap: var(--space_lg);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--muted_text) transparent;
+    scrollbar-color: var(--border_subtle) transparent;
     padding-bottom: var(--space_sm);
 }
 
 /* Cards in a scroll row have a fixed width instead of growing */
 .card_row .card {
-    flex: 0 0 280px;
+    flex: 0 0 300px;
 }

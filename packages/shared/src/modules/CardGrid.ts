@@ -4,6 +4,10 @@ import type { ModuleSpec } from './index';
 import { CardSchema } from '../schemas';
 
 export const CardGridPropsSchema = z.object({
+    /** Optional section heading rendered above the grid. */
+    heading: z.string().optional(),
+    /** Optional subheading rendered below the heading. */
+    subheading: z.string().optional(),
     cards:   z.array(CardSchema).min(1),
     columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).default(3),
 });
@@ -28,6 +32,8 @@ export const CardGridMeta: ModuleMeta = {
 };
 
 export const CardGridContentFields: ContentField[] = [
+    { path: 'heading',            type: 'text' },
+    { path: 'subheading',         type: 'text' },
     { path: 'cards[].title',      type: 'text' },
     { path: 'cards[].body',       type: 'text' },
     { path: 'cards[].imageAlt',   type: 'text' },

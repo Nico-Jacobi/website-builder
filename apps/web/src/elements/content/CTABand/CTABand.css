@@ -1,0 +1,165 @@
+/* ============================================================
+   CTABand — Vollbreiter Call-to-Action-Streifen
+   BEM-Root: .cta_band
+   Drei Varianten via data-style: gradient | surface | primary
+   ============================================================ */
+
+.cta_band {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+/* ----- Dot-Grid Overlay nur im Gradient-Modus ----- */
+.cta_band[data-style="gradient"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.08) 1px,
+        transparent 1px
+    );
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ----- Innerer Container (zentriert, max-width) ----- */
+.cta_band__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 80px var(--space_xl);
+}
+
+/* ===== Stil-Varianten ===== */
+
+/* gradient (Default) */
+.cta_band[data-style="gradient"] {
+    background: var(--gradient_hero);
+    color: var(--inverted_text);
+}
+
+/* surface */
+.cta_band[data-style="surface"] {
+    background: var(--surface);
+    color: var(--text);
+}
+
+.cta_band[data-style="surface"] .cta_band__inner {
+    border: 1px solid var(--border_subtle);
+    border-radius: var(--radius_lg);
+    /* Innenpanel bei surface-Variante leicht erhöht */
+    background: var(--surface_elevated, var(--surface));
+    padding: 60px var(--space_xl);
+}
+
+/* primary */
+.cta_band[data-style="primary"] {
+    background: var(--primary);
+    color: var(--inverted_text);
+}
+
+/* ----- Heading ----- */
+.cta_band__heading {
+    margin: 0 0 var(--space_md) 0;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    /* Erbt color vom Wrapper-Varianten-Selektor */
+    color: inherit;
+}
+
+/* ----- Subheading ----- */
+.cta_band__subheading {
+    margin: 0 0 var(--space_xl) 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    color: inherit;
+}
+
+/* ----- Button-Reihe ----- */
+.cta_band__buttons {
+    display: flex;
+    gap: var(--space_md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ----- Primärer Button ----- */
+.cta_band__btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space_sm) var(--space_xl);
+    border-radius: var(--radius_pill);
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: transform var(--dur_fast) var(--ease);
+    border: none;
+    cursor: pointer;
+}
+
+.cta_band__btn-primary:hover {
+    transform: scale(1.02);
+}
+
+/* gradient + primary Variante: weißer Button mit dunklem Text */
+.cta_band[data-style="gradient"] .cta_band__btn-primary,
+.cta_band[data-style="primary"]  .cta_band__btn-primary {
+    background: var(--inverted_text);
+    color: var(--primary);
+}
+
+/* surface Variante: primary-farbiger Button mit hellem Text */
+.cta_band[data-style="surface"] .cta_band__btn-primary {
+    background: var(--primary);
+    color: var(--inverted_text);
+}
+
+/* ----- Ghost-Button ----- */
+.cta_band__btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space_sm) var(--space_xl);
+    border-radius: var(--radius_pill);
+    border: 1px solid currentColor;
+    background: transparent;
+    /* Erbt Textfarbe vom Varianten-Wrapper → automatisch korrekt */
+    color: inherit;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: transform var(--dur_fast) var(--ease);
+    cursor: pointer;
+}
+
+.cta_band__btn-ghost:hover {
+    transform: scale(1.02);
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 640px) {
+    .cta_band__inner {
+        padding: 60px var(--space_md);
+    }
+
+    .cta_band__buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cta_band__btn-primary,
+    .cta_band__btn-ghost {
+        width: 100%;
+        max-width: 320px;
+        justify-content: center;
+    }
+}

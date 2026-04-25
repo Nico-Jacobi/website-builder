@@ -3,9 +3,55 @@ import { useEditableText } from '../../../builder/useEditableText';
 import { EditableLink } from '../../shared/EditableLink';
 import type { FooterProps, FooterColumn } from '@website-builder/shared';
 
-export default function Footer({ tagline, copyright, columns }: FooterProps) {
-    const taglineEdit = useEditableText('tagline');
+export default function Footer({ tagline, copyright, columns, compact }: FooterProps) {
+    const taglineEdit   = useEditableText('tagline');
     const copyrightEdit = useEditableText('copyright');
+
+    /* ── Compact-Layout (Single-Row, ex FooterSimple) ── */
+    if (compact) {
+        // Im Compact-Modus: alle Links aus allen Spalten flach in eine Nav-Zeile
+        const flatLinks: { colIndex: number; linkIndex: number; label: string; href: string }[] =
+            columns?.flatMap((col, colIndex) =>
+                col.links.map((link, linkIndex) => ({
+                    colIndex,
+                    linkIndex,
+                    label: link.label,
+                    href: link.href,
+                }))
+            ) ?? [];
+        const hasLinks = flatLinks.length > 0;
+
+        return (
+            <footer className="footer footer--compact">
+                <div className="footer__compact-inner">
+                    <div className="footer__compact-left">
+                        {tagline && (
+                            <span className="footer__tagline" {...taglineEdit}>{tagline}</span>
+                        )}
+                        {copyright && (
+                            <span className="footer__copyright" {...copyrightEdit}>{copyright}</span>
+                        )}
+                    </div>
+
+                    {hasLinks && (
+                        <nav className="footer__compact-links">
+                            {flatLinks.map((link, i) => (
+                                <EditableLink
+                                    key={i}
+                                    className="footer__link"
+                                    href={link.href}
+                                    label={link.label}
+                                    labelPath={`columns[${link.colIndex}].links[${link.linkIndex}].label`}
+                                />
+                            ))}
+                        </nav>
+                    )}
+                </div>
+            </footer>
+        );
+    }
+
+    /* ── Standard-Layout (Full-Column) ── */
     const hasColumns = columns && columns.length > 0;
 
     return (

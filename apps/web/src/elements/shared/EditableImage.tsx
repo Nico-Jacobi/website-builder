@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ImgHTMLAttributes } from 'react';
 import { useEditableImage } from '../../builder/useEditableImage';
 
 /**
@@ -23,6 +23,8 @@ export interface EditableImageProps {
     wrapperClassName?: string;
     imgClassName?: string;
     imgStyle?: CSSProperties;
+    /** Additional props to spread on the underlying <img> element (e.g. data-* attributes). */
+    imgProps?: ImgHTMLAttributes<HTMLImageElement> | Record<string, string | undefined>;
 }
 
 export function EditableImage({
@@ -33,13 +35,14 @@ export function EditableImage({
     wrapperClassName,
     imgClassName,
     imgStyle,
+    imgProps,
 }: EditableImageProps) {
     const { overlayElement, dragProps, openModal } = useEditableImage(src ?? '', path, altPath, alt);
 
     return (
         <div className={wrapperClassName} {...dragProps}>
             {src
-                ? <img className={imgClassName} src={src} alt={alt} style={imgStyle} />
+                ? <img className={imgClassName} src={src} alt={alt} style={imgStyle} {...imgProps} />
                 : <div
                     className="edit__img-placeholder"
                     data-edit-only=""

@@ -3,7 +3,6 @@ import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { EditModeProvider } from './EditModeContext';
-import { EditModeToolbar } from './EditModeToolbar';
 import {
     BlockIndexContext,
     useEditModeState,
@@ -331,7 +330,7 @@ describe('useEditableImage', () => {
             screen.getByPlaceholderText('Bild-URL eingeben…'),
         ).toBeInTheDocument();
         expect(screen.getByText('OK')).toBeInTheDocument();
-        expect(screen.getByText('✕')).toBeInTheDocument();
+        expect(screen.getByLabelText('Abbrechen')).toBeInTheDocument();
     });
 
     it('OK button commits new URL', async () => {
@@ -471,57 +470,13 @@ describe('useEditableImage', () => {
         await userEvent.click(screen.getByTitle('Bild tauschen'));
 
         // Click the cancel button
-        await userEvent.click(screen.getByText('✕'));
+        await userEvent.click(screen.getByLabelText('Abbrechen'));
 
         // Dialog should be closed
         expect(
             screen.queryByPlaceholderText('Bild-URL eingeben…'),
         ).not.toBeInTheDocument();
         expect(onSpecChange).not.toHaveBeenCalled();
-    });
-});
-
-// ---------------------------------------------------------------------------
-// EditModeToolbar tests
-// ---------------------------------------------------------------------------
-
-describe('EditModeToolbar', () => {
-    it('shows "Bearbeiten" when not in edit mode', () => {
-        renderWithProvider(<EditModeToolbar />, { blocks: [] });
-
-        expect(screen.getByText('Bearbeiten')).toBeInTheDocument();
-        expect(screen.queryByText('Fertig')).not.toBeInTheDocument();
-    });
-
-    it('clicking toggles to edit mode and shows "Fertig"', async () => {
-        renderWithProvider(<EditModeToolbar />, { blocks: [] });
-
-        await userEvent.click(screen.getByText('Bearbeiten'));
-
-        expect(screen.getByText('Fertig')).toBeInTheDocument();
-        expect(screen.queryByText('Bearbeiten')).not.toBeInTheDocument();
-    });
-
-    it('clicking again toggles back to "Bearbeiten"', async () => {
-        renderWithProvider(<EditModeToolbar />, { blocks: [] });
-
-        await userEvent.click(screen.getByText('Bearbeiten'));
-        expect(screen.getByText('Fertig')).toBeInTheDocument();
-
-        await userEvent.click(screen.getByText('Fertig'));
-        expect(screen.getByText('Bearbeiten')).toBeInTheDocument();
-    });
-
-    it('applies active CSS class when in edit mode', async () => {
-        renderWithProvider(<EditModeToolbar />, { blocks: [] });
-
-        const btn = screen.getByText('Bearbeiten');
-        expect(btn).not.toHaveClass('edit-toolbar__btn--active');
-
-        await userEvent.click(btn);
-
-        const activeBtn = screen.getByText('Fertig');
-        expect(activeBtn).toHaveClass('edit-toolbar__btn--active');
     });
 });
 
@@ -547,7 +502,7 @@ describe('Integration: full edit round-trip', () => {
 
         render(
             <EditModeProvider spec={spec} onSpecChange={onSpecChange}>
-                <EditModeToolbar />
+                <TestToggle />
                 <Renderer spec={spec} />
             </EditModeProvider>,
         );
@@ -560,8 +515,9 @@ describe('Integration: full edit round-trip', () => {
         const heading = screen.getByText('My Heading');
         expect(heading).not.toHaveAttribute('contenteditable');
 
-        // Click "Bearbeiten" to toggle edit mode
-        await userEvent.click(screen.getByText('Bearbeiten'));
+        // Toggle into edit mode via the test-only toggle (used to be the now-deleted
+        // EditModeToolbar's "Bearbeiten" button).
+        await userEvent.click(screen.getByText('toggle'));
 
         // Now elements should be contentEditable
         expect(heading).toHaveAttribute('contenteditable', 'true');

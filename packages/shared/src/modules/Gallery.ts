@@ -47,6 +47,14 @@ export const GalleryPropsSchema = z.object({
      * Accepts 'sm', 'md', or 'lg'. Defaults to 'md'.
      */
     gap: z.enum(['sm', 'md', 'lg']).default('md'),
+
+    /**
+     * When true, switches layout from CSS grid to CSS column-count (true masonry).
+     * Images flow with their natural height — no fixed aspect-ratio applied.
+     * The `columns` prop still controls the column count via --gallery-cols.
+     * Omit (undefined) for the default grid layout.
+     */
+    masonry: z.boolean().optional(),
 });
 
 export type GalleryProps = z.infer<typeof GalleryPropsSchema>;
@@ -57,7 +65,7 @@ export const GalleryDefaults: GalleryProps = {
         { imageQuery: 'gallery image two', src: '', alt: 'Gallery image two', caption: 'Caption for image two' },
     ],
     columns: 2,
-    gap: 'md',
+    gap:     'md',
 };
 
 export const GalleryMeta: ModuleMeta = {

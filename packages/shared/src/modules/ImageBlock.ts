@@ -11,16 +11,21 @@ export const ImageBlockPropsSchema = z.object({
     caption:    z.string().optional(),
     objectFit:  z.enum(['cover', 'contain', 'fill']).default('cover'),
     maxHeight:  z.number().default(480),
+    /**
+     * Optional fixed aspect ratio applied to the image via CSS `aspect-ratio`.
+     * Omit (undefined) to let the image use its natural dimensions.
+     */
+    aspectRatio: z.enum(['16/9', '4/3', '1/1', '3/2']).optional(),
 });
 
 export type ImageBlockProps = z.infer<typeof ImageBlockPropsSchema>;
 
 export const ImageBlockDefaults: ImageBlockProps = {
-    imageQuery: 'placeholder image',
-    src:        '',
-    alt:        'Placeholder image',
-    objectFit:  'cover',
-    maxHeight:  480,
+    imageQuery:  'placeholder image',
+    src:         '',
+    alt:         'Placeholder image',
+    objectFit:   'cover',
+    maxHeight:   480,
 };
 
 export const ImageBlockMeta: ModuleMeta = {

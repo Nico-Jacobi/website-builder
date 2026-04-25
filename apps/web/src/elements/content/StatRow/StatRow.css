@@ -17,11 +17,17 @@
     flex: 1 1 120px;
 }
 
+.stat_row__tile:not(:first-child) {
+    border-left: 1px solid var(--border_subtle);
+    padding-left: var(--space_xl);
+}
+
 .stat_row__value {
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 700;
+    letter-spacing: -0.03em;
     line-height: 1;
-    color: var(--secondary);
+    color: var(--primary);
 }
 
 .stat_row__label {
@@ -29,6 +35,12 @@
     line-height: 1.4;
     color: var(--muted_text);
     text-align: center;
+}
+
+.stat_row__value-affix {
+    font-size: 0.55em;
+    font-weight: 600;
+    vertical-align: middle;
 }
 
 @media (max-width: 480px) {
@@ -41,5 +53,10 @@
     .stat_row__tile {
         flex: none;
         width: 100%;
+    }
+
+    .stat_row__tile:not(:first-child) {
+        border-left: none;
+        padding-left: 0;
     }
 }

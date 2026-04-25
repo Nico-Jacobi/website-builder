@@ -4,6 +4,10 @@ import type { ModuleSpec } from './index';
 import { CardSchema } from '../schemas';
 
 export const CardRowPropsSchema = z.object({
+    /** Optional section heading rendered above the card row. */
+    heading: z.string().optional(),
+    /** Optional subheading rendered below the heading. */
+    subheading: z.string().optional(),
     cards: z.array(CardSchema).min(1),
 });
 
@@ -25,6 +29,8 @@ export const CardRowMeta: ModuleMeta = {
 };
 
 export const CardRowContentFields: ContentField[] = [
+    { path: 'heading',            type: 'text' },
+    { path: 'subheading',         type: 'text' },
     { path: 'cards[].title',      type: 'text' },
     { path: 'cards[].body',       type: 'text' },
     { path: 'cards[].imageAlt',   type: 'text' },

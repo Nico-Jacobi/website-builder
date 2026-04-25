@@ -12,16 +12,18 @@ describe('buildSystemPrompt (initial mode)', () => {
             'HeroBanner',
             'Container',
             'Footer',
-            'FooterSimple',
             'TextBlock',
             'MediaText',
             'CardRow',
-            'Spotlight',
-            'RecommendationRow',
-            'StatRow',
             'CardGrid',
+            'Spotlight',
+            'Testimonial',
+            'StatRow',
             'ImageBlock',
             'Gallery',
+            'LogoStrip',
+            'FeatureGrid',
+            'CTABand',
         ];
         for (const name of expectedNames) {
             expect(prompt).toContain(`\`${name}\``);
@@ -45,6 +47,9 @@ describe('buildSystemPrompt (initial mode)', () => {
             'text',
             'muted_text',
             'inverted_text',
+            'gradient_hero',
+            'border_subtle',
+            'surface_elevated',
         ];
         for (const key of themeKeys) {
             expect(prompt).toContain(`\`${key}\``);

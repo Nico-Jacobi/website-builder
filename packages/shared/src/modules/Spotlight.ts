@@ -12,6 +12,9 @@ export const SpotlightPropsSchema = z.object({
     /** Alt text for the image. Falls back to the title if omitted. */
     imageAlt: z.string().optional(),
 
+    /** Short pill-badge label shown above the title (e.g. "Neu", "Featured"). */
+    badge: z.string().optional(),
+
     /** Small label above the title (e.g. "Über uns", "Unser Gründer", "Das Team"). */
     overline: z.string().optional(),
 
@@ -48,6 +51,7 @@ export const SpotlightMeta: ModuleMeta = {
 };
 
 export const SpotlightContentFields: ContentField[] = [
+    { path: 'badge',      type: 'text' },
     { path: 'overline',   type: 'text' },
     { path: 'title',      type: 'text' },
     { path: 'body',       type: 'text' },

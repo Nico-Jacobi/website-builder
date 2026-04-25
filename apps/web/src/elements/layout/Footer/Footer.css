@@ -3,14 +3,14 @@
     color: var(--inverted_text);
 }
 
+/* ── Standard-Layout ── */
+
 .footer__inner {
     padding: var(--space_xl) var(--space_xl) var(--space_lg) var(--space_xl);
     display: flex;
     flex-direction: column;
     gap: var(--space_xl);
 }
-
-/* Link columns */
 
 .footer__columns {
     display: flex;
@@ -27,11 +27,11 @@
 
 .footer__column-heading {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .footer__links {
@@ -48,7 +48,7 @@
     text-decoration: none;
     font-size: 0.95rem;
     opacity: 0.85;
-    transition: opacity 0.2s;
+    transition: opacity var(--dur_normal) var(--ease);
 }
 
 .footer__link:hover {
@@ -64,7 +64,7 @@
     justify-content: space-between;
     gap: var(--space_sm);
     padding-top: var(--space_md);
-    border-top: 1px solid var(--divider_inverted);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .footer__tagline {
@@ -79,8 +79,46 @@
     opacity: 0.55;
 }
 
+/* ── Compact-Layout (footer--compact) ── */
+
+.footer--compact .footer__compact-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space_md);
+    padding: var(--space_md) var(--space_xl);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer--compact .footer__compact-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_xs);
+}
+
+/* Im Compact-Modus: tagline und copyright als span statt p */
+.footer--compact .footer__tagline,
+.footer--compact .footer__copyright {
+    display: block;
+    margin: 0;
+}
+
+.footer--compact .footer__compact-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space_md);
+}
+
+/* ── Responsive ── */
+
 @media (max-width: 640px) {
     .footer__bottom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .footer--compact .footer__compact-inner {
         flex-direction: column;
         align-items: flex-start;
     }

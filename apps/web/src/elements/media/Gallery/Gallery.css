@@ -11,12 +11,13 @@
     margin: 0;
     font-size: 2.25rem;
     font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--secondary);
 }
 
 .gallery__subheading {
     margin: 0;
-    font-size: 1.125rem;
+    font-size: 1.1rem;
     color: var(--muted_text);
     line-height: 1.5;
 }
@@ -30,10 +31,18 @@
 .gallery__grid[data-gap="md"] { --gallery-gap: var(--space_md); }
 .gallery__grid[data-gap="lg"] { --gallery-gap: var(--space_lg); }
 
+/* Standard grid layout */
 .gallery__grid {
     display: grid;
     grid-template-columns: repeat(var(--gallery-cols, 2), 1fr);
     gap: var(--gallery-gap, var(--space_md));
+}
+
+/* Masonry layout — überschreibt grid mit column-count */
+.gallery__grid[data-masonry] {
+    display: block;
+    column-count: var(--gallery-cols, 2);
+    column-gap: var(--gallery-gap, var(--space_md));
 }
 
 .gallery__item {
@@ -44,9 +53,34 @@
     position: relative;
 }
 
+/* Masonry: Items müssen break-inside: avoid haben und vertikalen Abstand selbst setzen */
+.gallery__grid[data-masonry] .gallery__item {
+    break-inside: avoid;
+    margin-bottom: var(--gallery-gap, var(--space_md));
+    display: block;    /* block statt flex — caption fließt natürlich unter das Bild */
+}
+
 .gallery__img-wrap {
     position: relative;
     line-height: 0;
+    overflow: hidden;
+    border-radius: var(--radius_lg);
+}
+
+/* Hover-Overlay via ::after — subtile Verdunkelung beim Hover */
+.gallery__img-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.25) 100%);
+    opacity: 0;
+    transition: opacity var(--dur_normal) var(--ease);
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.gallery__item:hover .gallery__img-wrap::after {
+    opacity: 1;
 }
 
 .gallery__img {
@@ -54,19 +88,43 @@
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
-    border-radius: var(--radius_md);
+    border-radius: var(--radius_lg);
     background-color: var(--background);
+    transition: transform var(--dur_normal) var(--ease);
+}
+
+.gallery__img:hover {
+    transform: scale(1.02);
+}
+
+/* Im Masonry-Modus kein festes aspect-ratio — Bilder fließen natürlich */
+.gallery__grid[data-masonry] .gallery__img {
+    aspect-ratio: unset;
+    height: auto;
 }
 
 .gallery__caption {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
     color: var(--muted_text);
     text-align: center;
     line-height: 1.4;
+    border-top: 1px solid var(--border_subtle);
+    padding-top: var(--space_xs);
+}
+
+/* Masonry: Caption-Padding anpassen (kein gap vom flex-parent mehr) */
+.gallery__grid[data-masonry] .gallery__caption {
+    padding-top: var(--space_xs);
+    margin-top: var(--space_xs);
 }
 
 @media (max-width: 640px) {
     .gallery__grid {
         grid-template-columns: 1fr;
+    }
+
+    .gallery__grid[data-masonry] {
+        column-count: 1;
     }
 }

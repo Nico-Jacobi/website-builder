@@ -48,7 +48,7 @@ describe('Renderer', () => {
     });
 
     // 3. Multiple blocks in order
-    it('renders Header, TextBlock, and FooterSimple content in order', () => {
+    it('renders Header, TextBlock, and Footer content in order', () => {
         const spec: SiteSpec = {
             blocks: [
                 {
@@ -62,8 +62,8 @@ describe('Renderer', () => {
                     props: { body: 'Main content paragraph' },
                 },
                 {
-                    id: 'fs1',
-                    type: 'FooterSimple',
+                    id: 'f1',
+                    type: 'Footer',
                     props: { tagline: 'Footer tagline' },
                 },
             ],
@@ -251,7 +251,7 @@ describe('Renderer', () => {
         expect(errorTexts).toContain('Invalid props for "TextBlock"');
     });
 
-    // 12. All 13 registered modules render with defaults (no error placeholders)
+    // 12. All 16 registered modules render with defaults (no error placeholders)
     describe('all registered modules render with defaults', () => {
         const allModules = listModules();
 
@@ -276,8 +276,8 @@ describe('Renderer', () => {
             },
         );
 
-        it('has exactly 14 modules registered', () => {
-            expect(allModules).toHaveLength(14);
+        it('has exactly 16 modules registered', () => {
+            expect(allModules).toHaveLength(16);
         });
     });
 
@@ -316,12 +316,12 @@ describe('Renderer', () => {
 describe('specFromTypes', () => {
     // 13. Valid types
     it('returns a spec with the correct number of blocks for valid types', () => {
-        const spec = specFromTypes(['Header', 'TextBlock', 'FooterSimple']);
+        const spec = specFromTypes(['Header', 'TextBlock', 'Footer']);
 
         expect(spec.blocks).toHaveLength(3);
         expect(spec.blocks[0].type).toBe('Header');
         expect(spec.blocks[1].type).toBe('TextBlock');
-        expect(spec.blocks[2].type).toBe('FooterSimple');
+        expect(spec.blocks[2].type).toBe('Footer');
     });
 
     // 14. Unknown type — skipped with warning
@@ -343,7 +343,7 @@ describe('specFromTypes', () => {
 
     // 15. Block IDs assigned
     it('assigns an id to every block', () => {
-        const spec = specFromTypes(['Header', 'TextBlock', 'FooterSimple']);
+        const spec = specFromTypes(['Header', 'TextBlock', 'Footer']);
 
         for (const block of spec.blocks) {
             expect(block.id).toBeDefined();
@@ -357,7 +357,7 @@ describe('specFromTypes', () => {
             'Header',
             'TextBlock',
             'TextBlock',
-            'FooterSimple',
+            'Footer',
         ]);
 
         const ids = spec.blocks.map((b) => b.id);

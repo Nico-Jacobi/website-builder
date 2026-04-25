@@ -1,21 +1,27 @@
 import './Spotlight.css';
 import { useEditableText } from '../../../builder/useEditableText';
+import { useEditModeState } from '../../../builder/editModeStore';
 import { EditableImage } from '../../shared/EditableImage';
 import type { SpotlightProps } from '@website-builder/shared';
 
 export default function Spotlight({
     image,
     imageAlt,
+    badge,
     overline,
     title,
     body,
     caption,
     imagePosition,
 }: SpotlightProps) {
+    const { isEditMode } = useEditModeState();
+    const badgeEdit    = useEditableText('badge');
     const overlineEdit = useEditableText('overline');
     const titleEdit    = useEditableText('title');
     const bodyEdit     = useEditableText('body');
     const captionEdit  = useEditableText('caption');
+
+    const showBadge = isEditMode || !!badge;
 
     return (
         <div className="section spotlight" data-image-position={imagePosition}>
@@ -28,6 +34,14 @@ export default function Spotlight({
                 imgClassName="spotlight__image"
             />
             <div className="spotlight__body">
+                {showBadge && (
+                    <span
+                        className="spotlight__badge"
+                        data-empty={!badge || undefined}
+                        data-placeholder="Badge"
+                        {...badgeEdit}
+                    >{badge}</span>
+                )}
                 <p
                     className="spotlight__overline"
                     data-empty={!overline || undefined}

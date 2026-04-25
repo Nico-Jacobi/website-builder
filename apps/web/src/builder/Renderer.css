@@ -1,9 +1,9 @@
 .builder__error {
     padding: var(--space_md);
     margin: var(--space_sm) 0;
-    border: 2px dashed var(--danger);
-    background: var(--danger_bg);
-    color: var(--danger);
+    border: 2px dashed var(--ui_danger);
+    background: var(--ui_danger_bg);
+    color: var(--ui_danger);
     font-size: 0.9rem;
     border-radius: var(--radius_sm);
 }

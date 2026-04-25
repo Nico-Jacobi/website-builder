@@ -21,7 +21,9 @@
     width: 100%;
     aspect-ratio: 3 / 2;
     object-fit: cover;
-    border-radius: var(--radius_md);
+    border-radius: var(--radius_lg);
+    border: 1px solid var(--border_subtle);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 .media_text__content { flex: 1; min-width: 0; }
@@ -29,13 +31,15 @@
 .media_text__heading {
     margin: 0 0 var(--space_md) 0;
     font-size: 2.25rem;
-    color: var(--secondary);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
 }
 
 .media_text__body {
     margin: 0;
     font-size: 1.125rem;
-    line-height: 1.65;
+    line-height: 1.7;
     color: var(--text);
 }
 

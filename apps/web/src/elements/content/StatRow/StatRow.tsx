@@ -15,11 +15,21 @@ export default function StatRow({ stats, align }: StatRowProps) {
 }
 
 function StatTile({ stat, index }: { stat: Stat; index: number }) {
-    const valueEdit = useEditableText(`stats[${index}].value`);
-    const labelEdit = useEditableText(`stats[${index}].label`);
+    const valueEdit  = useEditableText(`stats[${index}].value`);
+    const labelEdit  = useEditableText(`stats[${index}].label`);
+    const prefixEdit = useEditableText(`stats[${index}].prefix`);
+    const suffixEdit = useEditableText(`stats[${index}].suffix`);
     return (
         <div className="stat_row__tile">
-            <span className="stat_row__value" {...valueEdit}>{stat.value}</span>
+            <span className="stat_row__value">
+                {stat.prefix && (
+                    <span className="stat_row__value-affix" {...prefixEdit}>{stat.prefix}</span>
+                )}
+                <span {...valueEdit}>{stat.value}</span>
+                {stat.suffix && (
+                    <span className="stat_row__value-affix" {...suffixEdit}>{stat.suffix}</span>
+                )}
+            </span>
             <span className="stat_row__label" {...labelEdit}>{stat.label}</span>
         </div>
     );

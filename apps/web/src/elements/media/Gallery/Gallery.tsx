@@ -5,7 +5,7 @@ import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStor
 import { GalleryDefaults } from '@website-builder/shared';
 import type { GalleryProps, GalleryImage } from '@website-builder/shared';
 
-export default function Gallery({ heading, subheading, images, columns, gap }: GalleryProps) {
+export default function Gallery({ heading, subheading, images, columns, gap, masonry }: GalleryProps) {
     const headingEdit = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
     const { addItem, removeItem } = useEditModeActions();
@@ -21,6 +21,7 @@ export default function Gallery({ heading, subheading, images, columns, gap }: G
                 className="gallery__grid"
                 data-columns={columns}
                 data-gap={gap}
+                data-masonry={masonry || undefined}
             >
                 {images.map((image, index) => (
                     <GalleryItem
