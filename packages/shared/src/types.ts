@@ -11,6 +11,8 @@ export interface ModuleMeta {
     description: string;
     /** Free-form search/filter keywords. */
     tags?: string[];
+    /** Lucide-Icon-Name, Chrome-only, wird NICHT an LLM exponiert */
+    icon?: string;
 }
 
 /**

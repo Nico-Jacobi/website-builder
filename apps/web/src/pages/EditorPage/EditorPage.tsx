@@ -12,6 +12,7 @@ import { makeBlockOpsAdapter } from '../../data/blockOps';
 import type { BlockOpsAdapter } from '../../data/blockOps';
 import type { AutoSaveAdapter, SaveStatus } from '../../builder/autoSaveTypes';
 import { ChatPanel } from './chat/ChatPanel';
+import { ModulePalette } from './ModulePalette';
 import { useChatHistory } from './chat/useChatHistory';
 import { useInlineEditTracker } from './useInlineEditTracker';
 import { applyPatchOps } from './applyPatchOps';
@@ -272,6 +273,7 @@ export function EditorPage() {
                             </div>
                         )}
                     </main>
+                    <ModulePalette />
                 </div>
             </div>
         </EditModeProvider>

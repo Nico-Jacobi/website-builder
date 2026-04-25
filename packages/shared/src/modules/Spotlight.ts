@@ -47,6 +47,7 @@ export const SpotlightMeta: ModuleMeta = {
     name: 'Spotlight',
     category: 'content',
     description: 'A spotlight block introducing a person, team, or topic. Photo beside a short statement with optional overline label and signature caption. Suitable for "about us", founder introductions, or team highlights.',
+    icon: 'Sparkles',
     tags: ['about', 'owner', 'team', 'introduction', 'spotlight', 'profile', 'statement'],
 };
 

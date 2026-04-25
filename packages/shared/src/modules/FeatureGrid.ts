@@ -54,6 +54,7 @@ export const FeatureGridMeta: ModuleMeta = {
     name:        'FeatureGrid',
     category:    'content',
     description: 'Raster aus Feature-Kacheln mit Icon, Heading und Body. Ideal für Produkt-Features, Vorteile oder Service-Säulen.',
+    icon:        'Grid3x3',
     tags:        ['features', 'grid', 'icons', 'benefits', 'product', 'marketing', 'tiles'],
 };
 

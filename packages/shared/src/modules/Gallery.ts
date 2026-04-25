@@ -72,6 +72,7 @@ export const GalleryMeta: ModuleMeta = {
     name: 'Gallery',
     category: 'media',
     description: 'Responsive CSS-grid photo gallery of 2–4 images with configurable columns and gap. Use for portfolios, showcases, or photo collections.',
+    icon: 'Images',
     tags: ['gallery', 'grid', 'images', 'photos', 'media', 'caption'],
 };
 

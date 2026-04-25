@@ -1,0 +1,104 @@
+/* BlockOverlay — per-block editor toolbar.
+ *
+ * TOKEN RULE (hard): this file may only reference `--ui_*` chrome tokens and
+ * neutral spacing/radius tokens (`--space_*`, `--ui_radius_*`). Module tokens
+ * such as `--primary`, `--surface`, `--text` etc. MUST NOT appear here — the
+ * editor chrome is visually decoupled from the generated site's theme.
+ */
+
+.block-overlay {
+    position: absolute;
+    top: var(--space_sm);
+    left: var(--space_sm);
+    right: var(--space_sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space_sm);
+    height: 32px;
+    padding: 0 var(--space_sm);
+    background: var(--ui_bg_panel);
+    border: 1px solid var(--ui_border);
+    border-radius: var(--ui_radius_sm);
+    color: var(--ui_text);
+    box-shadow: var(--ui_shadow_panel);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--ui_dur) var(--ui_ease);
+    z-index: 5;
+}
+
+.block-overlay__wrapper:hover > .block-overlay,
+.block-overlay__wrapper:focus-within > .block-overlay,
+.block-overlay__wrapper[data-dragging="true"] > .block-overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.block-overlay__handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ui_text_muted);
+    cursor: grab;
+    border-radius: var(--ui_radius_sm);
+}
+
+.block-overlay__handle:hover {
+    background: var(--ui_bg_hover);
+    color: var(--ui_text);
+}
+
+.block-overlay__handle:active {
+    cursor: grabbing;
+}
+
+.block-overlay__label {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ui_text_muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.block-overlay__actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.block-overlay__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ui_text_muted);
+    cursor: pointer;
+    border-radius: var(--ui_radius_sm);
+    transition: background var(--ui_dur) var(--ui_ease),
+                color var(--ui_dur) var(--ui_ease);
+}
+
+.block-overlay__btn:hover:not(:disabled) {
+    background: var(--ui_bg_hover);
+    color: var(--ui_text);
+}
+
+.block-overlay__btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.block-overlay__btn--danger:hover:not(:disabled) {
+    color: var(--ui_accent_danger);
+}

@@ -24,6 +24,11 @@ export interface EditModeActionsValue {
     setIsEditMode: (value: boolean) => void;
     addItem: (blockIndex: number, listPath: string, defaultItem: unknown) => void;
     removeItem: (blockIndex: number, listPath: string, itemIndex: number) => void;
+    // Top-level block structure (top-level only; nested blocks in Container
+    // modules use a separate path via `addItem`/`removeItem` over `children`).
+    reorderBlocks: (fromIndex: number, toIndex: number) => void;
+    addBlock: (moduleType: string, atIndex?: number) => void;
+    removeBlock: (blockIndex: number) => void;
 }
 
 export const EditModeActionsContext = createContext<EditModeActionsValue>({
@@ -31,6 +36,9 @@ export const EditModeActionsContext = createContext<EditModeActionsValue>({
     setIsEditMode: () => {},
     addItem: () => {},
     removeItem: () => {},
+    reorderBlocks: () => {},
+    addBlock: () => {},
+    removeBlock: () => {},
 });
 
 export function useEditModeActions(): EditModeActionsValue {

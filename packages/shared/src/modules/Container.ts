@@ -23,6 +23,7 @@ export const ContainerMeta: ModuleMeta = {
     name:        'Container',
     category:    'layout',
     description: 'Wraps one or more blocks in a section with configurable vertical padding, optional max-width, and optional vertical scrolling.',
+    icon:        'Box',
     tags:        ['container', 'layout', 'section', 'wrapper'],
 };
 

@@ -25,6 +25,7 @@ export const CardRowMeta: ModuleMeta = {
     name:        'CardRow',
     category:    'content',
     description: 'A horizontal row of image-title-body cards. Scrolls horizontally on narrow viewports.',
+    icon:        'Rows3',
     tags:        ['cards', 'grid', 'gallery', 'features', 'list'],
 };
 

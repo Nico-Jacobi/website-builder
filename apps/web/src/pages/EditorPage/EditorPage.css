@@ -246,7 +246,7 @@
 /* ── Body layout ── */
 .editor_page__body {
     display: grid;
-    grid-template-columns: minmax(360px, 40%) 1fr;
+    grid-template-columns: minmax(340px, 38%) 1fr auto;
     overflow: hidden;
     min-height: 0;
 }

@@ -32,6 +32,7 @@ export const ImageBlockMeta: ModuleMeta = {
     name:        'ImageBlock',
     category:    'media',
     description: 'Full-width image with an optional caption. Use for hero images, section dividers, or standalone illustrations.',
+    icon:        'Image',
     tags:        ['image', 'media', 'photo', 'caption'],
 };
 

@@ -45,6 +45,7 @@ export const CTABandMeta: ModuleMeta = {
     name:        'CTABand',
     category:    'content',
     description: 'Fetter, vollbreiter Call-to-Action-Streifen mit Heading, Subtext und zwei Buttons. Drei Stil-Varianten: gradient, surface, primary. Typisch vor dem Footer.',
+    icon:        'Megaphone',
     tags:        ['cta', 'call-to-action', 'conversion', 'button', 'banner', 'marketing', 'footer-cta'],
 };
 

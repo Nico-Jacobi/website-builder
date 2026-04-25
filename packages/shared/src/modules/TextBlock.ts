@@ -25,6 +25,7 @@ export const TextBlockMeta: ModuleMeta = {
     name:        'TextBlock',
     category:    'content',
     description: 'Heading, body paragraph, and optional subtext with configurable text alignment.',
+    icon:        'Type',
     tags:        ['text', 'heading', 'copy', 'paragraph', 'content'],
 };
 

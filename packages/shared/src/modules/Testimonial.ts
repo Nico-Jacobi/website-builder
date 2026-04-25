@@ -64,6 +64,7 @@ export const TestimonialMeta: ModuleMeta = {
     category: 'content',
     description:
         'Grid of customer testimonial cards — each with a pull-quote, author name, role, and optional avatar photo. Ideal for social proof sections.',
+    icon: 'Quote',
     tags: ['testimonials', 'quotes', 'social-proof', 'reviews', 'customers'],
 };
 

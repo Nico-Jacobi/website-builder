@@ -1,7 +1,21 @@
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import './Renderer.css';
+import {
+    DndContext,
+    PointerSensor,
+    KeyboardSensor,
+    useSensor,
+    useSensors,
+    closestCenter,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { SectionShell } from '../elements/shared/SectionShell';
-import { BlockIndexContext } from './editModeStore';
+import { BlockIndexContext, useEditModeActions } from './editModeStore';
 import { getModule } from './registry';
 import type { BlockSpec, SiteSpec } from './schemas';
 
@@ -21,17 +35,50 @@ const MAX_MATERIALIZE_DEPTH = 32;
  */
 export default function Renderer({ spec }: { spec: SiteSpec }) {
     const themeStyle = themeToCssVars(spec.theme);
+    const { reorderBlocks, removeBlock } = useEditModeActions();
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    );
+
+    const sortableIds = spec.blocks.map((b, i) => b.id ?? `idx_${i}`);
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+        const from = sortableIds.indexOf(String(active.id));
+        const to = sortableIds.indexOf(String(over.id));
+        if (from === -1 || to === -1) return;
+        reorderBlocks(from, to);
+    };
 
     return (
-        <div className="vertical_layout" style={themeStyle}>
-            {spec.blocks.map((block, i) => (
-                <BlockIndexContext.Provider key={block.id ?? `idx_${i}`} value={i}>
-                    <SectionShell tone={block.tone}>
-                        {renderBlock(block, `blocks[${i}]`)}
-                    </SectionShell>
-                </BlockIndexContext.Provider>
-            ))}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+                <div className="vertical_layout" style={themeStyle}>
+                    {spec.blocks.map((block, i) => {
+                        const id = sortableIds[i];
+                        return (
+                            <BlockIndexContext.Provider key={id} value={i}>
+                                <SectionShell
+                                    tone={block.tone}
+                                    blockId={id}
+                                    blockLabel={block.type}
+                                    blockIndex={i}
+                                    totalBlocks={spec.blocks.length}
+                                    onMoveUp={() => reorderBlocks(i, i - 1)}
+                                    onMoveDown={() => reorderBlocks(i, i + 1)}
+                                    onDelete={() => removeBlock(i)}
+                                >
+                                    {renderBlock(block, `blocks[${i}]`)}
+                                </SectionShell>
+                            </BlockIndexContext.Provider>
+                        );
+                    })}
+                </div>
+            </SortableContext>
+        </DndContext>
     );
 }
 

@@ -48,4 +48,11 @@ describe('getRegistryLLMSurface', () => {
     it('is pure — two calls produce structurally identical results', () => {
         expect(getRegistryLLMSurface()).toEqual(getRegistryLLMSurface());
     });
+
+    it('does not expose icon to the LLM surface', () => {
+        const surface = getRegistryLLMSurface();
+        for (const descriptor of surface.modules) {
+            expect(descriptor).not.toHaveProperty('icon');
+        }
+    });
 });

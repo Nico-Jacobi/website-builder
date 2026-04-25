@@ -25,6 +25,7 @@ export const HeaderMeta: ModuleMeta = {
     name: 'Header',
     category: 'layout',
     description: 'Page header with brand (title + optional subtitle/icon) and optional navigation links.',
+    icon: 'Menu',
     tags: ['header', 'nav', 'branding'],
 };
 

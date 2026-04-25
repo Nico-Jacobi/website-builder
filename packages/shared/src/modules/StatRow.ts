@@ -44,6 +44,7 @@ export const StatRowMeta: ModuleMeta = {
     name: 'StatRow',
     category: 'content',
     description: 'Row of large-value statistic tiles with descriptive labels. Common on marketing and landing pages.',
+    icon: 'BarChart3',
     tags: ['stats', 'metrics', 'numbers', 'marketing', 'kpi'],
 };
 

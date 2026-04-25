@@ -28,6 +28,7 @@ export const CardGridMeta: ModuleMeta = {
     name:        'CardGrid',
     category:    'content',
     description: 'Grid of image-title-body cards that wraps into rows. Use instead of CardRow when cards should stack rather than scroll horizontally.',
+    icon:        'LayoutGrid',
     tags:        ['cards', 'grid', 'gallery', 'features', 'wrap'],
 };
 

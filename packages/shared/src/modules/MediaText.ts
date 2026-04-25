@@ -27,6 +27,7 @@ export const MediaTextMeta: ModuleMeta = {
     name:        'MediaText',
     category:    'content',
     description: 'Image beside a text column (heading + body). Position image left or right. Stacks vertically on narrow viewports.',
+    icon:        'Newspaper',
     tags:        ['media', 'image', 'text', 'side-by-side', 'layout'],
 };
 

@@ -50,6 +50,7 @@ export const LogoStripMeta: ModuleMeta = {
     name:        'LogoStrip',
     category:    'media',
     description: 'Horizontaler Streifen mit Partner- oder Kundenlogos als Trust-Signal. Unterstützt Grayscale-Hover und optionale Marquee-Animation.',
+    icon:        'Building2',
     tags:        ['logos', 'trust', 'partners', 'clients', 'brands', 'marquee', 'marketing'],
 };
 

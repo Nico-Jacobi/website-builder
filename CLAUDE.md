@@ -114,7 +114,7 @@ The design system has **two parallel token scopes** in
 | Scope | Prefix | Used by | Examples |
 |---|---|---|---|
 | **Module tokens** | `--primary`, `--background`, `--surface`, `--text`, `--muted_text`, `--accent`, … | Everything under `apps/web/src/elements/` (the generated website) | Header, HeroBanner, Card, Footer |
-| **Chrome tokens** | `--ui_*` | Editor shell: `apps/web/src/pages/`, `apps/web/src/builder/`, `apps/web/src/App.css` root scaffolding | EditorPage, ChatPanel, BuilderPage, EditModeToolbar |
+| **Chrome tokens** | `--ui_*` | Editor shell: `apps/web/src/pages/`, `apps/web/src/builder/`, `apps/web/src/App.css` root scaffolding | EditorPage, ChatPanel, BuilderPage |
 
 **Hard rule:** Modules **must never** read `--ui_*`, chrome **must never** read
 module tokens for core surfaces/text/accents. Breaking this couples the

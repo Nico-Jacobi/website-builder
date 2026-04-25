@@ -44,6 +44,7 @@ export const FooterMeta: ModuleMeta = {
     name:        'Footer',
     category:    'layout',
     description: 'Page footer with optional tagline, copyright notice, and grouped link columns. Set compact: true for a single-row minimal layout (replaces FooterSimple).',
+    icon:        'PanelBottom',
     tags:        ['footer', 'links', 'nav', 'layout'],
 };
 

@@ -68,6 +68,7 @@ export const HeroBannerMeta: ModuleMeta = {
     category: 'layout',
     description:
         'Full-width centered hero section with headline, optional subheading, background image/color, and configurable minimum height. Text is centered both horizontally and vertically. Place directly below the Header.',
+    icon: 'Rocket',
     tags: ['hero', 'banner', 'layout', 'landing'],
 };
 

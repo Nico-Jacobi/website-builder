@@ -5,9 +5,17 @@ import {
     EditModeActionsContext,
     EditModeStateContext,
     AutoSaveContext,
+    type EditModeActionsValue,
 } from './editModeStore';
 import type { AutoSaveAdapter } from './autoSaveTypes';
 import type { SiteSpec } from './schemas';
+import { getModule } from './registry';
+import { ensureBlockIds } from './blockIds';
+import {
+    reorderTopLevelBlocks,
+    appendBlockToSpec,
+    removeBlockFromSpec,
+} from '../pages/EditorPage/specOps';
 
 interface EditModeProviderProps {
     children: ReactNode;
@@ -142,10 +150,81 @@ export function EditModeProvider({
         [],
     );
 
+    // Structural top-level block actions. These write directly to the spec via
+    // `onSpecChange` — they do NOT go through the LLM-diff pipeline or the
+    // field-level `autoSave.patchContent` (which is keyed by blockId+fieldPath
+    // and doesn't model block-level structure). Backend persistence of
+    // structural edits is wired in a later plan via `blockOps`.
+
+    const reorderBlocks = useCallback<EditModeActionsValue['reorderBlocks']>(
+        (fromIndex, toIndex) => {
+            const current = specRef.current;
+            if (!current) return;
+            const next = reorderTopLevelBlocks(current, fromIndex, toIndex);
+            onSpecChangeRef.current(next);
+        },
+        [],
+    );
+
+    const addBlock = useCallback<EditModeActionsValue['addBlock']>(
+        (moduleType, atIndex) => {
+            const module = getModule(moduleType);
+            if (!module) return;
+            const current = specRef.current;
+            if (!current) return;
+            // `structuredClone` so every added block has independent props —
+            // otherwise two blocks would share references into `module.defaults`.
+            const fresh = {
+                type: moduleType,
+                props: structuredClone(module.defaults) as Record<string, unknown>,
+            };
+            const withAppended = appendBlockToSpec(current, fresh);
+            const withIds = ensureBlockIds(withAppended);
+            const finalSpec =
+                atIndex === undefined
+                    ? withIds
+                    : reorderTopLevelBlocks(
+                          withIds,
+                          withIds.blocks.length - 1,
+                          atIndex,
+                      );
+            onSpecChangeRef.current(finalSpec);
+        },
+        [],
+    );
+
+    const removeBlock = useCallback<EditModeActionsValue['removeBlock']>(
+        (blockIndex) => {
+            const current = specRef.current;
+            if (!current) return;
+            const target = current.blocks[blockIndex];
+            if (!target?.id) return;
+            const next = removeBlockFromSpec(current, target.id);
+            onSpecChangeRef.current(next);
+        },
+        [],
+    );
+
     const stateValue = useMemo(() => ({ isEditMode }), [isEditMode]);
     const actionsValue = useMemo(
-        () => ({ updateBlock, setIsEditMode, addItem, removeItem }),
-        [updateBlock, setIsEditMode, addItem, removeItem],
+        () => ({
+            updateBlock,
+            setIsEditMode,
+            addItem,
+            removeItem,
+            reorderBlocks,
+            addBlock,
+            removeBlock,
+        }),
+        [
+            updateBlock,
+            setIsEditMode,
+            addItem,
+            removeItem,
+            reorderBlocks,
+            addBlock,
+            removeBlock,
+        ],
     );
 
     return (
