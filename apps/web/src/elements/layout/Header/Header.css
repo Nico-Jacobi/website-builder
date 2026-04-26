@@ -9,18 +9,9 @@
     padding: var(--space_sm) var(--space_xl);
     color: var(--inverted_text);
 
-    /* Opaque fallback for browsers without backdrop-filter */
-    background-color: var(--primary);
+    /* Tone applied by SectionShell via data-tone; inherit keeps sticky bg correct */
+    background-color: inherit;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-/* Glassmorphism when supported */
-@supports (backdrop-filter: blur(12px)) {
-    .header {
-        background-color: color-mix(in srgb, var(--primary) 92%, transparent);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-    }
 }
 
 /* Brand */
