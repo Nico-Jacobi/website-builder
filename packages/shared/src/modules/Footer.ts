@@ -21,23 +21,8 @@ export type FooterProps = z.infer<typeof FooterPropsSchema>;
 export const FooterDefaults: FooterProps = {
     tagline:   'Building great things on the web.',
     copyright: `© ${new Date().getFullYear()} My Company`,
-    columns: [
-        {
-            heading: 'Product',
-            links: [
-                { label: 'Features', href: '#features' },
-                { label: 'Pricing',  href: '#pricing'  },
-            ],
-        },
-        {
-            heading: 'Company',
-            links: [
-                { label: 'About', href: '#about' },
-                { label: 'Blog',  href: '#blog'  },
-            ],
-        },
-    ],
-    compact: false,
+    columns:   [],
+    compact:   false,
 };
 
 export const FooterMeta: ModuleMeta = {

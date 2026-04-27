@@ -41,11 +41,22 @@ export type BlockSpec = {
 };
 
 /**
- * Full description of a website: optional theme overrides + a vertical stack
- * of blocks rendered in order.
+ * Site-level chrome: Header and Footer blocks that are shared across all pages.
+ * Both are optional so that existing specs without chrome remain valid.
+ */
+export const SiteChromeSchema = z.object({
+    header: BlockSpecSchema.optional(),
+    footer: BlockSpecSchema.optional(),
+});
+export type SiteChrome = z.infer<typeof SiteChromeSchema>;
+
+/**
+ * Full description of a website: optional theme overrides, optional site-wide
+ * chrome (header/footer), and a vertical stack of page-content blocks.
  */
 export const SiteSpecSchema = z.object({
     theme:  z.record(z.string(), z.string()).optional(),
+    chrome: SiteChromeSchema.optional(),
     blocks: z.array(BlockSpecSchema),
 });
 

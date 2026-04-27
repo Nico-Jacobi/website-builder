@@ -1,62 +1,98 @@
-import type { GoogleGenAI } from '@google/genai';
-import { buildSystemPrompt, getRegistryLLMSurface } from '@website-builder/shared';
-import type { RegistryLLMSurface, SiteSpec } from '@website-builder/shared';
+import { buildSystemPrompt, getRegistryLLMSurface, PageRefineOutputSchema } from '@website-builder/shared';
+import type { BlockSpec, SiteChrome, Sitemap } from '@website-builder/shared';
 import { callLLM } from './callLLM';
 import { fillImages } from './imageFiller';
 import { createLogCollector } from './logCollector';
-import type { ChatHistoryEntry, RefineCoreResult } from './types';
+import type { ChatHistoryEntry, LLMTrace, LogEntry } from './types';
+import { assembleSpec } from '../assembleSpec';
+import { loadSitemap } from '../sites/pageOps';
 
 export const REFINE_HISTORY_MAX = 10;
 
-export interface RefineArgs {
-    currentSpec: SiteSpec;
+export interface PageRefineArgs {
+    siteIdentifier: string;
+    pagePath: string;
     history: ChatHistoryEntry[];
     userMessage: string;
-    client?: GoogleGenAI | null;
-    surface?: RegistryLLMSurface;
+}
+
+export interface PageRefineResult {
+    theme?: Record<string, string>;
+    blocks: BlockSpec[];
+    log: LogEntry[];
+    trace: LLMTrace | null;
 }
 
 /**
- * Iteratives Refinement. Sendet den aktuellen Spec + die letzten History-Turns
- * + die neue User-Message an Gemini und erwartet einen komplett neuen Spec
- * zurück (mit `id` für weiter bestehende Blocks). Extrahiert `_explanation`
- * aus dem rohen JSON und liefert es als separates Feld.
+ * Page-scoped iterative refinement. Backend assembles the current page spec
+ * from the DB (no stale data from the client), calls the LLM with page blocks
+ * + locked chrome/sitemap context, and returns only the updated page blocks.
  */
-export async function refineSpec(args: RefineArgs): Promise<RefineCoreResult> {
+export async function refineSpec(args: PageRefineArgs): Promise<PageRefineResult> {
     const collector = createLogCollector();
-    const surface = args.surface ?? getRegistryLLMSurface();
-    const systemInstruction = buildSystemPrompt({ surface, mode: 'refine' });
+    const surface = getRegistryLLMSurface();
+
+    collector.log('step', `Page-Refine für ${args.siteIdentifier}${args.pagePath}`);
+
+    // Load current page spec from DB
+    const fullSpec = await assembleSpec(args.siteIdentifier, args.pagePath);
+    if (!fullSpec) {
+        throw new Error(`Site/page not found: ${args.siteIdentifier}${args.pagePath}`);
+    }
+
+    // Load sitemap
+    const sitemap = await loadSitemap(args.siteIdentifier);
+
+    const systemInstruction = buildSystemPrompt({
+        surface,
+        mode: 'refine',
+        locked: {
+            chrome: fullSpec.chrome,
+            sitemap: sitemap ?? undefined,
+        },
+    });
 
     const trimmedHistory = args.history.slice(-REFINE_HISTORY_MAX);
-    const userPrompt = composeRefineUserPrompt(
-        args.currentSpec,
-        trimmedHistory,
-        args.userMessage,
-    );
+    const userPrompt = composePageRefineUserPrompt({
+        currentPage: { theme: fullSpec.theme, blocks: fullSpec.blocks },
+        locked: { chrome: fullSpec.chrome, sitemap: sitemap ?? undefined },
+        history: trimmedHistory,
+        userMessage: args.userMessage,
+    });
 
     collector.log(
         'step',
-        `Refinement-Turn — ${trimmedHistory.length} History-Turns, ${args.currentSpec.blocks.length} aktuelle Blocks`,
+        `Refinement-Turn — ${trimmedHistory.length} History-Turns, ${fullSpec.blocks.length} aktuelle Blocks`,
     );
 
     const core = await callLLM({
         userPrompt,
         systemInstruction,
         collector,
-        client: 'client' in args ? args.client : undefined,
         surface,
     });
 
     if (core.kind !== 'ok') {
         return {
-            ...core,
+            blocks: fullSpec.blocks,
             log: collector.getLog(),
             trace: collector.getTrace(),
-        } as RefineCoreResult;
+        };
+    }
+
+    // Parse with PageRefineOutputSchema to get {theme?, blocks}
+    let validated: { theme?: Record<string, string>; blocks: BlockSpec[] };
+    try {
+        const raw: unknown = JSON.parse(core.rawText);
+        validated = PageRefineOutputSchema.parse(raw);
+    } catch {
+        // Fallback: use the spec from callLLM (already validated against SiteSpec schema)
+        validated = { theme: core.spec.theme, blocks: core.spec.blocks };
     }
 
     try {
-        await fillImages(core.spec, collector);
+        // fillImages operates on the SiteSpec shape — create a minimal spec for it
+        await fillImages({ blocks: validated.blocks }, collector);
     } catch (err) {
         collector.log(
             'warn',
@@ -64,32 +100,29 @@ export async function refineSpec(args: RefineArgs): Promise<RefineCoreResult> {
         );
     }
 
-    const explanation = extractExplanation(core.rawText);
-
     return {
-        kind: 'ok',
-        nextSpec: core.spec,
-        explanation,
+        theme: validated.theme,
+        blocks: validated.blocks,
         log: collector.getLog(),
         trace: collector.getTrace(),
     };
 }
 
 /**
- * Baut den User-Turn-Body für Gemini. Struktur: drei klar gelabelte Sektionen
- * (CURRENT_SPEC, HISTORY, USER_MESSAGE). User-Content wird in `<msg>` /
- * `<user_message>` getaggt und `<` escaped — verhindert Prompt-Injection durch
- * History-Inhalte oder User-Eingaben.
+ * Composes the user-turn prompt for page refinement.
+ * Shows current page + locked chrome/sitemap context, then conversation history
+ * and new user message.
  */
-export function composeRefineUserPrompt(
-    currentSpec: SiteSpec,
-    history: ChatHistoryEntry[],
-    userMessage: string,
-): string {
+function composePageRefineUserPrompt(args: {
+    currentPage: { theme?: Record<string, string>; blocks: BlockSpec[] };
+    locked: { chrome?: SiteChrome; sitemap?: Sitemap };
+    history: ChatHistoryEntry[];
+    userMessage: string;
+}): string {
     const historyLines =
-        history.length === 0
+        args.history.length === 0
             ? '(none)'
-            : history
+            : args.history
                   .map(
                       (h) =>
                           `<msg role="${h.role}">${escapeForTag(h.content)}</msg>`,
@@ -97,33 +130,26 @@ export function composeRefineUserPrompt(
                   .join('\n\n');
 
     return [
-        'CURRENT_SPEC:',
-        JSON.stringify(currentSpec, null, 2),
+        '# CURRENT PAGE',
+        '```json',
+        JSON.stringify(args.currentPage, null, 2),
+        '```',
         '',
-        'HISTORY:',
+        '# LOCKED CONTEXT (do not modify)',
+        'Site chrome (header/footer) and sitemap are shown for reference.',
+        'Internal links in your output must point to sitemap paths.',
+        '```json',
+        JSON.stringify(args.locked, null, 2),
+        '```',
+        '',
+        '# CONVERSATION',
         historyLines,
         '',
-        'USER_MESSAGE:',
-        `<user_message>${escapeForTag(userMessage)}</user_message>`,
+        '# USER MESSAGE',
+        `<user_message>${escapeForTag(args.userMessage)}</user_message>`,
     ].join('\n');
 }
 
 function escapeForTag(s: string): string {
     return s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function extractExplanation(rawText: string): string {
-    try {
-        const parsed: unknown = JSON.parse(rawText);
-        if (
-            parsed &&
-            typeof parsed === 'object' &&
-            typeof (parsed as { _explanation?: unknown })._explanation === 'string'
-        ) {
-            return (parsed as { _explanation: string })._explanation;
-        }
-    } catch {
-        // callLLM has already parsed rawText successfully — defensive only.
-    }
-    return '';
 }

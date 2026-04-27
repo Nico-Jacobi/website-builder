@@ -12,6 +12,7 @@ import {
     uniqueIndex,
     uuid,
 } from 'drizzle-orm/pg-core';
+import type { BlockSpec } from '@website-builder/shared';
 
 // --- Phase 1: multi-site content storage -----------------------------------
 
@@ -23,6 +24,10 @@ export const sites = pgTable('sites', {
     theme:         jsonb('theme').$type<Record<string, string> | null>(),
     /** Beim Create gesetzt, NULL nach erster Generation (Auto-Clear in addBlock). */
     initialPrompt: text('initial_prompt'),
+    /** Site-wide chrome: shared Header and Footer blocks (null until first generation). */
+    chrome:        jsonb('chrome').$type<{ header?: BlockSpec; footer?: BlockSpec } | null>(),
+    /** Ordered sitemap entries generated alongside the landing page. */
+    sitemap:       jsonb('sitemap').$type<Array<{ path: string; title: string; intent: string }> | null>(),
     createdAt:     timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -34,6 +39,8 @@ export const pages = pgTable(
         path:      text('path').notNull(), // "/", "/about"
         metaDesc:  text('meta_desc'),
         published: boolean('published').notNull().default(false),
+        /** Generation status: 'pending' | 'generating' | 'ready' | 'failed' */
+        status:    text('status').notNull().default('pending'),
         createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     },
     (t) => ({

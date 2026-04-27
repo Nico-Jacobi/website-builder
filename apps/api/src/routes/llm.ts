@@ -1,27 +1,35 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { SiteSpecSchema } from '@website-builder/shared';
-import { generateSpec } from '../services/llm/generateSpec';
 import { refineSpec } from '../services/llm/refineSpec';
+import { refineChrome } from '../services/llm/refineChrome';
+import { startGenerationJob } from '../services/generationJob';
 
 export const llmRouter = new Hono();
 
 const GenerateBody = z.object({
-    userPrompt: z.string().trim().min(1).max(10_000),
+    identifier: z.string().min(1),
+    userPrompt:  z.string().trim().min(1).max(10_000),
 });
 
-const HistoryEntry = z.object({
+const ChatMessageSchema = z.object({
     role:    z.enum(['user', 'assistant']),
     content: z.string().max(50_000),
 });
 
-const RefineBody = z.object({
-    currentSpec: SiteSpecSchema,
-    history:     z.array(HistoryEntry).max(50),
-    userMessage: z.string().trim().min(1).max(10_000),
+const PageRefineBody = z.object({
+    siteIdentifier: z.string(),
+    pagePath:       z.string(),
+    history:        z.array(ChatMessageSchema).max(50),
+    userMessage:    z.string().trim().min(1).max(10_000),
 });
 
-/** One-shot Erstgenerierung einer SiteSpec aus freiem Prompt. */
+const ChromeRefineBody = z.object({
+    siteIdentifier: z.string(),
+    history:        z.array(ChatMessageSchema).max(50),
+    userMessage:    z.string().trim().min(1).max(10_000),
+});
+
+/** Startet eine asynchrone Multi-Page-Generierung. Returnt sofort 202 Accepted. */
 llmRouter.post('/generate', async (c) => {
     let body: unknown;
     try {
@@ -34,11 +42,11 @@ llmRouter.post('/generate', async (c) => {
         return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
     }
 
-    const result = await generateSpec(parsed.data.userPrompt);
-    return c.json(result, 200);
+    startGenerationJob(parsed.data.identifier, parsed.data.userPrompt);
+    return c.json({ identifier: parsed.data.identifier, status: 'started' }, 202);
 });
 
-/** Refinement-Turn: LLM bekommt aktuellen Spec + History + neue Message, liefert next-Spec. */
+/** Page-scoped Refinement: LLM bekommt Page-Blocks + locked chrome/sitemap, liefert updated Page-Blocks. */
 llmRouter.post('/refine', async (c) => {
     let body: unknown;
     try {
@@ -46,15 +54,28 @@ llmRouter.post('/refine', async (c) => {
     } catch {
         return c.json({ error: 'body must be JSON' }, 400);
     }
-    const parsed = RefineBody.safeParse(body);
+    const parsed = PageRefineBody.safeParse(body);
     if (!parsed.success) {
         return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
     }
 
-    const result = await refineSpec({
-        currentSpec: parsed.data.currentSpec,
-        history:     parsed.data.history,
-        userMessage: parsed.data.userMessage,
-    });
+    const result = await refineSpec(parsed.data);
+    return c.json(result, 200);
+});
+
+/** Chrome-Refinement: LLM bekommt aktuelles Chrome + locked theme/sitemap, liefert updated chrome. */
+llmRouter.post('/refine-chrome', async (c) => {
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = ChromeRefineBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    const result = await refineChrome(parsed.data);
     return c.json(result, 200);
 });

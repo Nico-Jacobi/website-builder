@@ -18,7 +18,7 @@ function generateDraftSlug(): string {
 
 /**
  * Erzeugt einen neuen Site-Draft mit auto-generiertem Identifier
- * (`draft-<slug>`) und einer leeren Default-Page `/`.
+ * (`draft-<slug>`). Pages werden Sitemap-driven nach Phase A angelegt.
  */
 export async function createSite(input: CreateSiteInput): Promise<CreateSiteResult> {
     const name = input.name;
@@ -42,12 +42,6 @@ export async function createSite(input: CreateSiteInput): Promise<CreateSiteResu
                 })
                 .returning();
             if (!site) throw new Error('failed to insert site');
-
-            await tx.insert(schema.pages).values({
-                siteId:    site.id,
-                path:      '/',
-                published: false,
-            });
 
             return { id: site.id, identifier: site.identifier, name: site.name };
         });

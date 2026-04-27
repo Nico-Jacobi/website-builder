@@ -2,11 +2,16 @@ import { and, eq, inArray } from 'drizzle-orm';
 import type { BlockSpec, SiteSpec, ContentFieldType, Tone } from '@website-builder/shared';
 import { mergeProps } from '@website-builder/shared';
 import { db, schema } from '../db/client';
+import { backfillChromeIfNeeded } from './sites/backfillChrome';
 
 /**
  * Loads a site + page from the database and reconstructs the full SiteSpec
  * the client Renderer expects — merging struct_props with block_content
  * (and eventually resolved asset URLs).
+ *
+ * When pagePath is '/' and site.chrome is null, a lazy backfill is performed:
+ * Header/Footer blocks are extracted from the landing page blocks, persisted
+ * in sites.chrome, and removed from pageBlocks.
  *
  * Returns `null` if the site or page is not found.
  */
@@ -24,10 +29,37 @@ export async function assembleSpec(identifier: string, pagePath: string): Promis
     const blocks = await db.query.pageBlocks.findMany({
         where: eq(schema.pageBlocks.pageId, page.id),
     });
+
+    let pageBlockSpecs: BlockSpec[];
     if (blocks.length === 0) {
-        return { theme: site.theme ?? undefined, blocks: [] };
+        pageBlockSpecs = [];
+    } else {
+        pageBlockSpecs = await buildBlockSpecs(blocks);
     }
 
+    let chrome: SiteSpec['chrome'];
+    let contentBlocks: BlockSpec[];
+
+    if (!site.chrome && pagePath === '/') {
+        // Trigger lazy backfill for old single-page sites.
+        const result = await backfillChromeIfNeeded(site, pageBlockSpecs);
+        chrome = result.chrome;
+        contentBlocks = result.contentBlocks;
+    } else {
+        chrome = site.chrome ?? undefined;
+        contentBlocks = pageBlockSpecs;
+    }
+
+    return {
+        theme: site.theme ?? undefined,
+        chrome,
+        blocks: contentBlocks,
+    };
+}
+
+async function buildBlockSpecs(
+    blocks: Array<typeof schema.pageBlocks.$inferSelect>,
+): Promise<BlockSpec[]> {
     const blockIds = blocks.map((b) => b.id);
     const contentRows = await db
         .select()
@@ -76,12 +108,7 @@ export async function assembleSpec(identifier: string, pagePath: string): Promis
         };
     };
 
-    const rootBlocks = (childrenByParent.get(null) ?? []).map(buildBlock);
-
-    return {
-        theme: site.theme ?? undefined,
-        blocks: rootBlocks,
-    };
+    return (childrenByParent.get(null) ?? []).map(buildBlock);
 }
 
 function parseStoredValue(valueType: string, textValue: string | null): unknown {

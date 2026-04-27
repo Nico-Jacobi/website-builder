@@ -2,9 +2,10 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Hono, type Context } from 'hono';
+import { streamSSE } from 'hono/streaming';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { BlockSpecSchema, moduleContentFields } from '@website-builder/shared';
+import { BlockSpecSchema, SiteChromeSchema, SitemapEntrySchema, moduleContentFields } from '@website-builder/shared';
 import { db, schema } from '../db/client';
 import { assembleSpec } from '../services/assembleSpec';
 import { createSite } from '../services/sites/createSite';
@@ -18,6 +19,12 @@ import {
 } from '../services/sites/blockOps';
 import { UpdateThemeFailure, updateTheme } from '../services/sites/updateTheme';
 import { appendMessage, listMessages } from '../services/sites/messages';
+import { getSitePagesWithStatus, insertPage, updateSitemap, deletePage } from '../services/sites/pageOps';
+import { setSiteChrome } from '../services/sites/setSiteChrome';
+import { cleanupSitemapLinks } from '../services/sites/cleanupSitemapLinks';
+import { getJob, type JobEvent } from '../services/generationJob';
+import { regenerateSubpage } from '../services/llm/generateSubpage';
+import { writeSseEvent, startKeepAlive } from './sse';
 
 export const sitesRouter = new Hono();
 
@@ -447,6 +454,138 @@ sitesRouter.post('/:identifier/assets', async (c) => {
         .returning({ id: schema.assets.id });
 
     return c.json({ id: row.id, url: `/${relPath}` }, 201);
+});
+
+// --- Generation-stream (SSE) -----------------------------------------------
+
+sitesRouter.get('/:identifier/generation-stream', async (c) => {
+    const { identifier } = c.req.param();
+
+    return streamSSE(c, async (stream) => {
+        const stopKeepAlive = startKeepAlive(stream);
+
+        try {
+            // 1. Send a snapshot so reconnects are loss-free.
+            const pages = await getSitePagesWithStatus(identifier);
+            const site = await db.query.sites.findFirst({
+                where: eq(schema.sites.identifier, identifier),
+            });
+            await writeSseEvent(stream, {
+                type: 'snapshot',
+                pages,
+                sitemap: site?.sitemap ?? null,
+                hasChrome: !!(site?.chrome),
+            });
+
+            // 2. Subscribe to live events if a job is running.
+            const job = getJob(identifier);
+            if (!job) {
+                await writeSseEvent(stream, { type: 'idle' });
+            } else {
+                await new Promise<void>((resolve) => {
+                    const onEvent = (event: JobEvent) => {
+                        void writeSseEvent(stream, event);
+                        if (event.type === 'complete' || event.type === 'error') {
+                            resolve();
+                        }
+                    };
+                    job.events.on('event', onEvent);
+                    stream.onAbort(() => {
+                        job.events.off('event', onEvent);
+                        resolve();
+                    });
+                });
+            }
+        } finally {
+            stopKeepAlive();
+        }
+    });
+});
+
+// --- Chrome ----------------------------------------------------------------
+
+sitesRouter.put('/:identifier/chrome', async (c) => {
+    const identifier = c.req.param('identifier');
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = SiteChromeSchema.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    await setSiteChrome(identifier, parsed.data);
+    return c.body(null, 204);
+});
+
+// --- Pages (add / delete / regenerate) ------------------------------------
+
+sitesRouter.post('/:identifier/pages', async (c) => {
+    const identifier = c.req.param('identifier');
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = SitemapEntrySchema.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    const site = await db.query.sites.findFirst({
+        where: eq(schema.sites.identifier, identifier),
+    });
+    if (!site) return c.json({ error: 'site not found' }, 404);
+    if (!site.sitemap || !site.chrome) {
+        return c.json({ error: 'site not generated' }, 409);
+    }
+
+    const entry = parsed.data;
+    const newSitemap = [...site.sitemap, entry];
+    await updateSitemap(identifier, newSitemap);
+    await db.transaction(async (tx) => {
+        await insertPage(tx, site.id, entry, 'pending');
+    });
+    void regenerateSubpage(identifier, entry.path);
+
+    return c.json({ path: entry.path }, 202);
+});
+
+sitesRouter.delete('/:identifier/pages/:path', async (c) => {
+    const identifier = c.req.param('identifier');
+    const decoded = decodeURIComponent(c.req.param('path'));
+
+    if (decoded === '/') {
+        return c.json({ error: 'cannot delete landing page' }, 400);
+    }
+
+    const site = await db.query.sites.findFirst({
+        where: eq(schema.sites.identifier, identifier),
+    });
+    if (!site) return c.json({ error: 'site not found' }, 404);
+
+    const newSitemap = site.sitemap?.filter((e) => e.path !== decoded) ?? [];
+    await updateSitemap(identifier, newSitemap);
+    await deletePage(site.id, decoded);
+
+    const cleanedChrome = cleanupSitemapLinks(site.chrome, [decoded]);
+    if (cleanedChrome !== site.chrome && cleanedChrome) {
+        await setSiteChrome(identifier, cleanedChrome);
+    }
+
+    return c.body(null, 204);
+});
+
+sitesRouter.post('/:identifier/pages/:path/regenerate', async (c) => {
+    const identifier = c.req.param('identifier');
+    const decoded = decodeURIComponent(c.req.param('path'));
+
+    void regenerateSubpage(identifier, decoded);
+    return c.body(null, 202);
 });
 
 // --- Helpers --------------------------------------------------------------

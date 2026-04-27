@@ -64,6 +64,17 @@ describe('buildSystemPrompt (initial mode)', () => {
         expect(prompt).not.toContain('Refinement Mode');
     });
 
+    it('includes sitemap output instructions', () => {
+        expect(prompt).toContain('sitemap');
+        expect(prompt).toContain('"path"');
+        expect(prompt).toContain('"intent"');
+    });
+
+    it('instructs Header/Footer links to match sitemap paths (no dead hrefs)', () => {
+        expect(prompt).toContain('MUST point to paths from your `sitemap` output');
+        expect(prompt).not.toContain('dead hrefs');
+    });
+
     it('is pure: identical surface yields identical output', () => {
         const a = buildSystemPrompt({ surface, mode: 'initial' });
         const b = buildSystemPrompt({ surface, mode: 'initial' });
@@ -73,21 +84,16 @@ describe('buildSystemPrompt (initial mode)', () => {
 
 describe('buildSystemPrompt (refine mode)', () => {
     const surface = getRegistryLLMSurface();
-    const initialPrompt = buildSystemPrompt({ surface, mode: 'initial' });
     const refinePrompt = buildSystemPrompt({ surface, mode: 'refine' });
-
-    it('starts with the full initial prompt (initial is a prefix of refine)', () => {
-        expect(refinePrompt.startsWith(initialPrompt)).toBe(true);
-    });
 
     it('appends the Refinement Mode header', () => {
         expect(refinePrompt).toContain('## Refinement Mode');
     });
 
-    it('mentions CURRENT_SPEC, HISTORY and USER_MESSAGE sections', () => {
-        expect(refinePrompt).toContain('CURRENT_SPEC');
-        expect(refinePrompt).toContain('HISTORY');
-        expect(refinePrompt).toContain('USER_MESSAGE');
+    it('mentions CURRENT PAGE, CONVERSATION and USER MESSAGE sections', () => {
+        expect(refinePrompt).toContain('CURRENT PAGE');
+        expect(refinePrompt).toContain('CONVERSATION');
+        expect(refinePrompt).toContain('USER MESSAGE');
     });
 
     it('tells the model to preserve block ids for persisting blocks', () => {
@@ -101,6 +107,63 @@ describe('buildSystemPrompt (refine mode)', () => {
     it('is pure: identical inputs yield identical output', () => {
         const a = buildSystemPrompt({ surface, mode: 'refine' });
         const b = buildSystemPrompt({ surface, mode: 'refine' });
+        expect(a).toBe(b);
+    });
+});
+
+describe('buildSystemPrompt (subpage mode)', () => {
+    const surface = getRegistryLLMSurface();
+
+    const locked = {
+        theme:   { primary: '#1e3a5f', secondary: '#0a0a0a' },
+        chrome:  {
+            header: { type: 'Header', props: { title: 'Acme Corp', links: [{ label: 'Home', href: '/' }, { label: 'About', href: '/about' }] } },
+            footer: { type: 'Footer', props: { copyright: '© 2026 Acme Corp', columns: [] } },
+        },
+        sitemap: [
+            { path: '/',       title: 'Home',  intent: 'Landing page' },
+            { path: '/about',  title: 'About', intent: 'Company history and team' },
+        ],
+        pageBrief: { path: '/about', title: 'About', intent: 'Company history and team' },
+    };
+
+    const subpagePrompt = buildSystemPrompt({ surface, mode: 'subpage', locked });
+
+    it('includes the Subpage Generation Mode section', () => {
+        expect(subpagePrompt).toContain('Subpage Generation Mode');
+    });
+
+    it('describes locked theme context', () => {
+        expect(subpagePrompt).toContain('Locked site context');
+        expect(subpagePrompt).toContain('Theme (locked)');
+    });
+
+    it('describes locked chrome context', () => {
+        expect(subpagePrompt).toContain('Chrome');
+        expect(subpagePrompt).toContain('header/footer');
+    });
+
+    it('describes locked sitemap context', () => {
+        expect(subpagePrompt).toContain('Sitemap (locked)');
+    });
+
+    it('describes the page brief', () => {
+        expect(subpagePrompt).toContain('Page brief');
+        expect(subpagePrompt).toContain('/about');
+    });
+
+    it('instructs output to be only { blocks: [...] }', () => {
+        expect(subpagePrompt).toContain('"blocks"');
+        expect(subpagePrompt).toContain('no `theme`, no `chrome`, no `sitemap`');
+    });
+
+    it('does NOT include the Refinement Mode section', () => {
+        expect(subpagePrompt).not.toContain('Refinement Mode');
+    });
+
+    it('is pure: same locked input yields same output', () => {
+        const a = buildSystemPrompt({ surface, mode: 'subpage', locked });
+        const b = buildSystemPrompt({ surface, mode: 'subpage', locked });
         expect(a).toBe(b);
     });
 });

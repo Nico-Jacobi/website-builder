@@ -1,4 +1,5 @@
 import type { SiteSpec, BlockSpec } from '@website-builder/shared';
+import type { SiteChrome } from '@website-builder/shared';
 import type { LogCollector } from './logCollector';
 import { fetchPixabayImage } from '../images/pixabay';
 
@@ -16,6 +17,33 @@ interface ImageSlot {
     readonly height: number;
     readonly label: string;
     readonly apply: (url: string) => void;
+}
+
+/**
+ * Fills image slots for a raw array of blocks (no SiteSpec wrapper needed).
+ * Mutates the block props in-place, same as fillImages.
+ */
+export async function fillBlocksArray(blocks: BlockSpec[], collector: LogCollector): Promise<void> {
+    const dummySpec: SiteSpec = { blocks };
+    await fillImages(dummySpec, collector);
+}
+
+/**
+ * Convenience wrapper: fills images in chrome.header, chrome.footer AND content blocks.
+ * Phase-A uses this (landing has chrome + content); subpage generation uses fillBlocksArray directly.
+ */
+export async function fillImagesIn(
+    { chrome, blocks }: { chrome?: SiteChrome; blocks: BlockSpec[] },
+    collector: LogCollector,
+): Promise<void> {
+    const allBlocks: BlockSpec[] = [
+        ...(chrome?.header ? [chrome.header] : []),
+        ...(chrome?.footer ? [chrome.footer] : []),
+        ...blocks,
+    ];
+    if (allBlocks.length > 0) {
+        await fillBlocksArray(allBlocks, collector);
+    }
 }
 
 export async function fillImages(spec: SiteSpec, collector: LogCollector): Promise<SiteSpec> {

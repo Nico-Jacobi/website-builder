@@ -39,6 +39,14 @@ export function validateSpecAgainstRegistry(input: unknown): ValidateResult {
         validateBlock(block, `blocks[${i}]`, errors);
     });
 
+    // Validate chrome blocks if present
+    if (shape.data.chrome?.header) {
+        validateBlock(shape.data.chrome.header, 'chrome.header', errors);
+    }
+    if (shape.data.chrome?.footer) {
+        validateBlock(shape.data.chrome.footer, 'chrome.footer', errors);
+    }
+
     if (errors.length > 0) return { ok: false, errors };
     return { ok: true, spec: shape.data };
 }
