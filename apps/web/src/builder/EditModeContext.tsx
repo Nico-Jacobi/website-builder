@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { setNestedProp, getNestedProp } from './propPath';
 import {
     EditModeActionsContext,
     EditModeStateContext,
     AutoSaveContext,
+    useEditModeActions,
     type EditModeActionsValue,
 } from './editModeStore';
+import { useBlockTarget } from './blockTarget';
 import type { AutoSaveAdapter } from './autoSaveTypes';
 import type { SiteSpec } from './schemas';
 import { getModule } from './registry';
@@ -16,6 +18,7 @@ import {
     appendBlockToSpec,
     removeBlockFromSpec,
 } from '../pages/EditorPage/specOps';
+import { scheduleChromeSave } from '../data/autoSave';
 
 interface EditModeProviderProps {
     children: ReactNode;
@@ -23,6 +26,7 @@ interface EditModeProviderProps {
     onSpecChange: (spec: SiteSpec) => void;
     autoSave?: AutoSaveAdapter;
     initialEditMode?: boolean;
+    activePagePath?: string;
     /**
      * Wird bei jedem Inline-Edit aufgerufen, bevor der neue State publiziert
      * wird. `key` folgt der `InlineEditedKey`-Konvention:
@@ -32,6 +36,24 @@ interface EditModeProviderProps {
      * verteidigen.
      */
     onInlineEdit?: (key: string) => void;
+    /**
+     * The site identifier — required for chrome persistence via PUT /chrome.
+     * When not provided, chrome edits are applied locally but not persisted.
+     */
+    identifier?: string;
+}
+
+/** Context that provides chrome-specific edit helpers to child components. */
+export interface ChromeEditHelpers {
+    updateChromeProp: (position: 'header' | 'footer', propPath: string, value: unknown) => void;
+    updateChromeList: (position: 'header' | 'footer', listPath: string, nextArray: unknown[]) => void;
+    getChromeProp: (position: 'header' | 'footer', listPath: string) => unknown;
+}
+
+const ChromeEditContext = createContext<ChromeEditHelpers | null>(null);
+
+export function useChromeEditHelpers(): ChromeEditHelpers | null {
+    return useContext(ChromeEditContext);
 }
 
 export function EditModeProvider({
@@ -41,20 +63,24 @@ export function EditModeProvider({
     autoSave,
     initialEditMode = false,
     onInlineEdit,
+    activePagePath: _activePagePath,
+    identifier,
 }: EditModeProviderProps) {
     const [isEditMode, setIsEditMode] = useState(initialEditMode);
 
-    // Refs so updateBlock keeps a stable identity. Without this, every blur
+    // Refs so callbacks keep a stable identity. Without this, every blur
     // rebuilds actionsValue and re-renders every editable consumer.
     const specRef = useRef(spec);
     const onSpecChangeRef = useRef(onSpecChange);
     const autoSaveRef = useRef(autoSave);
     const onInlineEditRef = useRef(onInlineEdit);
+    const identifierRef = useRef(identifier);
     useEffect(() => {
         specRef.current = spec;
         onSpecChangeRef.current = onSpecChange;
         autoSaveRef.current = autoSave;
         onInlineEditRef.current = onInlineEdit;
+        identifierRef.current = identifier;
     });
 
     const updateBlock = useCallback(
@@ -205,6 +231,54 @@ export function EditModeProvider({
         [],
     );
 
+    // Chrome-aware helpers — exposed via ChromeEditContext for use by
+    // ChromeActionsGuard (rendered by the Renderer around each chrome block).
+    const updateChromeProp = useCallback(
+        (position: 'header' | 'footer', propPath: string, value: unknown) => {
+            const current = specRef.current;
+            const chromeBlock = current.chrome?.[position];
+            if (!chromeBlock) return;
+            const updatedBlock = {
+                ...chromeBlock,
+                props: setNestedProp(chromeBlock.props, propPath, value),
+            };
+            const updatedChrome = { ...current.chrome, [position]: updatedBlock };
+            onSpecChangeRef.current({ ...current, chrome: updatedChrome });
+            const id = identifierRef.current;
+            if (id) scheduleChromeSave(id, updatedChrome);
+        },
+        [],
+    );
+
+    const updateChromeList = useCallback(
+        (position: 'header' | 'footer', listPath: string, nextArray: unknown[]) => {
+            const current = specRef.current;
+            const chromeBlock = current.chrome?.[position];
+            if (!chromeBlock) return;
+            const updatedBlock = {
+                ...chromeBlock,
+                props: setNestedProp(chromeBlock.props, listPath, nextArray),
+            };
+            const updatedChrome = { ...current.chrome, [position]: updatedBlock };
+            onSpecChangeRef.current({ ...current, chrome: updatedChrome });
+            const id = identifierRef.current;
+            if (id) scheduleChromeSave(id, updatedChrome);
+        },
+        [],
+    );
+
+    const getChromeProp = useCallback(
+        (position: 'header' | 'footer', listPath: string): unknown => {
+            return getNestedProp(specRef.current.chrome?.[position]?.props ?? {}, listPath);
+        },
+        [],
+    );
+
+    const chromeHelpers = useMemo<ChromeEditHelpers>(
+        () => ({ updateChromeProp, updateChromeList, getChromeProp }),
+        [updateChromeProp, updateChromeList, getChromeProp],
+    );
+
     const stateValue = useMemo(() => ({ isEditMode }), [isEditMode]);
     const actionsValue = useMemo(
         () => ({
@@ -231,14 +305,90 @@ export function EditModeProvider({
         <EditModeStateContext.Provider value={stateValue}>
             <EditModeActionsContext.Provider value={actionsValue}>
                 <AutoSaveContext.Provider value={autoSave ?? null}>
-                    <div
-                        data-edit-mode={isEditMode ? 'true' : 'false'}
-                        style={{ display: 'contents' }}
-                    >
-                        {children}
-                    </div>
+                    <ChromeEditContext.Provider value={chromeHelpers}>
+                        <div
+                            data-edit-mode={isEditMode ? 'true' : 'false'}
+                            style={{ display: 'contents' }}
+                        >
+                            {children}
+                        </div>
+                    </ChromeEditContext.Provider>
                 </AutoSaveContext.Provider>
             </EditModeActionsContext.Provider>
         </EditModeStateContext.Provider>
+    );
+}
+
+/**
+ * Rendered by the Renderer *inside* each `BlockTargetContext.Provider` for
+ * chrome blocks. It reads the chrome target from context and overrides
+ * `EditModeActionsContext` with chrome-aware action implementations, so that
+ * modules inside a chrome block transparently route their inline edits to
+ * `spec.chrome` instead of `spec.blocks`.
+ *
+ * This component must be placed inside both:
+ *   - `ChromeEditContext.Provider` (set by EditModeProvider)
+ *   - `BlockTargetContext.Provider value={{kind:'chrome', ...}}` (set by Renderer)
+ */
+export function ChromeActionsGuard({ children }: { children: ReactNode }) {
+    const target = useBlockTarget();
+    const chromeHelpers = useChromeEditHelpers();
+    const baseActions = useEditModeActions();
+
+    const chromeAwareUpdateBlock = useCallback(
+        (blockIndex: number, propPath: string, value: unknown) => {
+            if (target?.kind === 'chrome' && chromeHelpers) {
+                chromeHelpers.updateChromeProp(target.position, propPath, value);
+            } else {
+                baseActions.updateBlock(blockIndex, propPath, value);
+            }
+        },
+        [target, chromeHelpers, baseActions],
+    );
+
+    const chromeAwareAddItem = useCallback(
+        (blockIndex: number, listPath: string, defaultItem: unknown) => {
+            if (target?.kind === 'chrome' && chromeHelpers) {
+                const existing = chromeHelpers.getChromeProp(target.position, listPath);
+                const nextArray = Array.isArray(existing)
+                    ? [...existing, defaultItem]
+                    : [defaultItem];
+                chromeHelpers.updateChromeList(target.position, listPath, nextArray);
+            } else {
+                baseActions.addItem(blockIndex, listPath, defaultItem);
+            }
+        },
+        [target, chromeHelpers, baseActions],
+    );
+
+    const chromeAwareRemoveItem = useCallback(
+        (blockIndex: number, listPath: string, itemIndex: number) => {
+            if (target?.kind === 'chrome' && chromeHelpers) {
+                const existing = chromeHelpers.getChromeProp(target.position, listPath);
+                if (!Array.isArray(existing)) return;
+                const nextArray = existing.filter((_, i) => i !== itemIndex);
+                chromeHelpers.updateChromeList(target.position, listPath, nextArray);
+            } else {
+                baseActions.removeItem(blockIndex, listPath, itemIndex);
+            }
+        },
+        [target, chromeHelpers, baseActions],
+    );
+
+    const chromeAwareActions = useMemo<EditModeActionsValue>(
+        () => ({
+            ...baseActions,
+            updateBlock: chromeAwareUpdateBlock,
+            addItem: chromeAwareAddItem,
+            removeItem: chromeAwareRemoveItem,
+            // addBlock / removeBlock / reorderBlocks are page-only
+        }),
+        [baseActions, chromeAwareUpdateBlock, chromeAwareAddItem, chromeAwareRemoveItem],
+    );
+
+    return (
+        <EditModeActionsContext.Provider value={chromeAwareActions}>
+            {children}
+        </EditModeActionsContext.Provider>
     );
 }

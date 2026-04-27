@@ -1,0 +1,209 @@
+/* ============================================================
+   PageSwitcher — Editor-UI sidebar for page navigation.
+   Chrome tokens only (--ui_*). BEM scoped via .page-switcher / .page-row.
+   ============================================================ */
+
+.page-switcher {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--ui_border);
+    background: var(--ui_bg_elevated);
+    max-height: 280px;
+    overflow: hidden;
+}
+
+.page-switcher__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space_xs) var(--space_sm);
+    border-bottom: 1px solid var(--ui_border);
+    flex-shrink: 0;
+}
+
+.page-switcher__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ui_text_subtle);
+}
+
+/* Spinner — CSS-only rotating ring */
+.page-switcher__spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--ui_border);
+    border-top-color: var(--ui_text_muted);
+    border-radius: 50%;
+    animation: page-switcher-spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes page-switcher-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── List ── */
+.page-switcher__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+.page-switcher__empty {
+    padding: var(--space_sm) var(--space_md);
+    font-size: 0.8rem;
+    color: var(--ui_text_subtle);
+    font-style: italic;
+}
+
+/* ── Page Row ── */
+.page-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--ui_border);
+    transition: background var(--ui_dur) var(--ui_ease);
+}
+
+.page-row:hover {
+    background: var(--ui_bg_hover);
+}
+
+.page-row--active {
+    background: var(--ui_bg_hover);
+}
+
+.page-row--active .page-row__main {
+    color: var(--ui_text);
+}
+
+.page-row__main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--space_xs) var(--space_sm);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--ui_text_muted);
+    overflow: hidden;
+}
+
+.page-row__path {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.page-row__title {
+    font-size: 0.72rem;
+    color: var(--ui_text_subtle);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ── Status pill ── */
+.page-row__status {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 1px 5px;
+    border-radius: var(--ui_radius_sm);
+    margin-top: 2px;
+    background: var(--ui_bg);
+    color: var(--ui_text_subtle);
+}
+
+.page-row__status--ready {
+    background: rgba(20, 184, 166, 0.15);
+    color: var(--ui_accent_success);
+}
+
+.page-row__status--generating,
+.page-row__status--pending {
+    background: rgba(234, 179, 8, 0.12);
+    color: #ca8a04;
+}
+
+.page-row__status--failed {
+    background: rgba(248, 113, 113, 0.15);
+    color: var(--ui_accent_danger);
+}
+
+/* ── Action buttons ── */
+.page-row__retry,
+.page-row__delete {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 6px;
+    margin: 0 var(--space_xs);
+    border: 1px solid var(--ui_border);
+    border-radius: var(--ui_radius_sm);
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 600;
+    transition: background var(--ui_dur) var(--ui_ease),
+                color var(--ui_dur) var(--ui_ease),
+                border-color var(--ui_dur) var(--ui_ease);
+}
+
+.page-row__retry {
+    color: var(--ui_accent_danger);
+    border-color: var(--ui_accent_danger);
+}
+
+.page-row__retry:hover {
+    background: rgba(248, 113, 113, 0.1);
+}
+
+.page-row__delete {
+    color: var(--ui_text_subtle);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.page-row__delete:hover {
+    color: var(--ui_accent_danger);
+    border-color: var(--ui_accent_danger);
+    background: rgba(248, 113, 113, 0.08);
+}
+
+/* ── Add button ── */
+.page-switcher__add {
+    flex-shrink: 0;
+    width: 100%;
+    padding: var(--space_xs) var(--space_sm);
+    background: none;
+    border: none;
+    border-top: 1px solid var(--ui_border);
+    cursor: pointer;
+    color: var(--ui_text_subtle);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: left;
+    transition: color var(--ui_dur) var(--ui_ease),
+                background var(--ui_dur) var(--ui_ease);
+}
+
+.page-switcher__add:hover {
+    color: var(--ui_text);
+    background: var(--ui_bg_hover);
+}

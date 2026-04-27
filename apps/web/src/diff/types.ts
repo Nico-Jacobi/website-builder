@@ -7,7 +7,7 @@
  * module that knows nothing about routes.
  */
 
-import type { BlockSpec } from '@website-builder/shared';
+import type { BlockSpec, SiteChrome } from '@website-builder/shared';
 
 export type PatchOp =
     | {
@@ -40,7 +40,18 @@ export type PatchOp =
           type: 'updateTheme';
           theme: Record<string, string> | null;
           previousTheme: Record<string, string> | null;
+      }
+    | {
+          type: 'updateChrome';
+          chrome: SiteChrome;
+          previousChrome: SiteChrome | null;
       };
+
+/** Alias for {@link PatchOp} — use in contexts that refer to spec-level operations. */
+export type SpecOp = PatchOp;
+
+/** The `updateChrome` variant of {@link PatchOp} — update the site-wide header/footer chrome. */
+export type UpdateChromeOp = Extract<PatchOp, { type: 'updateChrome' }>;
 
 export interface RejectedOp {
     op: PatchOp;

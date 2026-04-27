@@ -10,6 +10,8 @@ import type { ChatMessage } from './chat/types';
 import type { ChatHistoryEntry, GenerateResult, RefineResult } from '../../llm/types';
 import type { ApplyResult } from './applyPatchOps';
 import type { RejectedOp } from '../../diff/types';
+import type { StreamEvent } from '../../data/useGenerationStream';
+import type { RefineScope } from './chat/RefineScopeToggle';
 
 /** Maximum number of turns we ship to the LLM — matches REFINE_HISTORY_MAX. */
 export const CHAT_HISTORY_MAX = 10;
@@ -83,12 +85,17 @@ export interface ApplySummary {
  * Bei der Erst-Generation (`initial`) ersetzen wir die Ops-Zahl durch eine
  * nutzerfreundliche Gesamtlauf-Zeit — "9 Änderungen angewendet" ist für den
  * ersten Turn keine nützliche Info, da ohnehin *alles* neu ist.
+ *
+ * Für Multi-Page-Refinement (scope='page' oder scope='chrome') wird der
+ * page-context in die Summary eingebettet.
  */
 export function summarizeApply(
     apply:       ApplyResult,
     rejected:    RejectedOp[],
     explanation: string,
     initial?:    { durationMs: number },
+    scope?:      RefineScope,
+    pagePath?:   string,
 ): ApplySummary {
     const parts: string[] = [];
     if (explanation.trim()) parts.push(explanation.trim());
@@ -100,7 +107,13 @@ export function summarizeApply(
             const seconds = Math.max(1, Math.round(initial.durationMs / 1000));
             parts.push(`Website nach ${seconds}s generiert.`);
         } else if (apply.applied > 0) {
-            parts.push(`Angewendet: ${apply.applied} Änderung${apply.applied === 1 ? '' : 'en'}.`);
+            if (scope === 'chrome') {
+                parts.push(`Header/Footer aktualisiert (${apply.applied} Op${apply.applied === 1 ? '' : 's'}).`);
+            } else if (scope === 'page' && pagePath) {
+                parts.push(`Page ${pagePath} aktualisiert (${apply.applied} Op${apply.applied === 1 ? '' : 's'}).`);
+            } else {
+                parts.push(`Angewendet: ${apply.applied} Änderung${apply.applied === 1 ? '' : 'en'}.`);
+            }
         }
     } else {
         parts.push(
@@ -116,4 +129,49 @@ export function summarizeApply(
         assistant:       parts.join(' ').trim() || 'Ok.',
         conflictWarning,
     };
+}
+
+/**
+ * Wandelt einen Generation-Stream-Event in eine ChatMessage-ähnliche Struktur
+ * um, die im Chat-Feed angezeigt werden kann. Gibt `null` zurück für Events,
+ * die keine sichtbare Nachricht erzeugen (z.B. snapshot, idle, *_started).
+ *
+ * `durations` ist eine Map von page-path → {start, end?} Timestamps
+ * (in `performance.now()`-Millisekunden). start/end werden vom Caller gesetzt
+ * wenn der zugehörige *_started- bzw. *_done-Event eintrifft.
+ */
+export function summarizeGenerationEvent(
+    event:     StreamEvent,
+    durations: Map<string, { start: number; end?: number }>,
+): { role: 'assistant'; content: string } | null {
+    function dur(path: string): string {
+        const e = durations.get(path);
+        if (!e?.end) return '?';
+        const secs = ((e.end - e.start) / 1000).toFixed(1);
+        return `${secs}s`;
+    }
+
+    switch (event.type) {
+        case 'landing_done':
+            return {
+                role:    'assistant',
+                content: `Landing generiert in ${dur('/')}; ${event.sitemap.length - 1} Subpage(s) werden generiert…`,
+            };
+        case 'subpage_done':
+            return {
+                role:    'assistant',
+                content: `Page ${event.path} fertig (${dur(event.path)})`,
+            };
+        case 'subpage_failed':
+            return {
+                role:    'assistant',
+                content: `Page ${event.path} fehlgeschlagen: ${event.reason}. Nutze Retry in der Sidebar.`,
+            };
+        case 'complete':
+            return { role: 'assistant', content: 'Site komplett generiert.' };
+        case 'error':
+            return { role: 'assistant', content: `Generation fehlgeschlagen: ${event.reason}` };
+        default:
+            return null;
+    }
 }

@@ -47,11 +47,13 @@ export interface BlockOpsAdapter {
 
 export interface MakeBlockOpsAdapterOptions {
     identifier:    string;
+    pagePath:      string;
     savedResetMs?: number;
 }
 
 export function makeBlockOpsAdapter({
     identifier,
+    pagePath,
     savedResetMs = 2000,
 }: MakeBlockOpsAdapterOptions): BlockOpsAdapter {
     const listeners = new Set<(s: SaveStatus) => void>();
@@ -100,6 +102,7 @@ export function makeBlockOpsAdapter({
             return withStatus(() =>
                 addBlockHttp({
                     identifier,
+                    pagePath,
                     parentBlockId: opts.parentBlockId ?? null,
                     position:      opts.position,
                     block:         opts.block,

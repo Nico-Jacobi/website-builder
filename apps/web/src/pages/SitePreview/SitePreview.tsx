@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import type { SiteSpec } from '@website-builder/shared';
 import './SitePreview.css';
-import Renderer from '../../builder/Renderer';
+import { PreviewSurface } from '../../builder/PreviewSurface';
+import { useActivePagePath, useNavigateToPage } from '../../builder/usePageNavigation';
 import { fetchSiteSpec } from '../../data/siteClient';
 
 type FetchStatus =
@@ -11,9 +12,9 @@ type FetchStatus =
     | { kind: 'error'; message: string };
 
 export function SitePreview() {
-    const [params] = useSearchParams();
-    const identifier = params.get('identifier');
-    const path = params.get('path') ?? '/';
+    const { identifier } = useParams<{ identifier: string }>();
+    const activePagePath = useActivePagePath();
+    const navigateToPage = useNavigateToPage(identifier ?? '', 'site');
 
     const [spec, setSpec] = useState<SiteSpec | null>(null);
     const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ kind: 'loading' });
@@ -22,7 +23,7 @@ export function SitePreview() {
         if (!identifier) return;
         let cancelled = false;
         setFetchStatus({ kind: 'loading' });
-        fetchSiteSpec(identifier, path)
+        fetchSiteSpec(identifier, activePagePath)
             .then((loaded) => {
                 if (!cancelled) {
                     setSpec(loaded);
@@ -38,7 +39,7 @@ export function SitePreview() {
                 }
             });
         return () => { cancelled = true; };
-    }, [identifier, path]);
+    }, [identifier, activePagePath]);
 
     if (!identifier) {
         return <Navigate to="/" replace />;
@@ -67,9 +68,13 @@ export function SitePreview() {
     }
 
     return (
-        <div data-edit-mode="false" style={{ display: 'contents' }}>
+        <div style={{ display: 'contents' }}>
             <Link to="/" className="site_preview__back-overlay">← Zurück</Link>
-            <Renderer spec={spec} />
+            <PreviewSurface
+                spec={spec}
+                editMode={false}
+                onNavigate={navigateToPage}
+            />
         </div>
     );
 }

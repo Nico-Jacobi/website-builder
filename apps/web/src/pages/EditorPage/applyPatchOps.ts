@@ -68,12 +68,13 @@ export type ApplyResult =
  */
 function opSortIndex(op: PatchOp): number {
     switch (op.type) {
-        case 'updateTheme': return 0;
-        case 'removeBlock': return 1;
-        case 'moveBlock':   return 2;
-        case 'addBlock':    return 3;
-        case 'updateTone':  return 4;
-        case 'updateField': return 5;
+        case 'updateTheme':  return 0;
+        case 'updateChrome': return 0;
+        case 'removeBlock':  return 1;
+        case 'moveBlock':    return 2;
+        case 'addBlock':     return 3;
+        case 'updateTone':   return 4;
+        case 'updateField':  return 5;
     }
 }
 
@@ -158,6 +159,12 @@ async function applyOne(
         case 'updateTheme': {
             await blockOps.patchTheme({ theme: op.theme });
             return updateThemeInSpec(spec, op.theme);
+        }
+
+        case 'updateChrome': {
+            // Chrome updates are applied locally; persistence is handled by
+            // the chrome-specific endpoint (see Plan 03.3 / AutoSave routing).
+            return { ...spec, chrome: op.chrome };
         }
 
         case 'updateField': {

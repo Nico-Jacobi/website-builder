@@ -5,12 +5,28 @@ import type { BlockSpec, SiteSpec } from './schemas';
  * BlockSpec inside child arrays) that doesn't already have one. Pure: returns
  * a new spec, leaves the input untouched.
  *
+ * Also walks `spec.chrome.header` and `spec.chrome.footer` so that chrome
+ * blocks get stable IDs too — required for Edit-Mode selection (Plan 05).
+ *
  * Stable IDs are what keep edit-mode state (focus, local form values) intact
  * when blocks are reordered, inserted, or deleted. Without them, React keys
  * collapse to array indices and component state shifts with position.
  */
 export function ensureBlockIds(spec: SiteSpec): SiteSpec {
-    return { ...spec, blocks: spec.blocks.map(ensureBlockIdsDeep) };
+    return {
+        ...spec,
+        chrome: spec.chrome
+            ? {
+                  header: spec.chrome.header
+                      ? ensureBlockIdsDeep(spec.chrome.header)
+                      : undefined,
+                  footer: spec.chrome.footer
+                      ? ensureBlockIdsDeep(spec.chrome.footer)
+                      : undefined,
+              }
+            : undefined,
+        blocks: spec.blocks.map(ensureBlockIdsDeep),
+    };
 }
 
 function ensureBlockIdsDeep(block: BlockSpec): BlockSpec {

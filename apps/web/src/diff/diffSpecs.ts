@@ -36,6 +36,14 @@ interface BlockLocation {
     position: number;
 }
 
+function sameChrome(
+    a: SiteSpec['chrome'],
+    b: SiteSpec['chrome'],
+): boolean {
+    // Simple structural compare via JSON — chrome is small enough that this is fine.
+    return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+}
+
 export function diffSpecs(before: SiteSpec, after: SiteSpec): PatchOp[] {
     const beforeById = new Map<string, BlockLocation>();
     const afterById = new Map<string, BlockLocation>();
@@ -48,6 +56,15 @@ export function diffSpecs(before: SiteSpec, after: SiteSpec): PatchOp[] {
     const adds: PatchOp[] = [];
     const toneUpdates: PatchOp[] = [];
     const fieldUpdates: PatchOp[] = [];
+
+    // --- chrome: whole-replace diff (chrome is small; granular would be overhead).
+    if (!sameChrome(before.chrome, after.chrome)) {
+        themeUpdates.push({
+            type: 'updateChrome',
+            chrome: after.chrome ?? {},
+            previousChrome: before.chrome ?? null,
+        });
+    }
 
     // --- theme: full-replace diff. Compared by canonical JSON so key-order
     // noise doesn't register as a change.

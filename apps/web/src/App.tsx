@@ -9,8 +9,8 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<BuilderPage />} />
-                <Route path="/site" element={<SitePreview />} />
-                <Route path="/editor/:identifier" element={<EditorPage />} />
+                <Route path="/site/:identifier/:pagePath?" element={<SitePreview />} />
+                <Route path="/editor/:identifier/:pagePath?" element={<EditorPage />} />
             </Routes>
         </BrowserRouter>
     );

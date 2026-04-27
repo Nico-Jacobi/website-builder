@@ -56,6 +56,7 @@ function isConflicting(op: PatchOp, keys: Set<InlineEditedKey>): boolean {
             return hasAnyKeyFor(keys, op.blockId);
         case 'addBlock':
         case 'updateTheme':
+        case 'updateChrome':
             return false;
     }
 }
@@ -82,7 +83,8 @@ function blockIdOf(op: PatchOp): string {
             // `rejected` without narrowing first.
             return op.block.id ?? '';
         case 'updateTheme':
-            // Theme ops aren't tied to a block; same total-function rationale.
+        case 'updateChrome':
+            // Theme/chrome ops aren't tied to a block; same total-function rationale.
             return '';
     }
 }

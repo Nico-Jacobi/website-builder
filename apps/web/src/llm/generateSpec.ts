@@ -5,14 +5,24 @@ import { clearTrace, setTrace, type LLMTrace } from './llmTrace';
 const apiBase: string = (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:3001';
 
 /**
+ * Fires a generation job on the backend (async — result comes via SSE).
+ * Returns as soon as the backend accepts the job (202 or 200).
+ */
+export async function startGeneration(identifier: string, userPrompt: string): Promise<void> {
+    const resp = await fetch(`${apiBase}/api/llm/generate`, {
+        method:  'POST',
+        headers: { 'content-type': 'application/json' },
+        body:    JSON.stringify({ identifier, userPrompt }),
+    });
+    if (!resp.ok) throw new Error(`generation start failed: ${resp.status}`);
+    // Fire-and-forget — SSE provides progress via useGenerationStream
+}
+
+/**
+ * @deprecated Use startGeneration() instead. Kept for backwards compatibility
+ * until EditorPage chat-flow is fully migrated to SSE-driven generation (Plan 07).
+ *
  * One-shot Spec-Generierung via Backend.
- *
- * Request:  POST {apiBase}/api/llm/generate
- * Response: Core-Result mit `kind`, payload, `log`, `trace` (siehe Backend).
- *
- * `log` + `trace` werden direkt nach dem Fetch in die Pub/Sub-Stores
- * (`logger.ts`, `llmTrace.ts`) geschrieben, damit das Debug-Panel
- * unverändert weiter funktioniert.
  */
 export async function generateSpec(userPrompt: string): Promise<GenerateResult> {
     clearLog();

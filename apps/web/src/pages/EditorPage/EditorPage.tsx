@@ -3,11 +3,12 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
 import type { SiteSpec } from '@website-builder/shared';
 import './EditorPage.css';
-import Renderer from '../../builder/Renderer';
+import { PreviewSurface } from '../../builder/PreviewSurface';
+import { useActivePagePath, useNavigateToPage } from '../../builder/usePageNavigation';
 import { EditModeProvider } from '../../builder/EditModeContext';
 import { useEditModeActions, useEditModeState } from '../../builder/editModeStore';
-import { fetchSiteMeta, fetchSiteSpec, renameSite } from '../../data/siteClient';
-import { makeAutoSaveAdapter } from '../../data/autoSave';
+import { fetchSiteMeta, fetchSiteGenerationMeta, fetchSiteSpec, renameSite } from '../../data/siteClient';
+import { makeAutoSaveAdapter, flushAutoSave } from '../../data/autoSave';
 import { makeBlockOpsAdapter } from '../../data/blockOps';
 import type { BlockOpsAdapter } from '../../data/blockOps';
 import type { AutoSaveAdapter, SaveStatus } from '../../builder/autoSaveTypes';
@@ -18,16 +19,19 @@ import { useInlineEditTracker } from './useInlineEditTracker';
 import { applyPatchOps } from './applyPatchOps';
 import { diffSpecs } from '../../diff/diffSpecs';
 import { detectConflicts } from '../../diff/detectConflicts';
-import { generateSpec } from '../../llm/generateSpec';
-import { refineSpec } from '../../llm/refineSpec';
+import { startGeneration } from '../../llm/generateSpec';
+import { useGenerationStream } from '../../data/useGenerationStream';
+import { PageSwitcher } from './PageSwitcher/PageSwitcher';
+import { refineSpec, refineChrome } from '../../llm/refineSpec';
 import { clearLog } from '../../llm/logger';
 import { clearTrace } from '../../llm/llmTrace';
 import {
-    adaptGenerateResult,
     formatLLMError,
     summarizeApply,
+    summarizeGenerationEvent,
     toHistoryEntries,
 } from './chatFlow';
+import type { RefineScope } from './chat/RefineScopeToggle';
 
 type FetchStatus =
     | { kind: 'loading' }
@@ -36,14 +40,15 @@ type FetchStatus =
 
 export function EditorPage() {
     const { identifier } = useParams<{ identifier: string }>();
+    const activePagePath = useActivePagePath();
+    const navigateToPage = useNavigateToPage(identifier ?? '', 'editor');
     const [spec, setSpec] = useState<SiteSpec | null>(null);
     const [siteName, setSiteName] = useState<string>('');
-    const [initialPrompt, setInitialPrompt] = useState<string | null>(null);
     const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ kind: 'loading' });
     const [chatBusy, setChatBusy] = useState<boolean>(false);
-    const [autoGenerating, setAutoGenerating] = useState<boolean>(false);
+    const [refineScope, setRefineScope] = useState<RefineScope>('page');
     const inFlightRef = useRef<boolean>(false);
-    const autoTriggerRef = useRef<boolean>(false);
+    const durationsRef = useRef<Map<string, { start: number; end?: number }>>(new Map());
 
     // --- Site-Fetch -------------------------------------------------------
     useEffect(() => {
@@ -51,12 +56,11 @@ export function EditorPage() {
         let cancelled = false;
         setFetchStatus({ kind: 'loading' });
 
-        Promise.all([fetchSiteSpec(identifier), fetchSiteMeta(identifier)])
+        Promise.all([fetchSiteSpec(identifier, activePagePath), fetchSiteMeta(identifier)])
             .then(([loadedSpec, meta]) => {
                 if (cancelled) return;
                 setSpec(loadedSpec);
                 setSiteName(meta.name);
-                setInitialPrompt(meta.initialPrompt);
                 setFetchStatus({ kind: 'ok' });
             })
             .catch((err: unknown) => {
@@ -70,7 +74,7 @@ export function EditorPage() {
         return () => {
             cancelled = true;
         };
-    }, [identifier]);
+    }, [identifier, activePagePath]);
 
     // --- Trace/Log-Reset bei Site-Wechsel ---------------------------------
     useEffect(() => {
@@ -97,10 +101,16 @@ export function EditorPage() {
 
     useEffect(() => {
         if (!identifier) { setBlockOps(undefined); return; }
-        const adapter = makeBlockOpsAdapter({ identifier });
+        const adapter = makeBlockOpsAdapter({ identifier, pagePath: activePagePath });
         setBlockOps(adapter);
         return () => adapter.dispose();
-    }, [identifier]);
+    }, [identifier, activePagePath]);
+
+    // --- Page navigation with flush ---------------------------------------
+    const handleNavigate = useCallback(async (path: string) => {
+        await flushAutoSave();
+        navigateToPage(path);
+    }, [navigateToPage]);
 
     // --- Debounced site rename --------------------------------------------
     const renameTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -114,9 +124,61 @@ export function EditorPage() {
     }, [identifier]);
     useEffect(() => () => { if (renameTimer.current) clearTimeout(renameTimer.current); }, []);
 
+    // --- Generation stream (SSE) — one connection per editor session -----
+    const stream = useGenerationStream(identifier ?? '');
+
     // --- Chat-History + Inline-Edit-Tracker -------------------------------
     const chat = useChatHistory(identifier ?? '');
     const tracker = useInlineEditTracker();
+
+    // --- Auto-Trigger: Erst-Generation sobald sitemap === null und initialPrompt vorhanden.
+    // Basiert auf fetchSiteGenerationMeta (DB-Abfrage) statt spec.blocks.length,
+    // da Subpages am Anfang leer sein können (blocks=[] ist kein sicherer Indikator).
+    const autoTriggeredRef = useRef<boolean>(false);
+
+    // Auto-Trigger: Check sitemap directly from DB on mount. If sitemap === null
+    // and initialPrompt is set, kick off initial generation via SSE-driven startGeneration.
+    // Uses fetchSiteGenerationMeta which includes `sitemap` (unlike fetchSiteMeta).
+    useEffect(() => {
+        if (!identifier) return;
+        if (autoTriggeredRef.current) return;
+        let cancelled = false;
+        fetchSiteGenerationMeta(identifier)
+            .then(meta => {
+                if (cancelled) return;
+                if (autoTriggeredRef.current) return;
+                if (!meta.initialPrompt) return;
+                if (meta.sitemap !== null) return; // already generated
+                autoTriggeredRef.current = true;
+                void startGeneration(identifier, meta.initialPrompt);
+            })
+            .catch(() => { /* ignore — main fetch handles the error display */ });
+        return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [identifier]);
+
+    // --- SSE → Chat-Feed Listener ----------------------------------------
+    useEffect(() => {
+        return stream.subscribe(event => {
+            // Track durations for timing summaries
+            if (event.type === 'landing_started') {
+                durationsRef.current.set('/', { start: performance.now() });
+            } else if (event.type === 'subpage_started') {
+                durationsRef.current.set(event.path, { start: performance.now() });
+            } else if (event.type === 'landing_done') {
+                const e = durationsRef.current.get('/');
+                if (e) e.end = performance.now();
+            } else if (event.type === 'subpage_done' || event.type === 'subpage_failed') {
+                const e = durationsRef.current.get(event.path);
+                if (e) e.end = performance.now();
+            }
+
+            const msg = summarizeGenerationEvent(event, durationsRef.current);
+            if (msg) {
+                void chat.appendAssistant(msg.content);
+            }
+        });
+    }, [stream.subscribe, chat.appendAssistant]);
 
     // --- Chat-Submit: voller LLM-Turn -------------------------------------
     async function handleChatSubmit(userMessage: string): Promise<void> {
@@ -129,79 +191,113 @@ export function EditorPage() {
             await chat.appendUser(userMessage);
             tracker.reset();
 
-            const isInitial = spec.blocks.length === 0;
             const historyEntries = toHistoryEntries(chat.messages);
 
-            const turnStart = performance.now();
-            const llmResult = isInitial
-                ? adaptGenerateResult(await generateSpec(userMessage))
-                : await refineSpec({
-                      currentSpec: spec,
-                      history:     historyEntries,
-                      userMessage,
-                  });
+            if (refineScope === 'chrome') {
+                // Chrome-refinement: update header/footer for all pages
+                let chromeResult: Awaited<ReturnType<typeof refineChrome>>;
+                try {
+                    chromeResult = await refineChrome({
+                        siteIdentifier: identifier,
+                        history:        historyEntries,
+                        userMessage,
+                    });
+                } catch (err) {
+                    await chat.appendSystem(
+                        `Chrome-Refinement fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`,
+                    );
+                    return;
+                }
 
-            if (llmResult.kind !== 'ok') {
-                await chat.appendSystem(formatLLMError(llmResult));
-                return;
-            }
+                const nextSpecWithChrome: SiteSpec = { ...spec, chrome: chromeResult.chrome };
+                const ops = diffSpecs(spec, nextSpecWithChrome);
 
-            const ops = diffSpecs(spec, llmResult.nextSpec);
-            if (ops.length === 0) {
-                await chat.appendAssistant(
-                    llmResult.explanation || 'Keine Änderungen.',
+                if (ops.length === 0) {
+                    await chat.appendAssistant('Keine Änderungen am Header/Footer.');
+                    return;
+                }
+
+                const { apply, rejected } = detectConflicts(ops, tracker.snapshot());
+
+                const applyResult = await applyPatchOps({
+                    ops:         apply,
+                    currentSpec: spec,
+                    identifier,
+                    blockOps,
+                });
+
+                setSpec(applyResult.nextSpec);
+
+                const summary = summarizeApply(
+                    applyResult,
+                    rejected,
+                    '',
+                    undefined,
+                    'chrome',
+                    activePagePath,
                 );
-                return;
-            }
+                await chat.appendAssistant(summary.assistant, {
+                    applied:  applyResult.applied,
+                    rejected: rejected.length,
+                });
+                if (rejected.length > 0) {
+                    await chat.appendSystem(summary.conflictWarning);
+                }
+            } else {
+                // Page-scoped refinement
+                const llmResult = await refineSpec({
+                    siteIdentifier: identifier,
+                    pagePath:       activePagePath,
+                    history:        historyEntries,
+                    userMessage,
+                });
 
-            const { apply, rejected } = detectConflicts(ops, tracker.snapshot());
+                if (llmResult.kind !== 'ok') {
+                    await chat.appendSystem(formatLLMError(llmResult));
+                    return;
+                }
 
-            const applyResult = await applyPatchOps({
-                ops:         apply,
-                currentSpec: spec,
-                identifier,
-                blockOps,
-            });
+                const ops = diffSpecs(spec, llmResult.nextSpec);
+                if (ops.length === 0) {
+                    await chat.appendAssistant(
+                        llmResult.explanation || 'Keine Änderungen.',
+                    );
+                    return;
+                }
 
-            setSpec(applyResult.nextSpec);
+                const { apply, rejected } = detectConflicts(ops, tracker.snapshot());
 
-            const summary = summarizeApply(
-                applyResult,
-                rejected,
-                llmResult.explanation,
-                isInitial ? { durationMs: performance.now() - turnStart } : undefined,
-            );
-            await chat.appendAssistant(summary.assistant, {
-                applied:  applyResult.applied,
-                rejected: rejected.length,
-            });
-            if (rejected.length > 0) {
-                await chat.appendSystem(summary.conflictWarning);
+                const applyResult = await applyPatchOps({
+                    ops:         apply,
+                    currentSpec: spec,
+                    identifier,
+                    blockOps,
+                });
+
+                setSpec(applyResult.nextSpec);
+
+                const summary = summarizeApply(
+                    applyResult,
+                    rejected,
+                    llmResult.explanation,
+                    undefined,
+                    'page',
+                    activePagePath,
+                );
+                await chat.appendAssistant(summary.assistant, {
+                    applied:  applyResult.applied,
+                    rejected: rejected.length,
+                });
+                if (rejected.length > 0) {
+                    await chat.appendSystem(summary.conflictWarning);
+                }
+
             }
         } finally {
             setChatBusy(false);
             inFlightRef.current = false;
         }
     }
-
-    // --- Auto-Trigger: Erst-Generation beim Öffnen einer frisch erstellten Site.
-    // Feuert einmal pro Mount (autoTriggerRef), sobald Spec + Meta + BlockOps
-    // bereit sind und die Site einen initialPrompt hat. Nach erfolgreichem
-    // addBlock setzt das Backend initialPrompt=NULL → Reload triggert nicht mehr.
-    useEffect(() => {
-        if (fetchStatus.kind !== 'ok') return;
-        if (!spec || !identifier || !blockOps) return;
-        if (autoTriggerRef.current) return;
-        if (spec.blocks.length !== 0) return;
-        if (!initialPrompt) return;
-
-        autoTriggerRef.current = true;
-        setAutoGenerating(true);
-        void handleChatSubmit(initialPrompt).finally(() => {
-            setAutoGenerating(false);
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchStatus.kind, spec, identifier, blockOps, initialPrompt]);
 
     // --- Render-Guards ----------------------------------------------------
     if (!identifier) return <Navigate to="/" replace />;
@@ -230,6 +326,11 @@ export function EditorPage() {
 
     const chatStatus = chatBusy ? 'sending' : chat.status;
 
+    // Show loading overlay only while landing page is not yet ready.
+    // Once landing is done, show the preview (subpages load in background).
+    const landingStatus = stream.state.pages.get('/');
+    const showLoadingOverlay = stream.state.isGenerating && landingStatus !== 'ready' && (!spec || spec.blocks.length === 0);
+
     return (
         <EditModeProvider
             spec={spec}
@@ -237,6 +338,8 @@ export function EditorPage() {
             autoSave={autoSave}
             initialEditMode={true}
             onInlineEdit={tracker.markEdited}
+            activePagePath={activePagePath}
+            identifier={identifier}
         >
             <div className="editor_page">
                 <EditorHeader
@@ -248,14 +351,18 @@ export function EditorPage() {
                 />
                 <div className="editor_page__body">
                     <aside className="editor_page__chat_slot">
+                        <PageSwitcher identifier={identifier} stream={stream} />
                         <ChatPanel
                             messages={chat.messages}
                             status={chatStatus}
                             onSubmit={handleChatSubmit}
+                            refineScope={refineScope}
+                            onScopeChange={setRefineScope}
+                            activePagePath={activePagePath}
                         />
                     </aside>
                     <main className="editor_page__preview">
-                        {autoGenerating && spec.blocks.length === 0 ? (
+                        {showLoadingOverlay ? (
                             <div className="editor_page__preview-loading">
                                 <Loader2
                                     className="editor_page__preview-loading-spinner"
@@ -269,7 +376,10 @@ export function EditorPage() {
                             </div>
                         ) : (
                             <div className="editor_page__preview-frame">
-                                <Renderer spec={spec} />
+                                <EditorPreview
+                                    spec={spec}
+                                    onNavigate={handleNavigate}
+                                />
                             </div>
                         )}
                     </main>
@@ -282,6 +392,27 @@ export function EditorPage() {
 
 // --- Subcomponents --------------------------------------------------------
 
+/**
+ * Thin wrapper that reads `isEditMode` from EditModeContext (must be rendered
+ * inside an EditModeProvider) and forwards it to PreviewSurface.
+ */
+function EditorPreview({
+    spec,
+    onNavigate,
+}: {
+    spec: SiteSpec;
+    onNavigate: (path: string) => void;
+}) {
+    const { isEditMode } = useEditModeState();
+    return (
+        <PreviewSurface
+            spec={spec}
+            editMode={isEditMode}
+            onNavigate={onNavigate}
+        />
+    );
+}
+
 interface EditorHeaderProps {
     name:         string;
     onNameChange: (next: string) => void;
@@ -292,7 +423,7 @@ interface EditorHeaderProps {
 
 function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: EditorHeaderProps) {
     const status = useCombinedSaveStatus(autoSave, blockOps);
-    const previewHref = `/site?identifier=${encodeURIComponent(identifier)}`;
+    const previewHref = `/site/${encodeURIComponent(identifier)}`;
 
     return (
         <header className="editor_page__header">

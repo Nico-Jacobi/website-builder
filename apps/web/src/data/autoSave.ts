@@ -1,5 +1,7 @@
 import { patchBlockContent, uploadAsset as uploadAssetHttp } from './siteClient';
+import { putChrome } from './chromeClient';
 import type { AutoSaveAdapter, SaveStatus } from '../builder/autoSaveTypes';
+import type { SiteChrome } from '@website-builder/shared';
 
 interface AutoSaveOptions {
     identifier: string;
@@ -99,4 +101,75 @@ export function makeAutoSaveAdapter({
             listeners.clear();
         },
     };
+}
+
+// ── Chrome Auto-Save (module-level, not tied to an adapter instance) ──────────
+// Chrome is a whole-replace PUT, so we only keep the most-recent pending value
+// and debounce it with a 1500ms delay. `flushAutoSave` drains this before any
+// page-navigation so edits are never lost during a page switch.
+
+let pendingChromeSave: { identifier: string; chrome: SiteChrome } | undefined;
+let chromeTimer: ReturnType<typeof setTimeout> | null = null;
+let chromeSavePromise: Promise<void> | null = null;
+let chromeResolve: (() => void) | null = null;
+
+const CHROME_DEBOUNCE_MS = 1500;
+
+export function scheduleChromeSave(identifier: string, chrome: SiteChrome): void {
+    pendingChromeSave = { identifier, chrome };
+
+    if (chromeTimer !== null) {
+        clearTimeout(chromeTimer);
+    }
+
+    // If there's no in-progress flush promise, create one so flushAutoSave can await it.
+    if (chromeSavePromise === null) {
+        chromeSavePromise = new Promise<void>((resolve) => {
+            chromeResolve = resolve;
+        });
+    }
+
+    chromeTimer = setTimeout(() => {
+        chromeTimer = null;
+        const snapshot = pendingChromeSave;
+        pendingChromeSave = undefined;
+        const resolve = chromeResolve;
+        chromeSavePromise = null;
+        chromeResolve = null;
+        if (snapshot) {
+            void putChrome(snapshot.identifier, snapshot.chrome).finally(() => {
+                resolve?.();
+            });
+        } else {
+            resolve?.();
+        }
+    }, CHROME_DEBOUNCE_MS);
+}
+
+/**
+ * Flush any pending chrome save immediately (bypassing the debounce).
+ * Called before page navigation to ensure no edits are lost.
+ */
+export async function flushAutoSave(): Promise<void> {
+    if (chromeTimer !== null) {
+        clearTimeout(chromeTimer);
+        chromeTimer = null;
+
+        const snapshot = pendingChromeSave;
+        pendingChromeSave = undefined;
+        const resolve = chromeResolve;
+        chromeSavePromise = null;
+        chromeResolve = null;
+
+        if (snapshot) {
+            await putChrome(snapshot.identifier, snapshot.chrome);
+        }
+        resolve?.();
+        return;
+    }
+
+    // If a save is already in-flight (timer fired, putChrome running), await it.
+    if (chromeSavePromise !== null) {
+        await chromeSavePromise;
+    }
 }

@@ -1,0 +1,170 @@
+/* ============================================================
+   AddPageDialog — Modal overlay for adding a new page.
+   Chrome tokens only (--ui_*). BEM scoped via .add-page-*.
+   ============================================================ */
+
+.add-page-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.add-page-dialog {
+    width: min(420px, calc(100vw - 2 * var(--space_lg)));
+    border: 1px solid var(--ui_border_strong);
+    border-radius: var(--ui_radius_lg, 8px);
+    background: var(--ui_bg_elevated);
+    box-shadow: var(--ui_shadow_panel);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Header ── */
+.add-page-dialog__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space_sm) var(--space_md);
+    border-bottom: 1px solid var(--ui_border);
+}
+
+.add-page-dialog__title {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ui_text);
+}
+
+.add-page-dialog__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ui_text_subtle);
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: var(--ui_radius_sm);
+    transition: color var(--ui_dur) var(--ui_ease),
+                background var(--ui_dur) var(--ui_ease);
+}
+
+.add-page-dialog__close:hover {
+    color: var(--ui_text);
+    background: var(--ui_bg_hover);
+}
+
+/* ── Body ── */
+.add-page-dialog__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_sm);
+    padding: var(--space_md);
+}
+
+.add-page-dialog__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_xs);
+}
+
+.add-page-dialog__field-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space_xs);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ui_text_muted);
+}
+
+.add-page-dialog__field-hint {
+    font-weight: 400;
+    color: var(--ui_text_subtle);
+    font-size: 0.72rem;
+}
+
+.add-page-dialog__input,
+.add-page-dialog__textarea {
+    padding: 7px 10px;
+    border: 1px solid var(--ui_border);
+    border-radius: var(--ui_radius_sm);
+    background: var(--ui_bg);
+    color: var(--ui_text);
+    font-size: 0.85rem;
+    transition: border-color var(--ui_dur) var(--ui_ease);
+    resize: vertical;
+}
+
+.add-page-dialog__input:focus,
+.add-page-dialog__textarea:focus {
+    outline: none;
+    border-color: var(--ui_border_strong);
+}
+
+.add-page-dialog__input::placeholder,
+.add-page-dialog__textarea::placeholder {
+    color: var(--ui_text_subtle);
+}
+
+.add-page-dialog__error {
+    margin: 0;
+    padding: var(--space_xs) var(--space_sm);
+    border-radius: var(--ui_radius_sm);
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    color: var(--ui_accent_danger);
+    font-size: 0.8rem;
+}
+
+/* ── Footer ── */
+.add-page-dialog__footer {
+    display: flex;
+    gap: var(--space_sm);
+    justify-content: flex-end;
+    padding: var(--space_sm) var(--space_md);
+    border-top: 1px solid var(--ui_border);
+}
+
+.add-page-dialog__btn {
+    padding: 7px 16px;
+    border-radius: var(--ui_radius_sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--ui_dur) var(--ui_ease),
+                color var(--ui_dur) var(--ui_ease),
+                border-color var(--ui_dur) var(--ui_ease);
+}
+
+.add-page-dialog__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.add-page-dialog__btn--cancel {
+    background: transparent;
+    border: 1px solid var(--ui_border);
+    color: var(--ui_text_muted);
+}
+
+.add-page-dialog__btn--cancel:hover:not(:disabled) {
+    background: var(--ui_bg_hover);
+    color: var(--ui_text);
+    border-color: var(--ui_border_strong);
+}
+
+.add-page-dialog__btn--submit {
+    background: var(--ui_btn_primary_bg);
+    border: 1px solid transparent;
+    color: var(--ui_btn_primary_text);
+}
+
+.add-page-dialog__btn--submit:hover:not(:disabled) {
+    opacity: 0.9;
+}

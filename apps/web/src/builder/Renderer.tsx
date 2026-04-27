@@ -16,6 +16,8 @@ import {
 } from '@dnd-kit/sortable';
 import { SectionShell } from '../elements/shared/SectionShell';
 import { BlockIndexContext, useEditModeActions } from './editModeStore';
+import { BlockTargetContext } from './blockTarget';
+import { ChromeActionsGuard } from './EditModeContext';
 import { getModule } from './registry';
 import type { BlockSpec, SiteSpec } from './schemas';
 
@@ -26,12 +28,19 @@ const MAX_MATERIALIZE_DEPTH = 32;
  *
  * Responsibilities:
  *   1. Apply spec.theme as CSS custom properties on the root wrapper.
- *   2. For each block, look up registry[block.type].
- *   3. Validate block.props with the module's Zod schema.
- *   4. Recurse into any prop that is a BlockSpec[] (so container modules
+ *   2. Render chrome.header (if present) above the page-block area.
+ *   3. For each page block, look up registry[block.type].
+ *   4. Validate block.props with the module's Zod schema.
+ *   5. Recurse into any prop that is a BlockSpec[] (so container modules
  *      receive ready-to-render React children, not raw JSON).
- *   5. Render an inline error placeholder on unknown types or invalid props
+ *   6. Render chrome.footer (if present) below the page-block area.
+ *   7. Render an inline error placeholder on unknown types or invalid props
  *      — errors are visible, never silent.
+ *
+ * Chrome blocks (header/footer) are rendered outside SortableContext but inside
+ * DndContext — they are site-wide and not user-reorderable. Each block (chrome
+ * or page) receives a BlockTargetContext.Provider so that Plan 05
+ * (EditModeContext) can distinguish between chrome-ops and page-block-ops.
  */
 export default function Renderer({ spec }: { spec: SiteSpec }) {
     const themeStyle = themeToCssVars(spec.theme);
@@ -57,25 +66,54 @@ export default function Renderer({ spec }: { spec: SiteSpec }) {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
                 <div className="vertical_layout" style={themeStyle}>
+                    {/* Chrome header — outside sortable items, site-wide, no move/delete */}
+                    {spec.chrome?.header && (
+                        <BlockTargetContext.Provider value={{ kind: 'chrome', position: 'header' }}>
+                            <ChromeActionsGuard>
+                                <div data-chrome-section="header">
+                                    <SectionShell tone={spec.chrome.header.tone}>
+                                        {renderBlock(spec.chrome.header, 'chrome.header')}
+                                    </SectionShell>
+                                </div>
+                            </ChromeActionsGuard>
+                        </BlockTargetContext.Provider>
+                    )}
+
+                    {/* Page blocks — sortable via DnD */}
                     {spec.blocks.map((block, i) => {
                         const id = sortableIds[i];
                         return (
-                            <BlockIndexContext.Provider key={id} value={i}>
-                                <SectionShell
-                                    tone={block.tone}
-                                    blockId={id}
-                                    blockLabel={block.type}
-                                    blockIndex={i}
-                                    totalBlocks={spec.blocks.length}
-                                    onMoveUp={() => reorderBlocks(i, i - 1)}
-                                    onMoveDown={() => reorderBlocks(i, i + 1)}
-                                    onDelete={() => removeBlock(i)}
-                                >
-                                    {renderBlock(block, `blocks[${i}]`)}
-                                </SectionShell>
-                            </BlockIndexContext.Provider>
+                            <BlockTargetContext.Provider key={id} value={{ kind: 'page', index: i }}>
+                                <BlockIndexContext.Provider value={i}>
+                                    <SectionShell
+                                        tone={block.tone}
+                                        blockId={id}
+                                        blockLabel={block.type}
+                                        blockIndex={i}
+                                        totalBlocks={spec.blocks.length}
+                                        onMoveUp={() => reorderBlocks(i, i - 1)}
+                                        onMoveDown={() => reorderBlocks(i, i + 1)}
+                                        onDelete={() => removeBlock(i)}
+                                    >
+                                        {renderBlock(block, `blocks[${i}]`)}
+                                    </SectionShell>
+                                </BlockIndexContext.Provider>
+                            </BlockTargetContext.Provider>
                         );
                     })}
+
+                    {/* Chrome footer — outside sortable items, site-wide, no move/delete */}
+                    {spec.chrome?.footer && (
+                        <BlockTargetContext.Provider value={{ kind: 'chrome', position: 'footer' }}>
+                            <ChromeActionsGuard>
+                                <div data-chrome-section="footer">
+                                    <SectionShell tone={spec.chrome.footer.tone}>
+                                        {renderBlock(spec.chrome.footer, 'chrome.footer')}
+                                    </SectionShell>
+                                </div>
+                            </ChromeActionsGuard>
+                        </BlockTargetContext.Provider>
+                    )}
                 </div>
             </SortableContext>
         </DndContext>

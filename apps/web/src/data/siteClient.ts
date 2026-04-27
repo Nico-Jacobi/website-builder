@@ -1,4 +1,4 @@
-import type { BlockSpec, SiteSpec, Tone } from '@website-builder/shared';
+import type { BlockSpec, SiteSpec, Tone, SitemapEntry, SiteChrome, Sitemap } from '@website-builder/shared';
 import { SiteSpecSchema } from '@website-builder/shared';
 
 /**
@@ -262,6 +262,53 @@ export async function fetchSiteMeta(identifier: string): Promise<SiteMeta> {
     );
     await ensureOk(resp, 'fetchSiteMeta');
     return resp.json() as Promise<SiteMeta>;
+}
+
+// --- Generation meta (sitemap + pages-with-status + chrome) ---------------
+
+export interface SiteGenerationMetaResponse {
+    sitemap: Sitemap | null;
+    chrome: SiteChrome | null;
+    initialPrompt: string | null;
+    pages: Array<{ path: string; status: string; metaDesc?: string }>;
+}
+
+export async function fetchSiteGenerationMeta(identifier: string): Promise<SiteGenerationMetaResponse> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}`,
+    );
+    await ensureOk(resp, 'fetchSiteGenerationMeta');
+    return resp.json() as Promise<SiteGenerationMetaResponse>;
+}
+
+// --- Page management -------------------------------------------------------
+
+export async function addPage(identifier: string, entry: SitemapEntry): Promise<void> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/pages`,
+        {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(entry),
+        },
+    );
+    await ensureOk(resp, 'addPage');
+}
+
+export async function deletePage(identifier: string, path: string): Promise<void> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/pages/${encodeURIComponent(path)}`,
+        { method: 'DELETE' },
+    );
+    await ensureOk(resp, 'deletePage');
+}
+
+export async function regeneratePage(identifier: string, path: string): Promise<void> {
+    const resp = await fetch(
+        `${apiBase}/api/sites/${encodeURIComponent(identifier)}/pages/${encodeURIComponent(path)}/regenerate`,
+        { method: 'POST' },
+    );
+    await ensureOk(resp, 'regeneratePage');
 }
 
 export async function fetchSiteSpec(identifier: string, path: string = '/'): Promise<SiteSpec> {
