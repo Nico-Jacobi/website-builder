@@ -6,6 +6,7 @@ import { createLogCollector } from './logCollector';
 import type { ChatHistoryEntry, LLMTrace, LogEntry } from './types';
 import { assembleSpec } from '../assembleSpec';
 import { loadSitemap } from '../sites/pageOps';
+import { setSiteChrome } from '../sites/setSiteChrome';
 
 export const REFINE_HISTORY_MAX = 10;
 
@@ -17,10 +18,11 @@ export interface PageRefineArgs {
 }
 
 export interface PageRefineResult {
-    theme?: Record<string, string>;
-    blocks: BlockSpec[];
-    log: LogEntry[];
-    trace: LLMTrace | null;
+    theme?:  Record<string, string>;
+    blocks:  BlockSpec[];
+    chrome?: SiteChrome;
+    log:     LogEntry[];
+    trace:   LLMTrace | null;
 }
 
 /**
@@ -80,8 +82,8 @@ export async function refineSpec(args: PageRefineArgs): Promise<PageRefineResult
         };
     }
 
-    // Parse with PageRefineOutputSchema to get {theme?, blocks}
-    let validated: { theme?: Record<string, string>; blocks: BlockSpec[] };
+    // Parse with PageRefineOutputSchema to get {theme?, blocks, chrome?}
+    let validated: { theme?: Record<string, string>; blocks: BlockSpec[]; chrome?: SiteChrome };
     try {
         const raw: unknown = JSON.parse(core.rawText);
         validated = PageRefineOutputSchema.parse(raw);
@@ -91,7 +93,6 @@ export async function refineSpec(args: PageRefineArgs): Promise<PageRefineResult
     }
 
     try {
-        // fillImages operates on the SiteSpec shape — create a minimal spec for it
         await fillImages({ blocks: validated.blocks }, collector);
     } catch (err) {
         collector.log(
@@ -100,11 +101,22 @@ export async function refineSpec(args: PageRefineArgs): Promise<PageRefineResult
         );
     }
 
+    // If the LLM updated chrome, persist it to DB immediately.
+    const outChrome = validated.chrome ?? fullSpec.chrome;
+    if (validated.chrome) {
+        try {
+            await setSiteChrome(args.siteIdentifier, validated.chrome);
+        } catch (err) {
+            collector.log('warn', `Chrome-Persist fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`);
+        }
+    }
+
     return {
-        theme: validated.theme,
+        theme:  validated.theme,
         blocks: validated.blocks,
-        log: collector.getLog(),
-        trace: collector.getTrace(),
+        chrome: outChrome,
+        log:    collector.getLog(),
+        trace:  collector.getTrace(),
     };
 }
 

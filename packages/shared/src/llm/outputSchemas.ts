@@ -18,10 +18,11 @@ export const SubpageOutputSchema = z.object({
 });
 export type SubpageOutput = z.infer<typeof SubpageOutputSchema>;
 
-/** Output of mode 'refine': updated page blocks (optional theme). */
+/** Output of mode 'refine': updated page blocks (optional theme + optional chrome). */
 export const PageRefineOutputSchema = z.object({
     theme:        z.record(z.string(), z.string()).optional(),
     blocks:       z.array(BlockSpecSchema),
+    chrome:       SiteChromeSchema.optional(),
     _explanation: z.string().optional(),
 });
 export type PageRefineOutput = z.infer<typeof PageRefineOutputSchema>;

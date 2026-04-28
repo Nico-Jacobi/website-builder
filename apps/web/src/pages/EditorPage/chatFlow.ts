@@ -11,7 +11,6 @@ import type { ChatHistoryEntry, GenerateResult, RefineResult } from '../../llm/t
 import type { ApplyResult } from './applyPatchOps';
 import type { RejectedOp } from '../../diff/types';
 import type { StreamEvent } from '../../data/useGenerationStream';
-import type { RefineScope } from './chat/RefineScopeToggle';
 
 /** Maximum number of turns we ship to the LLM — matches REFINE_HISTORY_MAX. */
 export const CHAT_HISTORY_MAX = 10;
@@ -94,7 +93,7 @@ export function summarizeApply(
     rejected:    RejectedOp[],
     explanation: string,
     initial?:    { durationMs: number },
-    scope?:      RefineScope,
+    _scope?:     string,
     pagePath?:   string,
 ): ApplySummary {
     const parts: string[] = [];
@@ -107,9 +106,7 @@ export function summarizeApply(
             const seconds = Math.max(1, Math.round(initial.durationMs / 1000));
             parts.push(`Website nach ${seconds}s generiert.`);
         } else if (apply.applied > 0) {
-            if (scope === 'chrome') {
-                parts.push(`Header/Footer aktualisiert (${apply.applied} Op${apply.applied === 1 ? '' : 's'}).`);
-            } else if (scope === 'page' && pagePath) {
+            if (pagePath) {
                 parts.push(`Page ${pagePath} aktualisiert (${apply.applied} Op${apply.applied === 1 ? '' : 's'}).`);
             } else {
                 parts.push(`Angewendet: ${apply.applied} Änderung${apply.applied === 1 ? '' : 'en'}.`);

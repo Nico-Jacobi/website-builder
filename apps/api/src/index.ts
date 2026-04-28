@@ -5,6 +5,11 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { sitesRouter } from './routes/sites';
 import { llmRouter } from './routes/llm';
+import { runMigrations } from './db/migrate';
+
+const url = process.env.DATABASE_URL;
+if (!url) throw new Error('DATABASE_URL is not set');
+await runMigrations(url);
 
 const app = new Hono();
 

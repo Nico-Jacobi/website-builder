@@ -2,11 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { refineSpec } from './refineSpec';
 import { clearLog } from './logger';
 import { clearTrace } from './llmTrace';
-import type { SiteSpec } from '@website-builder/shared';
 
 const originalFetch = globalThis.fetch;
-
-const emptySpec: SiteSpec = { blocks: [] };
 
 beforeEach(() => {
     clearLog();
@@ -16,6 +13,13 @@ beforeEach(() => {
 afterEach(() => {
     globalThis.fetch = originalFetch;
 });
+
+const baseArgs = {
+    siteIdentifier: 'test-site',
+    pagePath:       '/',
+    history:        [] as { role: 'user' | 'assistant'; content: string }[],
+    userMessage:    'add a header',
+};
 
 describe('refineSpec (frontend fetch wrapper)', () => {
     it('returns ok with nextSpec + explanation from backend', async () => {
@@ -30,11 +34,7 @@ describe('refineSpec (frontend fetch wrapper)', () => {
             .fn()
             .mockResolvedValue(new Response(JSON.stringify(fakeResp), { status: 200 })) as unknown as typeof fetch;
 
-        const result = await refineSpec({
-            currentSpec: emptySpec,
-            history:     [],
-            userMessage: 'add a header',
-        });
+        const result = await refineSpec(baseArgs);
         expect(result.kind).toBe('ok');
         if (result.kind === 'ok') {
             expect(result.nextSpec.blocks).toHaveLength(1);
@@ -44,15 +44,12 @@ describe('refineSpec (frontend fetch wrapper)', () => {
 
     it('returns api_error when fetch rejects', async () => {
         globalThis.fetch = vi.fn().mockRejectedValue(new Error('network down')) as unknown as typeof fetch;
-        const result = await refineSpec({
-            currentSpec: emptySpec,
-            history:     [],
-            userMessage: 'anything',
-        });
+        const result = await refineSpec(baseArgs);
         expect(result.kind).toBe('api_error');
     });
 
     it('sends the correct body shape to /api/llm/refine', async () => {
+        const args = { ...baseArgs, history: [{ role: 'user' as const, content: 'first' }], userMessage: 'second' };
         const spy = vi.fn().mockResolvedValue(
             new Response(
                 JSON.stringify({ kind: 'ok', nextSpec: { blocks: [] }, explanation: '', log: [], trace: null }),
@@ -60,20 +57,12 @@ describe('refineSpec (frontend fetch wrapper)', () => {
             ),
         );
         globalThis.fetch = spy as unknown as typeof fetch;
-        await refineSpec({
-            currentSpec: emptySpec,
-            history:     [{ role: 'user', content: 'first' }],
-            userMessage: 'second',
-        });
+        await refineSpec(args);
         expect(spy).toHaveBeenCalledWith(
             expect.stringContaining('/api/llm/refine'),
             expect.objectContaining({
                 method: 'POST',
-                body:   JSON.stringify({
-                    currentSpec: emptySpec,
-                    history:     [{ role: 'user', content: 'first' }],
-                    userMessage: 'second',
-                }),
+                body:   JSON.stringify(args),
             }),
         );
     });

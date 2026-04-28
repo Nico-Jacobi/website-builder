@@ -9,19 +9,14 @@ import type { FormEvent, KeyboardEvent } from 'react';
 import { ArrowUp } from 'lucide-react';
 import './ChatPanel.css';
 import type { ChatMessage, ChatStatus } from './types';
-import { RefineScopeToggle } from './RefineScopeToggle';
-import type { RefineScope } from './RefineScopeToggle';
 
 export interface ChatPanelProps {
-    messages:       ChatMessage[];
-    status:         ChatStatus;
-    onSubmit:       (userMessage: string) => Promise<void>;
-    refineScope:    RefineScope;
-    onScopeChange:  (scope: RefineScope) => void;
-    activePagePath: string;
+    messages:  ChatMessage[];
+    status:    ChatStatus;
+    onSubmit:  (userMessage: string) => Promise<void>;
 }
 
-export function ChatPanel({ messages, status, onSubmit, refineScope, onScopeChange, activePagePath }: ChatPanelProps) {
+export function ChatPanel({ messages, status, onSubmit }: ChatPanelProps) {
     const [draft, setDraft] = useState<string>('');
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -66,11 +61,6 @@ export function ChatPanel({ messages, status, onSubmit, refineScope, onScopeChan
                     </div>
                 )}
             </div>
-            <RefineScopeToggle
-                value={refineScope}
-                onChange={onScopeChange}
-                activePagePath={activePagePath}
-            />
             <form className="chat_panel__input" onSubmit={handleSubmit}>
                 <textarea
                     className="chat_panel__textarea"

@@ -46,7 +46,7 @@ llmRouter.post('/generate', async (c) => {
     return c.json({ identifier: parsed.data.identifier, status: 'started' }, 202);
 });
 
-/** Page-scoped Refinement: LLM bekommt Page-Blocks + locked chrome/sitemap, liefert updated Page-Blocks. */
+/** Page-scoped Refinement: LLM bekommt Page-Blocks + chrome/sitemap, liefert updated blocks + optional chrome. */
 llmRouter.post('/refine', async (c) => {
     let body: unknown;
     try {
@@ -60,7 +60,16 @@ llmRouter.post('/refine', async (c) => {
     }
 
     const result = await refineSpec(parsed.data);
-    return c.json(result, 200);
+    return c.json({
+        kind:    'ok',
+        nextSpec: {
+            theme:  result.theme,
+            blocks: result.blocks,
+            chrome: result.chrome,
+        },
+        log:   result.log,
+        trace: result.trace,
+    }, 200);
 });
 
 /** Chrome-Refinement: LLM bekommt aktuelles Chrome + locked theme/sitemap, liefert updated chrome. */

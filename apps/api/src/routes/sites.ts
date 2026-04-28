@@ -125,9 +125,12 @@ sitesRouter.get('/:identifier', async (c) => {
         identifier:    site.identifier,
         name:          site.name,
         theme:         site.theme ?? null,
+        sitemap:       site.sitemap ?? null,
+        chrome:        site.chrome ?? null,
         initialPrompt: site.initialPrompt ?? null,
         pages: pages.map((p) => ({
             path:      p.path,
+            status:    p.status,
             metaDesc:  p.metaDesc,
             published: p.published,
         })),

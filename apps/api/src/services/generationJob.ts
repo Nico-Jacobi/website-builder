@@ -3,7 +3,6 @@ import { eq } from 'drizzle-orm';
 import { db, schema } from '../db/client';
 import type { Sitemap } from '@website-builder/shared';
 import { insertPage, replacePageBlocksTx, replacePageBlocks, setPageStatus, getPageId } from './sites/pageOps';
-import { setSiteChrome } from './sites/setSiteChrome';
 import { generateLandingAndSitemap } from './llm/generateLandingAndSitemap';
 import type { LandingAndSitemapResult } from './llm/generateLandingAndSitemap';
 import { generateSubpage } from './llm/generateSubpage';
@@ -154,7 +153,7 @@ async function runJob(
             state.setPageStatus(entry.path, 'pending');
         }
 
-        await withLimit(3, subpageEntries, async (entry) => {
+        const subpageResults = await withLimit(3, subpageEntries, async (entry) => {
             state.setPageStatus(entry.path, 'generating');
             const pageId = await getPageId(identifier, entry.path);
             await setPageStatus(pageId, 'generating');
@@ -184,7 +183,16 @@ async function runJob(
             }
         });
 
-        events.emit('event', { type: 'complete' } satisfies JobEvent);
+        const anyFailed = subpageResults.some((r) => !r.ok);
+        if (anyFailed) {
+            const failCount = subpageResults.filter((r) => !r.ok).length;
+            events.emit('event', {
+                type: 'error',
+                reason: `${failCount} page(s) failed to generate — use Retry in the sidebar.`,
+            } satisfies JobEvent);
+        } else {
+            events.emit('event', { type: 'complete' } satisfies JobEvent);
+        }
     } catch (error) {
         events.emit('event', { type: 'error', reason: String(error) } satisfies JobEvent);
     }
@@ -207,12 +215,13 @@ async function persistLandingPhase(
     const siteId = site.id;
 
     await db.transaction(async (tx) => {
-        // Update theme + sitemap on the site row
+        // Update theme + sitemap + chrome on the site row (atomic)
         await tx
             .update(schema.sites)
             .set({
                 theme: phase.theme ?? null,
                 sitemap: phase.sitemap,
+                chrome: phase.chrome,
             })
             .where(eq(schema.sites.identifier, identifier));
 
@@ -225,9 +234,6 @@ async function persistLandingPhase(
         // Write landing page blocks (transactional)
         await replacePageBlocksTx(tx, identifier, '/', phase.landingBlocks);
     });
-
-    // Chrome is set outside the main TX (setSiteChrome opens its own TX)
-    await setSiteChrome(identifier, phase.chrome);
 }
 
 // ---------------------------------------------------------------------------

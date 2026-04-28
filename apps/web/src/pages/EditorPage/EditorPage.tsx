@@ -21,8 +21,7 @@ import { diffSpecs } from '../../diff/diffSpecs';
 import { detectConflicts } from '../../diff/detectConflicts';
 import { startGeneration } from '../../llm/generateSpec';
 import { useGenerationStream } from '../../data/useGenerationStream';
-import { PageSwitcher } from './PageSwitcher/PageSwitcher';
-import { refineSpec, refineChrome } from '../../llm/refineSpec';
+import { refineSpec } from '../../llm/refineSpec';
 import { clearLog } from '../../llm/logger';
 import { clearTrace } from '../../llm/llmTrace';
 import {
@@ -31,7 +30,6 @@ import {
     summarizeGenerationEvent,
     toHistoryEntries,
 } from './chatFlow';
-import type { RefineScope } from './chat/RefineScopeToggle';
 
 type FetchStatus =
     | { kind: 'loading' }
@@ -46,35 +44,49 @@ export function EditorPage() {
     const [siteName, setSiteName] = useState<string>('');
     const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ kind: 'loading' });
     const [chatBusy, setChatBusy] = useState<boolean>(false);
-    const [refineScope, setRefineScope] = useState<RefineScope>('page');
     const inFlightRef = useRef<boolean>(false);
     const durationsRef = useRef<Map<string, { start: number; end?: number }>>(new Map());
+    const [specRefreshKey, setSpecRefreshKey] = useState(0);
 
     // --- Site-Fetch -------------------------------------------------------
     useEffect(() => {
         if (!identifier) return;
         let cancelled = false;
-        setFetchStatus({ kind: 'loading' });
+        // Only show the loading spinner on first load (no spec yet).
+        if (spec === null) setFetchStatus({ kind: 'loading' });
 
-        Promise.all([fetchSiteSpec(identifier, activePagePath), fetchSiteMeta(identifier)])
-            .then(([loadedSpec, meta]) => {
-                if (cancelled) return;
-                setSpec(loadedSpec);
-                setSiteName(meta.name);
+        void (async () => {
+            const [specResult, metaResult] = await Promise.allSettled([
+                fetchSiteSpec(identifier, activePagePath),
+                fetchSiteMeta(identifier),
+            ]);
+            if (cancelled) return;
+
+            if (metaResult.status === 'rejected') {
+                const err = metaResult.reason;
+                setFetchStatus({ kind: 'error', message: err instanceof Error ? err.message : String(err) });
+                return;
+            }
+            setSiteName(metaResult.value.name);
+
+            if (specResult.status === 'rejected') {
+                const msg = specResult.reason instanceof Error ? specResult.reason.message : String(specResult.reason);
+                // 404 = page not generated yet; show empty canvas and let the SSE stream update us.
+                if (msg.includes('site or page not found')) {
+                    setSpec((prev) => prev ?? { blocks: [] });
+                    setFetchStatus({ kind: 'ok' });
+                } else {
+                    setFetchStatus({ kind: 'error', message: msg });
+                }
+            } else {
+                setSpec(specResult.value);
                 setFetchStatus({ kind: 'ok' });
-            })
-            .catch((err: unknown) => {
-                if (cancelled) return;
-                setFetchStatus({
-                    kind:    'error',
-                    message: err instanceof Error ? err.message : String(err),
-                });
-            });
+            }
+        })();
 
-        return () => {
-            cancelled = true;
-        };
-    }, [identifier, activePagePath]);
+        return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [identifier, activePagePath, specRefreshKey]);
 
     // --- Trace/Log-Reset bei Site-Wechsel ---------------------------------
     useEffect(() => {
@@ -135,6 +147,9 @@ export function EditorPage() {
     // Basiert auf fetchSiteGenerationMeta (DB-Abfrage) statt spec.blocks.length,
     // da Subpages am Anfang leer sein können (blocks=[] ist kein sicherer Indikator).
     const autoTriggeredRef = useRef<boolean>(false);
+    // True from the moment we call startGeneration until the SSE stream confirms
+    // landing_started (at which point stream.state.isGenerating takes over).
+    const [generationPending, setGenerationPending] = useState(false);
 
     // Auto-Trigger: Check sitemap directly from DB on mount. If sitemap === null
     // and initialPrompt is set, kick off initial generation via SSE-driven startGeneration.
@@ -150,6 +165,7 @@ export function EditorPage() {
                 if (!meta.initialPrompt) return;
                 if (meta.sitemap !== null) return; // already generated
                 autoTriggeredRef.current = true;
+                setGenerationPending(true);
                 void startGeneration(identifier, meta.initialPrompt);
             })
             .catch(() => { /* ignore — main fetch handles the error display */ });
@@ -160,6 +176,16 @@ export function EditorPage() {
     // --- SSE → Chat-Feed Listener ----------------------------------------
     useEffect(() => {
         return stream.subscribe(event => {
+            // Once the stream confirms generation is running, the pending flag is no longer needed.
+            if (
+                event.type === 'landing_started' ||
+                event.type === 'complete' ||
+                event.type === 'error' ||
+                (event.type === 'snapshot' && event.pages.some(p => p.status === 'generating' || p.status === 'pending'))
+            ) {
+                setGenerationPending(false);
+            }
+
             // Track durations for timing summaries
             if (event.type === 'landing_started') {
                 durationsRef.current.set('/', { start: performance.now() });
@@ -168,6 +194,8 @@ export function EditorPage() {
             } else if (event.type === 'landing_done') {
                 const e = durationsRef.current.get('/');
                 if (e) e.end = performance.now();
+                // Landing page is now in the DB — refresh the spec.
+                setSpecRefreshKey(k => k + 1);
             } else if (event.type === 'subpage_done' || event.type === 'subpage_failed') {
                 const e = durationsRef.current.get(event.path);
                 if (e) e.end = performance.now();
@@ -193,105 +221,49 @@ export function EditorPage() {
 
             const historyEntries = toHistoryEntries(chat.messages);
 
-            if (refineScope === 'chrome') {
-                // Chrome-refinement: update header/footer for all pages
-                let chromeResult: Awaited<ReturnType<typeof refineChrome>>;
-                try {
-                    chromeResult = await refineChrome({
-                        siteIdentifier: identifier,
-                        history:        historyEntries,
-                        userMessage,
-                    });
-                } catch (err) {
-                    await chat.appendSystem(
-                        `Chrome-Refinement fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`,
-                    );
-                    return;
-                }
+            const llmResult = await refineSpec({
+                siteIdentifier: identifier,
+                pagePath:       activePagePath,
+                history:        historyEntries,
+                userMessage,
+            });
 
-                const nextSpecWithChrome: SiteSpec = { ...spec, chrome: chromeResult.chrome };
-                const ops = diffSpecs(spec, nextSpecWithChrome);
+            if (llmResult.kind !== 'ok') {
+                await chat.appendSystem(formatLLMError(llmResult));
+                return;
+            }
 
-                if (ops.length === 0) {
-                    await chat.appendAssistant('Keine Änderungen am Header/Footer.');
-                    return;
-                }
+            const ops = diffSpecs(spec, llmResult.nextSpec);
+            if (ops.length === 0) {
+                await chat.appendAssistant(llmResult.explanation || 'Keine Änderungen.');
+                return;
+            }
 
-                const { apply, rejected } = detectConflicts(ops, tracker.snapshot());
+            const { apply, rejected } = detectConflicts(ops, tracker.snapshot());
 
-                const applyResult = await applyPatchOps({
-                    ops:         apply,
-                    currentSpec: spec,
-                    identifier,
-                    blockOps,
-                });
+            const applyResult = await applyPatchOps({
+                ops:         apply,
+                currentSpec: spec,
+                identifier,
+                blockOps,
+            });
 
-                setSpec(applyResult.nextSpec);
+            setSpec(applyResult.nextSpec);
 
-                const summary = summarizeApply(
-                    applyResult,
-                    rejected,
-                    '',
-                    undefined,
-                    'chrome',
-                    activePagePath,
-                );
-                await chat.appendAssistant(summary.assistant, {
-                    applied:  applyResult.applied,
-                    rejected: rejected.length,
-                });
-                if (rejected.length > 0) {
-                    await chat.appendSystem(summary.conflictWarning);
-                }
-            } else {
-                // Page-scoped refinement
-                const llmResult = await refineSpec({
-                    siteIdentifier: identifier,
-                    pagePath:       activePagePath,
-                    history:        historyEntries,
-                    userMessage,
-                });
-
-                if (llmResult.kind !== 'ok') {
-                    await chat.appendSystem(formatLLMError(llmResult));
-                    return;
-                }
-
-                const ops = diffSpecs(spec, llmResult.nextSpec);
-                if (ops.length === 0) {
-                    await chat.appendAssistant(
-                        llmResult.explanation || 'Keine Änderungen.',
-                    );
-                    return;
-                }
-
-                const { apply, rejected } = detectConflicts(ops, tracker.snapshot());
-
-                const applyResult = await applyPatchOps({
-                    ops:         apply,
-                    currentSpec: spec,
-                    identifier,
-                    blockOps,
-                });
-
-                setSpec(applyResult.nextSpec);
-
-                const summary = summarizeApply(
-                    applyResult,
-                    rejected,
-                    llmResult.explanation,
-                    undefined,
-                    'page',
-                    activePagePath,
-                );
-                await chat.appendAssistant(summary.assistant, {
-                    applied:  applyResult.applied,
-                    rejected: rejected.length,
-                });
-                if (rejected.length > 0) {
-                    await chat.appendSystem(summary.conflictWarning);
-                }
-
+            const summary = summarizeApply(
+                applyResult,
+                rejected,
+                llmResult.explanation,
+                undefined,
+                'page',
+                activePagePath,
+            );
+            await chat.appendAssistant(summary.assistant, {
+                applied:  applyResult.applied,
+                rejected: rejected.length,
+            });
+            if (rejected.length > 0) {
+                await chat.appendSystem(summary.conflictWarning);
             }
         } finally {
             setChatBusy(false);
@@ -326,10 +298,12 @@ export function EditorPage() {
 
     const chatStatus = chatBusy ? 'sending' : chat.status;
 
-    // Show loading overlay only while landing page is not yet ready.
-    // Once landing is done, show the preview (subpages load in background).
+    // Show loading overlay while landing page is not yet ready.
+    // generationPending covers the gap between startGeneration() and the first SSE event.
     const landingStatus = stream.state.pages.get('/');
-    const showLoadingOverlay = stream.state.isGenerating && landingStatus !== 'ready' && (!spec || spec.blocks.length === 0);
+    const showLoadingOverlay =
+        (generationPending || (stream.state.isGenerating && landingStatus !== 'ready')) &&
+        (!spec || spec.blocks.length === 0);
 
     return (
         <EditModeProvider
@@ -351,14 +325,10 @@ export function EditorPage() {
                 />
                 <div className="editor_page__body">
                     <aside className="editor_page__chat_slot">
-                        <PageSwitcher identifier={identifier} stream={stream} />
                         <ChatPanel
                             messages={chat.messages}
                             status={chatStatus}
                             onSubmit={handleChatSubmit}
-                            refineScope={refineScope}
-                            onScopeChange={setRefineScope}
-                            activePagePath={activePagePath}
                         />
                     </aside>
                     <main className="editor_page__preview">

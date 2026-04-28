@@ -54,12 +54,13 @@ function FeatureTile({
     feature: FeatureItem;
     index: number;
 }) {
+    const iconEdit    = useEditableText(`features[${index}].icon`);
     const headingEdit = useEditableText(`features[${index}].heading`);
     const bodyEdit    = useEditableText(`features[${index}].body`);
 
     return (
         <div className="feature_grid__tile">
-            <span className="feature_grid__icon" aria-hidden="true">
+            <span className="feature_grid__icon" {...iconEdit}>
                 {feature.icon}
             </span>
             <h3 className="feature_grid__tile-heading" {...headingEdit}>

@@ -35,6 +35,7 @@ import type { BlockSpec, SiteSpec } from '@website-builder/shared';
 import type { PatchOp } from '../../diff/types';
 import { setNestedProp } from '../../builder/propPath';
 import { patchBlockContent } from '../../data/siteClient';
+import { scheduleChromeSave } from '../../data/autoSave';
 import type { BlockOpsAdapter } from '../../data/blockOps';
 import {
     mapBlocks,
@@ -162,8 +163,7 @@ async function applyOne(
         }
 
         case 'updateChrome': {
-            // Chrome updates are applied locally; persistence is handled by
-            // the chrome-specific endpoint (see Plan 03.3 / AutoSave routing).
+            scheduleChromeSave(identifier, op.chrome);
             return { ...spec, chrome: op.chrome };
         }
 
