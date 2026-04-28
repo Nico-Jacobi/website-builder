@@ -1,3 +1,11 @@
+.renderer__ghost-block {
+    opacity: 0.5;
+    outline: 2px dashed var(--primary);
+    outline-offset: -2px;
+    pointer-events: none;
+    user-select: none;
+}
+
 .builder__error {
     padding: var(--space_md);
     margin: var(--space_sm) 0;

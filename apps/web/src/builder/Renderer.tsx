@@ -1,23 +1,15 @@
-import { Fragment, type CSSProperties, type ReactNode } from 'react';
+import { Fragment, useContext, type CSSProperties, type ReactNode } from 'react';
 import './Renderer.css';
 import {
-    DndContext,
-    PointerSensor,
-    KeyboardSensor,
-    useSensor,
-    useSensors,
-    closestCenter,
-    type DragEndEvent,
-} from '@dnd-kit/core';
-import {
     SortableContext,
-    sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 import { SectionShell } from '../elements/shared/SectionShell';
 import { BlockIndexContext, useEditModeActions } from './editModeStore';
 import { BlockTargetContext } from './blockTarget';
 import { ChromeActionsGuard } from './EditModeContext';
+import { DropIndicatorContext, PaletteModuleTypeContext } from './EditorDndProvider';
 import { getModule } from './registry';
 import type { BlockSpec, SiteSpec } from './schemas';
 
@@ -46,77 +38,97 @@ export default function Renderer({ spec }: { spec: SiteSpec }) {
     const themeStyle = themeToCssVars(spec.theme);
     const { reorderBlocks, removeBlock } = useEditModeActions();
 
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-    );
+    const paletteModuleType = useContext(PaletteModuleTypeContext);
+    const dropIndicator = useContext(DropIndicatorContext);
+
+    // Compute where to render the ghost block preview (null = not dragging from palette).
+    let ghostIndex: number | null = null;
+    if (paletteModuleType && dropIndicator) {
+        ghostIndex = dropIndicator.position === 'before'
+            ? dropIndicator.blockIndex
+            : dropIndicator.blockIndex + 1;
+    }
 
     const sortableIds = spec.blocks.map((b, i) => b.id ?? `idx_${i}`);
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        if (!over || active.id === over.id) return;
-        const from = sortableIds.indexOf(String(active.id));
-        const to = sortableIds.indexOf(String(over.id));
-        if (from === -1 || to === -1) return;
-        reorderBlocks(from, to);
-    };
+    const { setNodeRef: setCanvasRef } = useDroppable({ id: 'canvas-drop-zone' });
 
     return (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-                <div className="vertical_layout" style={themeStyle}>
-                    {/* Chrome header — outside sortable items, site-wide, no move/delete */}
-                    {spec.chrome?.header && (
-                        <BlockTargetContext.Provider value={{ kind: 'chrome', position: 'header' }}>
-                            <ChromeActionsGuard>
-                                <div data-chrome-section="header">
-                                    <SectionShell tone={spec.chrome.header.tone}>
-                                        {renderBlock(spec.chrome.header, 'chrome.header')}
-                                    </SectionShell>
-                                </div>
-                            </ChromeActionsGuard>
-                        </BlockTargetContext.Provider>
-                    )}
+        <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+            <div ref={setCanvasRef} className="vertical_layout" style={themeStyle}>
+                {/* Chrome header — outside sortable items, site-wide, no move/delete */}
+                {spec.chrome?.header && (
+                    <BlockTargetContext.Provider value={{ kind: 'chrome', position: 'header' }}>
+                        <ChromeActionsGuard>
+                            <div data-chrome-section="header">
+                                <SectionShell tone={spec.chrome.header.tone}>
+                                    {renderBlock(spec.chrome.header, 'chrome.header')}
+                                </SectionShell>
+                            </div>
+                        </ChromeActionsGuard>
+                    </BlockTargetContext.Provider>
+                )}
 
-                    {/* Page blocks — sortable via DnD */}
-                    {spec.blocks.map((block, i) => {
-                        const id = sortableIds[i];
-                        return (
-                            <BlockTargetContext.Provider key={id} value={{ kind: 'page', index: i }}>
-                                <BlockIndexContext.Provider value={i}>
-                                    <SectionShell
-                                        tone={block.tone}
-                                        blockId={id}
-                                        blockLabel={block.type}
-                                        blockIndex={i}
-                                        totalBlocks={spec.blocks.length}
-                                        onMoveUp={() => reorderBlocks(i, i - 1)}
-                                        onMoveDown={() => reorderBlocks(i, i + 1)}
-                                        onDelete={() => removeBlock(i)}
-                                    >
-                                        {renderBlock(block, `blocks[${i}]`)}
-                                    </SectionShell>
-                                </BlockIndexContext.Provider>
-                            </BlockTargetContext.Provider>
-                        );
-                    })}
-
-                    {/* Chrome footer — outside sortable items, site-wide, no move/delete */}
-                    {spec.chrome?.footer && (
-                        <BlockTargetContext.Provider value={{ kind: 'chrome', position: 'footer' }}>
-                            <ChromeActionsGuard>
-                                <div data-chrome-section="footer">
-                                    <SectionShell tone={spec.chrome.footer.tone}>
-                                        {renderBlock(spec.chrome.footer, 'chrome.footer')}
-                                    </SectionShell>
-                                </div>
-                            </ChromeActionsGuard>
+                {/* Page blocks — sortable via DnD */}
+                {spec.blocks.flatMap((block, i) => {
+                    const id = sortableIds[i];
+                    const blockEl = (
+                        <BlockTargetContext.Provider key={id} value={{ kind: 'page', index: i }}>
+                            <BlockIndexContext.Provider value={i}>
+                                <SectionShell
+                                    tone={block.tone}
+                                    blockId={id}
+                                    blockLabel={block.type}
+                                    blockIndex={i}
+                                    totalBlocks={spec.blocks.length}
+                                    onMoveUp={() => reorderBlocks(i, i - 1)}
+                                    onMoveDown={() => reorderBlocks(i, i + 1)}
+                                    onDelete={() => removeBlock(i)}
+                                >
+                                    {renderBlock(block, `blocks[${i}]`)}
+                                </SectionShell>
+                            </BlockIndexContext.Provider>
                         </BlockTargetContext.Provider>
-                    )}
-                </div>
-            </SortableContext>
-        </DndContext>
+                    );
+
+                    if (ghostIndex === i) {
+                        return [
+                            <GhostBlock key="__palette_ghost__" moduleType={paletteModuleType!} />,
+                            blockEl,
+                        ];
+                    }
+                    return [blockEl];
+                })}
+
+                {/* Ghost at the end when dropping after the last block */}
+                {ghostIndex === spec.blocks.length && (
+                    <GhostBlock key="__palette_ghost__" moduleType={paletteModuleType!} />
+                )}
+
+                {/* Chrome footer — outside sortable items, site-wide, no move/delete */}
+                {spec.chrome?.footer && (
+                    <BlockTargetContext.Provider value={{ kind: 'chrome', position: 'footer' }}>
+                        <ChromeActionsGuard>
+                            <div data-chrome-section="footer">
+                                <SectionShell tone={spec.chrome.footer.tone}>
+                                    {renderBlock(spec.chrome.footer, 'chrome.footer')}
+                                </SectionShell>
+                            </div>
+                        </ChromeActionsGuard>
+                    </BlockTargetContext.Provider>
+                )}
+            </div>
+        </SortableContext>
+    );
+}
+
+function GhostBlock({ moduleType }: { moduleType: string }) {
+    const module = getModule(moduleType);
+    if (!module) return null;
+    return (
+        // inert makes the entire subtree non-interactive (no clicks, focus, pointer events)
+        <div className="renderer__ghost-block" aria-hidden="true" inert>
+            {renderBlock({ type: moduleType, props: module.defaults as Record<string, unknown> }, '__ghost__')}
+        </div>
     );
 }
 

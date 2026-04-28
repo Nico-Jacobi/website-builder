@@ -78,9 +78,20 @@
     border-radius: var(--ui_radius_sm);
     color: var(--ui_text);
     text-align: left;
-    cursor: pointer;
+    cursor: grab;
     transition: background var(--ui_dur) var(--ui_ease),
                 border-color var(--ui_dur) var(--ui_ease);
+}
+
+.module-palette__card--dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.module-palette__card--ghost {
+    opacity: 0.85;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    pointer-events: none;
 }
 
 .module-palette__card:hover {

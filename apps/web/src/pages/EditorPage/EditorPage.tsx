@@ -14,6 +14,7 @@ import type { BlockOpsAdapter } from '../../data/blockOps';
 import type { AutoSaveAdapter, SaveStatus } from '../../builder/autoSaveTypes';
 import { ChatPanel } from './chat/ChatPanel';
 import { ModulePalette } from './ModulePalette';
+import { EditorDndProvider } from '../../builder/EditorDndProvider';
 import { useChatHistory } from './chat/useChatHistory';
 import { useInlineEditTracker } from './useInlineEditTracker';
 import { applyPatchOps } from './applyPatchOps';
@@ -193,12 +194,18 @@ export function EditorPage() {
                 durationsRef.current.set(event.path, { start: performance.now() });
             } else if (event.type === 'landing_done') {
                 const e = durationsRef.current.get('/');
-                if (e) e.end = performance.now();
+                if (e) {
+                    e.end = performance.now();
+                }
                 // Landing page is now in the DB — refresh the spec.
                 setSpecRefreshKey(k => k + 1);
             } else if (event.type === 'subpage_done' || event.type === 'subpage_failed') {
-                const e = durationsRef.current.get(event.path);
-                if (e) e.end = performance.now();
+                let e = durationsRef.current.get(event.path);
+                if (!e) {
+                    e = { start: performance.now() };
+                    durationsRef.current.set(event.path, e);
+                }
+                e.end = performance.now();
             }
 
             const msg = summarizeGenerationEvent(event, durationsRef.current);
@@ -324,36 +331,38 @@ export function EditorPage() {
                     blockOps={blockOps}
                 />
                 <div className="editor_page__body">
-                    <aside className="editor_page__chat_slot">
-                        <ChatPanel
-                            messages={chat.messages}
-                            status={chatStatus}
-                            onSubmit={handleChatSubmit}
-                        />
-                    </aside>
-                    <main className="editor_page__preview">
-                        {showLoadingOverlay ? (
-                            <div className="editor_page__preview-loading">
-                                <Loader2
-                                    className="editor_page__preview-loading-spinner"
-                                    size={40}
-                                    strokeWidth={1.75}
-                                    aria-hidden="true"
-                                />
-                                <p className="editor_page__preview-loading-text">
-                                    Generiere deine Website… ca. 18s
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="editor_page__preview-frame">
-                                <EditorPreview
-                                    spec={spec}
-                                    onNavigate={handleNavigate}
-                                />
-                            </div>
-                        )}
-                    </main>
-                    <ModulePalette />
+                    <EditorDndProvider>
+                        <aside className="editor_page__chat_slot">
+                            <ChatPanel
+                                messages={chat.messages}
+                                status={chatStatus}
+                                onSubmit={handleChatSubmit}
+                            />
+                        </aside>
+                        <main className="editor_page__preview">
+                            {showLoadingOverlay ? (
+                                <div className="editor_page__preview-loading">
+                                    <Loader2
+                                        className="editor_page__preview-loading-spinner"
+                                        size={40}
+                                        strokeWidth={1.75}
+                                        aria-hidden="true"
+                                    />
+                                    <p className="editor_page__preview-loading-text">
+                                        Generiere deine Website… ca. 18s
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="editor_page__preview-frame">
+                                    <EditorPreview
+                                        spec={spec}
+                                        onNavigate={handleNavigate}
+                                    />
+                                </div>
+                            )}
+                        </main>
+                        <ModulePalette />
+                    </EditorDndProvider>
                 </div>
             </div>
         </EditModeProvider>
