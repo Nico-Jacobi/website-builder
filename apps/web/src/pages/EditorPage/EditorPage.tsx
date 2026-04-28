@@ -16,6 +16,7 @@ import type { AutoSaveAdapter, SaveStatus } from '../../builder/autoSaveTypes';
 import { ChatPanel } from './chat/ChatPanel';
 import { ModulePalette } from './ModulePalette';
 import { EditorDndProvider } from '../../builder/EditorDndProvider';
+import { LanguageToggle } from '../../builder/LanguageToggle';
 import { useChatHistory } from './chat/useChatHistory';
 import { useInlineEditTracker } from './useInlineEditTracker';
 import { applyPatchOps } from './applyPatchOps';
@@ -435,6 +436,7 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
             </div>
             <div className="editor_page__header-actions">
                 <SaveStatusIndicator status={status} />
+                <LanguageToggle />
                 <EditModeToggle />
                 <a
                     href={previewHref}

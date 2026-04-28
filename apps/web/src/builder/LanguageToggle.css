@@ -1,0 +1,24 @@
+.language-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--ui_border);
+    border-radius: var(--radius_sm);
+    background: var(--ui_bg_input);
+    color: var(--ui_text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.language-toggle:hover {
+    background: var(--ui_bg_hover);
+    border-color: var(--ui_border_strong);
+}
+
+.language-toggle:active {
+    background: var(--ui_bg_elevated);
+}
