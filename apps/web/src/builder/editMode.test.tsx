@@ -287,7 +287,7 @@ describe('useEditableImage', () => {
         );
 
         // No edit button should be present
-        expect(screen.queryByTitle('Bild tauschen')).not.toBeInTheDocument();
+        expect(screen.queryByTitle('Swap image')).not.toBeInTheDocument();
     });
 
     it('shows edit button in edit mode', async () => {
@@ -306,7 +306,7 @@ describe('useEditableImage', () => {
 
         await userEvent.click(screen.getByText('toggle'));
 
-        expect(screen.getByTitle('Bild tauschen')).toBeInTheDocument();
+        expect(screen.getByTitle('Swap image')).toBeInTheDocument();
     });
 
     it('opens URL input on edit button click', async () => {
@@ -324,13 +324,13 @@ describe('useEditableImage', () => {
         );
 
         await userEvent.click(screen.getByText('toggle'));
-        await userEvent.click(screen.getByTitle('Bild tauschen'));
+        await userEvent.click(screen.getByTitle('Swap image'));
 
         expect(
-            screen.getByPlaceholderText('Bild-URL eingeben…'),
+            screen.getByPlaceholderText('Enter image URL…'),
         ).toBeInTheDocument();
         expect(screen.getByText('OK')).toBeInTheDocument();
-        expect(screen.getByLabelText('Abbrechen')).toBeInTheDocument();
+        expect(screen.getByLabelText('Cancel')).toBeInTheDocument();
     });
 
     it('OK button commits new URL', async () => {
@@ -356,9 +356,9 @@ describe('useEditableImage', () => {
         // Enter edit mode
         await userEvent.click(screen.getByText('toggle'));
         // Open URL dialog
-        await userEvent.click(screen.getByTitle('Bild tauschen'));
+        await userEvent.click(screen.getByTitle('Swap image'));
 
-        const input = screen.getByPlaceholderText('Bild-URL eingeben…');
+        const input = screen.getByPlaceholderText('Enter image URL…');
         // Clear existing value and type new URL
         await userEvent.clear(input);
         await userEvent.type(input, 'https://example.com/new.jpg');
@@ -390,9 +390,9 @@ describe('useEditableImage', () => {
         );
 
         await userEvent.click(screen.getByText('toggle'));
-        await userEvent.click(screen.getByTitle('Bild tauschen'));
+        await userEvent.click(screen.getByTitle('Swap image'));
 
-        const input = screen.getByPlaceholderText('Bild-URL eingeben…');
+        const input = screen.getByPlaceholderText('Enter image URL…');
         await userEvent.clear(input);
         await userEvent.type(input, 'https://example.com/enter.jpg{Enter}');
 
@@ -426,11 +426,11 @@ describe('useEditableImage', () => {
         );
 
         await userEvent.click(screen.getByText('toggle'));
-        await userEvent.click(screen.getByTitle('Bild tauschen'));
+        await userEvent.click(screen.getByTitle('Swap image'));
 
         // Verify dialog is open
         expect(
-            screen.getByPlaceholderText('Bild-URL eingeben…'),
+            screen.getByPlaceholderText('Enter image URL…'),
         ).toBeInTheDocument();
 
         // Press Escape on the input
@@ -438,7 +438,7 @@ describe('useEditableImage', () => {
 
         // Dialog should be closed
         expect(
-            screen.queryByPlaceholderText('Bild-URL eingeben…'),
+            screen.queryByPlaceholderText('Enter image URL…'),
         ).not.toBeInTheDocument();
         // No commit should have happened
         expect(onSpecChange).not.toHaveBeenCalled();
@@ -467,14 +467,14 @@ describe('useEditableImage', () => {
         );
 
         await userEvent.click(screen.getByText('toggle'));
-        await userEvent.click(screen.getByTitle('Bild tauschen'));
+        await userEvent.click(screen.getByTitle('Swap image'));
 
         // Click the cancel button
-        await userEvent.click(screen.getByLabelText('Abbrechen'));
+        await userEvent.click(screen.getByLabelText('Cancel'));
 
         // Dialog should be closed
         expect(
-            screen.queryByPlaceholderText('Bild-URL eingeben…'),
+            screen.queryByPlaceholderText('Enter image URL…'),
         ).not.toBeInTheDocument();
         expect(onSpecChange).not.toHaveBeenCalled();
     });
