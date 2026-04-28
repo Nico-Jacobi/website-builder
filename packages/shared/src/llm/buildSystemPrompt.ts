@@ -77,7 +77,7 @@ export function buildSystemPrompt({ surface, mode, locked }: BuildSystemPromptAr
         '',
         '   Your output must also include a top-level `sitemap` array (see Sitemap section below).',
         '4. Fill `props` per block according to that module\'s Props JSON Schema (see module reference).',
-        '5. The first block is typically `Header` and the last is typically `Footer`. Between them, build a coherent landing-page narrative.',
+        '5. You **must** include a `Header` (navigation) and a `Footer`. Either place them as the first and last entries in `blocks`, OR put them directly in a top-level `chrome: { "header": {...}, "footer": {...} }` field. Between the header and footer, build a coherent landing-page narrative.',
         '6. Use `Container` for grouping only when a section clearly needs a distinct background or max-width. Max ONE level of nesting — do not put Containers inside Containers.',
         '7. **Header and Footer `links` MUST point to paths from your `sitemap` output.** Do not invent dead anchors like `"#about"` or `"#features"`. Every href in Header/Footer navigation must match a `path` value in the sitemap you produce.',
         '8. **Never write image URLs.** For any image field use the corresponding `imageQuery` field with descriptive English keywords (e.g. `"trailer rental truck"`). The builder fetches real photos automatically. Leave `imageSrc`, `image`, `backgroundImage`, and `src` fields empty or omit them entirely.',

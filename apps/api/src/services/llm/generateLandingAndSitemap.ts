@@ -70,7 +70,18 @@ export async function generateLandingAndSitemap(
         `LandingOutput validiert — ${validated.blocks.length} Blocks, ${validated.sitemap.length} Sitemap-Einträge`,
     );
 
-    const { chrome, contentBlocks } = extractChrome(validated.blocks);
+    // Prefer explicit chrome field (LLM used the chrome key directly).
+    // Fall back to extracting Header/Footer from the blocks array.
+    let chrome: SiteChrome;
+    let contentBlocks: BlockSpec[];
+    if (validated.chrome?.header || validated.chrome?.footer) {
+        chrome = validated.chrome;
+        contentBlocks = validated.blocks.filter(
+            (b) => b.type !== 'Header' && b.type !== 'Footer',
+        );
+    } else {
+        ({ chrome, contentBlocks } = extractChrome(validated.blocks));
+    }
 
     try {
         await fillImagesIn({ chrome, blocks: contentBlocks }, collector);

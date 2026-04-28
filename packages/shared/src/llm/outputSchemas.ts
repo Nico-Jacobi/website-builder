@@ -2,9 +2,10 @@ import { z } from 'zod';
 import { BlockSpecSchema, SiteChromeSchema } from '../schemas';
 import { SitemapSchema } from '../sitemap';
 
-/** Output of mode 'initial': Landing-Page blocks + sitemap (+ optional theme). */
+/** Output of mode 'initial': Landing-Page blocks + sitemap (+ optional theme + optional chrome). */
 export const LandingOutputSchema = z.object({
     theme:        z.record(z.string(), z.string()).optional(),
+    chrome:       SiteChromeSchema.optional(),
     blocks:       z.array(BlockSpecSchema),
     sitemap:      SitemapSchema,
     _explanation: z.string().optional(),
