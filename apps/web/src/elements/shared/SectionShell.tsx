@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { Tone } from '@website-builder/shared';
 import { useEditModeState } from '../../builder/editModeStore';
 import { BlockOverlay } from '../../builder/BlockOverlay';
+import { useDropIndicator } from '../../builder/EditorDndProvider';
 
 interface SectionShellProps {
     tone?: Tone;
@@ -51,6 +52,7 @@ export function SectionShell({
     children,
 }: SectionShellProps) {
     const { isEditMode } = useEditModeState();
+    const { isBefore, isAfter } = useDropIndicator(blockIndex ?? -1);
     const sortable = useSortable({
         id: blockId ?? '__static__',
         disabled: !isEditMode || !blockId,
@@ -79,6 +81,8 @@ export function SectionShell({
             className="block-overlay__wrapper"
             data-tone={tone ?? undefined}
             data-dragging={sortable.isDragging ? 'true' : undefined}
+            data-drop-before={isBefore ? 'true' : undefined}
+            data-drop-after={isAfter ? 'true' : undefined}
             style={style}
         >
             {showOverlay && (

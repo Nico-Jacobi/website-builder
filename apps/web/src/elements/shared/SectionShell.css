@@ -2,6 +2,34 @@
    No padding — modules control their own spacing via .section or their own CSS.
    When data-tone is absent, no styles are applied (shell is transparent). */
 
+/* ── Drop Indicator Lines ── */
+.block-overlay__wrapper {
+    position: relative;
+}
+
+.block-overlay__wrapper[data-drop-before]::before,
+.block-overlay__wrapper[data-drop-after]::after {
+    content: '';
+    display: block;
+    height: 2px;
+    background: var(--primary);
+    border-radius: var(--radius_sm);
+    margin: 0 var(--space_md);
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.block-overlay__wrapper[data-drop-before]::before {
+    top: 0;
+}
+
+.block-overlay__wrapper[data-drop-after]::after {
+    bottom: 0;
+}
+
 [data-tone="surface"] {
     background-color: var(--surface);
     color: var(--text);
