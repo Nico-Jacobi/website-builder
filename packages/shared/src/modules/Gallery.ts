@@ -61,8 +61,8 @@ export type GalleryProps = z.infer<typeof GalleryPropsSchema>;
 
 export const GalleryDefaults: GalleryProps = {
     images: [
-        { imageQuery: 'gallery image one', src: '', alt: 'Gallery image one', caption: 'Caption for image one' },
-        { imageQuery: 'gallery image two', src: '', alt: 'Gallery image two', caption: 'Caption for image two' },
+        { imageQuery: 'Bild', src: '', alt: 'Ein Bild', caption: 'Bildunterschrift' },
+        { imageQuery: 'Bild', src: '', alt: 'Ein Bild', caption: 'Bildunterschrift' },
     ],
     columns: 2,
     gap:     'md',

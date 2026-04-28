@@ -32,12 +32,12 @@ export const CTABandPropsSchema = z.object({
 export type CTABandProps = z.infer<typeof CTABandPropsSchema>;
 
 export const CTABandDefaults: CTABandProps = {
-    heading:           'Start building today',
-    subheading:        'Join thousands of teams already using our platform.',
-    ctaLabel:          'Get started for free',
-    ctaHref:           '#signup',
-    ctaSecondaryLabel: 'View documentation',
-    ctaSecondaryHref:  '#docs',
+    heading:           'Titel des Call-to-Action',
+    subheading:        'Ein erläuternder Untertext.',
+    ctaLabel:          'Button-Text',
+    ctaHref:           '#',
+    ctaSecondaryLabel: 'Sekundärer Button',
+    ctaSecondaryHref:  '#',
     style:             'gradient',
 };
 

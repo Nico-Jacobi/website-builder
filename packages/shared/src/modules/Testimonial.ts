@@ -35,25 +35,25 @@ export const TestimonialPropsSchema = z.object({
 export type TestimonialProps = z.infer<typeof TestimonialPropsSchema>;
 
 export const TestimonialDefaults: TestimonialProps = {
-    heading: 'What our customers say',
+    heading: 'Das sagen unsere Kunden',
     items: [
         {
-            quote: 'This completely changed how we work. Incredibly well designed.',
-            author: 'Sarah K.',
-            role: 'Head of Product',
-            company: 'Acme',
+            quote: 'Ein Zitat oder eine positive Aussage eines Kunden.',
+            author: 'Name Eins',
+            role: 'Position',
+            company: 'Firma',
         },
         {
-            quote: "The best tool we've ever adopted. Our team loved it from day one.",
-            author: 'Michael R.',
-            role: 'CTO',
-            company: 'Veritas',
+            quote: 'Ein weiteres Zitat oder eine positive Aussage eines Kunden.',
+            author: 'Name Zwei',
+            role: 'Position',
+            company: 'Firma',
         },
         {
-            quote: 'Elegant, fast, and reliable. Exactly what we were looking for.',
-            author: 'Lena M.',
-            role: 'Design Lead',
-            company: 'Studio Nord',
+            quote: 'Ein drittes Zitat oder eine positive Aussage eines Kunden.',
+            author: 'Name Drei',
+            role: 'Position',
+            company: 'Firma',
         },
     ],
     layout: 'grid',

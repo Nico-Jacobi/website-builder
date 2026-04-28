@@ -36,12 +36,12 @@ export const LogoStripPropsSchema = z.object({
 export type LogoStripProps = z.infer<typeof LogoStripPropsSchema>;
 
 export const LogoStripDefaults: LogoStripProps = {
-    heading: 'Trusted by leading teams',
+    heading: 'Vertraut von vielen',
     logos: [
-        { name: 'Vercel',  imageQuery: 'vercel logo tech company'       },
-        { name: 'Linear',  imageQuery: 'linear app logo software'        },
-        { name: 'Stripe',  imageQuery: 'stripe payment logo'             },
-        { name: 'Figma',   imageQuery: 'figma design tool logo'          },
+        { name: 'Logo Eins',   imageQuery: 'logo'       },
+        { name: 'Logo Zwei',   imageQuery: 'logo'        },
+        { name: 'Logo Drei',   imageQuery: 'logo'        },
+        { name: 'Logo Vier',   imageQuery: 'logo'        },
     ],
     marquee: false,
 };

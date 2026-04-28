@@ -16,12 +16,12 @@ export type CardGridProps = z.infer<typeof CardGridPropsSchema>;
 
 export const CardGridDefaults: CardGridProps = {
     cards: [
-        { title: 'Grid Card One',   body: 'Description for the first card.'  },
-        { title: 'Grid Card Two',   body: 'Description for the second card.' },
-        { title: 'Grid Card Three', body: 'Description for the third card.'  },
-        { title: 'Grid Card Four',  body: 'Description for the fourth card.' },
+        { title: 'Karte Eins',   body: 'Beschreibung der ersten Karte.'  },
+        { title: 'Karte Zwei',   body: 'Beschreibung der zweiten Karte.' },
+        { title: 'Karte Drei', body: 'Beschreibung der dritten Karte.'  },
+        { title: 'Karte Vier',  body: 'Beschreibung der vierten Karte.' },
     ],
-    columns: 4,
+    columns: 3,
 };
 
 export const CardGridMeta: ModuleMeta = {

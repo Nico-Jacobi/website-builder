@@ -33,9 +33,9 @@ export type StatRowProps = z.infer<typeof StatRowPropsSchema>;
 
 export const StatRowDefaults: StatRowProps = {
     stats: [
-        { value: '10k+', label: 'Active Users'  },
-        { value: '99%',  label: 'Uptime'         },
-        { value: '4.9★', label: 'Average Rating' },
+        { value: '100', label: 'Ein Wert'  },
+        { value: '100', label: 'Ein Wert'  },
+        { value: '100', label: 'Ein Wert'  },
     ],
     align: 'center',
 };

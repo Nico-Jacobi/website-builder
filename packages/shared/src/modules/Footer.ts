@@ -19,8 +19,8 @@ export const FooterPropsSchema = z.object({
 export type FooterProps = z.infer<typeof FooterPropsSchema>;
 
 export const FooterDefaults: FooterProps = {
-    tagline:   'Building great things on the web.',
-    copyright: `© ${new Date().getFullYear()} My Company`,
+    tagline:   'Hier könnte Ihr Tagline stehen.',
+    copyright: `© ${new Date().getFullYear()} Ihr Unternehmen`,
     columns:   [],
     compact:   false,
 };

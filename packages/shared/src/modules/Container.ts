@@ -14,7 +14,7 @@ export const ContainerPropsSchema = z.object({
 export type ContainerProps = z.infer<typeof ContainerPropsSchema>;
 
 export const ContainerDefaults: ContainerProps = {
-    children:  [{ type: 'TextBlock', props: { body: 'Container content' } }],
+    children:  [{ type: 'TextBlock', props: { body: 'Inhalt des Containers' } }],
     paddingY:  'md',
     scrollable: false,
 };

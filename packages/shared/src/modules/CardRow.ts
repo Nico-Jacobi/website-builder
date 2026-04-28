@@ -15,9 +15,9 @@ export type CardRowProps = z.infer<typeof CardRowPropsSchema>;
 
 export const CardRowDefaults: CardRowProps = {
     cards: [
-        { title: 'Card One',   body: 'Description for the first card.'  },
-        { title: 'Card Two',   body: 'Description for the second card.' },
-        { title: 'Card Three', body: 'Description for the third card.'  },
+        { title: 'Karte Eins',   body: 'Beschreibung der ersten Karte.'  },
+        { title: 'Karte Zwei',   body: 'Beschreibung der zweiten Karte.' },
+        { title: 'Karte Drei', body: 'Beschreibung der dritten Karte.'  },
     ],
 };
 

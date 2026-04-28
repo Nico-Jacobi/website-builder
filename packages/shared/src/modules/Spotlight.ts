@@ -34,12 +34,12 @@ export const SpotlightPropsSchema = z.object({
 export type SpotlightProps = z.infer<typeof SpotlightPropsSchema>;
 
 export const SpotlightDefaults: SpotlightProps = {
-    imageQuery: 'professional portrait office',
+    imageQuery: 'Porträt',
     image: '',
-    overline: 'Unser Gründer',
-    title: 'Handwerk seit 1987',
-    body: 'Wir glauben an den ruhigen, sorgfältigen Ton eines Ortes, an dem die Dinge mit Bedacht entstehen — jeden Tag aufs Neue, mit den gleichen Händen und denselben Überzeugungen.',
-    caption: '— Max Müller, Inhaber',
+    overline: 'Ein Label',
+    title: 'Titel',
+    body: 'Eine Beschreibung oder ein Statement über diese Person oder dieses Thema.',
+    caption: '— Name, Position',
     imagePosition: 'left',
 };
 

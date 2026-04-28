@@ -16,10 +16,10 @@ export const MediaTextPropsSchema = z.object({
 export type MediaTextProps = z.infer<typeof MediaTextPropsSchema>;
 
 export const MediaTextDefaults: MediaTextProps = {
-    imageQuery:    'placeholder image',
+    imageQuery:    'Bild',
     imageSrc:      '',
-    imageAlt:      'Placeholder image',
-    body:          'Describe what makes this image interesting.',
+    imageAlt:      'Ein Bild',
+    body:          'Beschreiben Sie den Inhalt des Bildes.',
     imagePosition: 'left',
 };
 

@@ -21,9 +21,9 @@ export const ImageBlockPropsSchema = z.object({
 export type ImageBlockProps = z.infer<typeof ImageBlockPropsSchema>;
 
 export const ImageBlockDefaults: ImageBlockProps = {
-    imageQuery:  'placeholder image',
+    imageQuery:  'Bild',
     src:         '',
-    alt:         'Placeholder image',
+    alt:         'Ein Bild',
     objectFit:   'cover',
     maxHeight:   480,
 };

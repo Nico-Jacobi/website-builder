@@ -17,8 +17,8 @@ export const HeaderPropsSchema = z.object({
 export type HeaderProps = z.infer<typeof HeaderPropsSchema>;
 
 export const HeaderDefaults: HeaderProps = {
-    title: 'My Website',
-    subtitle: 'A tagline',
+    title: 'Website',
+    subtitle: 'Ein kurzer Tagline',
 };
 
 export const HeaderMeta: ModuleMeta = {

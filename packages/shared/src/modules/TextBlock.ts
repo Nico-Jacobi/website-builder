@@ -17,7 +17,7 @@ export const TextBlockPropsSchema = z.object({
 export type TextBlockProps = z.infer<typeof TextBlockPropsSchema>;
 
 export const TextBlockDefaults: TextBlockProps = {
-    body:  'Enter your body text here.',
+    body:  'Geben Sie Ihren Text hier ein.',
     align: 'left',
 };
 

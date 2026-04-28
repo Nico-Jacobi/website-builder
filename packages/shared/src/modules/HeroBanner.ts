@@ -59,8 +59,8 @@ export const HeroBannerPropsSchema = z.object({
 export type HeroBannerProps = z.infer<typeof HeroBannerPropsSchema>;
 
 export const HeroBannerDefaults: HeroBannerProps = {
-    heading: 'Welcome to Our Platform',
-    subheading: 'Everything you need to build and ship faster.',
+    heading: 'Willkommen',
+    subheading: 'Ein kurzer Beschreibungstext.',
 };
 
 export const HeroBannerMeta: ModuleMeta = {

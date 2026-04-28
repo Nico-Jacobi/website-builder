@@ -38,14 +38,14 @@ export const FeatureGridPropsSchema = z.object({
 export type FeatureGridProps = z.infer<typeof FeatureGridPropsSchema>;
 
 export const FeatureGridDefaults: FeatureGridProps = {
-    heading: 'Everything you need',
+    heading: 'Unsere Features',
     features: [
-        { icon: '⚡', heading: 'Lightning Fast',      body: 'Built for performance from the ground up. Zero compromise.'         },
-        { icon: '🔒', heading: 'Secure by Default',   body: 'Enterprise-grade security out of the box.'                          },
-        { icon: '🌐', heading: 'Global Scale',         body: 'Deploy to 40+ regions worldwide in seconds.'                        },
-        { icon: '🎨', heading: 'Beautiful DX',         body: 'Developer experience that feels like magic.'                        },
-        { icon: '📊', heading: 'Real-time Analytics',  body: 'Understand your users with live insights.'                          },
-        { icon: '🔄', heading: 'Always in Sync',       body: 'Automatic updates and zero-downtime deploys.'                       },
+        { icon: '⚡', heading: 'Feature Eins',   body: 'Eine kurze Beschreibung dieser Feature.'         },
+        { icon: '🔒', heading: 'Feature Zwei',   body: 'Eine kurze Beschreibung dieser Feature.'         },
+        { icon: '🌐', heading: 'Feature Drei',   body: 'Eine kurze Beschreibung dieser Feature.'         },
+        { icon: '🎨', heading: 'Feature Vier',   body: 'Eine kurze Beschreibung dieser Feature.'         },
+        { icon: '📊', heading: 'Feature Fünf',   body: 'Eine kurze Beschreibung dieser Feature.'         },
+        { icon: '🔄', heading: 'Feature Sechs',  body: 'Eine kurze Beschreibung dieser Feature.'         },
     ],
     columns: '3',
 };
