@@ -1,5 +1,6 @@
 import './ModulePalette.css';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PanelRightOpen } from 'lucide-react';
 import { useDraggable } from '@dnd-kit/core';
 import { listModules } from '../../builder/registry';
@@ -13,31 +14,32 @@ type AnyModule = ModuleDefinition<any>;
 const CHROME_MODULES = new Set(['Header', 'Footer', 'Container']);
 
 const CATEGORY_ORDER = ['layout', 'content', 'media'] as const;
-const CATEGORY_LABEL: Record<string, string> = {
-    layout:  'Layout',
-    content: 'Inhalt',
-    media:   'Medien',
-    other:   'Sonstige',
-};
 
 export function ModulePalette() {
+    const { t } = useTranslation();
     const { isEditMode } = useEditModeState();
     const { addBlock, setIsEditMode } = useEditModeActions();
 
     const grouped = useMemo(() => groupByCategory(listModules()), []);
+    const categoryLabel = {
+        layout:  'Layout',
+        content: t('editor.palette.categoryContent'),
+        media:   t('editor.palette.categoryMedia'),
+        other:   t('editor.palette.categoryOther'),
+    };
 
     if (!isEditMode) {
         return (
             <aside
                 className="module-palette module-palette--collapsed"
-                aria-label="Modul-Palette (geschlossen)"
+                aria-label={t('editor.palette.collapsedAriaLabel')}
             >
                 <button
                     type="button"
                     className="module-palette__rail"
                     onClick={() => setIsEditMode(true)}
-                    aria-label="Modul-Palette öffnen (aktiviert Bearbeitungsmodus)"
-                    title="Modul-Palette öffnen"
+                    aria-label={t('editor.palette.openAriaLabel')}
+                    title={t('editor.palette.openLabel')}
                 >
                     <PanelRightOpen size={18} aria-hidden="true" />
                 </button>
@@ -46,22 +48,22 @@ export function ModulePalette() {
     }
 
     return (
-        <aside className="module-palette" aria-label="Modul-Palette">
+        <aside className="module-palette" aria-label={t('editor.palette.ariaLabel')}>
             <header className="module-palette__header">
-                <h2 className="module-palette__title">Module</h2>
+                <h2 className="module-palette__title">{t('editor.palette.title')}</h2>
             </header>
             <div className="module-palette__scroll">
                 {CATEGORY_ORDER.map((cat) => (
                     <PaletteGroup
                         key={cat}
-                        label={CATEGORY_LABEL[cat]}
+                        label={categoryLabel[cat]}
                         modules={grouped[cat] ?? []}
                         onAdd={addBlock}
                     />
                 ))}
                 {grouped.other?.length ? (
                     <PaletteGroup
-                        label={CATEGORY_LABEL.other}
+                        label={categoryLabel.other}
                         modules={grouped.other}
                         onAdd={addBlock}
                     />

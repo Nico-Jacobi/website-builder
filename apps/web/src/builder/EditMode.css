@@ -26,6 +26,10 @@
     pointer-events: none;
 }
 
+[data-edit-mode="true"] [data-empty]:focus::before {
+    content: '';
+}
+
 /* Edit-only Elemente: außerhalb Edit Mode ausblenden ("+"-Button, Placeholder-Wrapper) */
 [data-edit-mode="false"] [data-edit-only] {
     display: none;

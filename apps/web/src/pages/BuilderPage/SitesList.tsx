@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { RotateCw, Trash2, Pencil, Loader2 } from 'lucide-react';
 import { listSites, deleteSite, type SiteListItem } from '../../data/siteClient';
 
 export function SitesList() {
+    const { t } = useTranslation();
     const [sites, setSites] = useState<SiteListItem[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [deleting, setDeleting] = useState<string | null>(null);
@@ -20,7 +22,7 @@ export function SitesList() {
     useEffect(() => { void load(); }, []);
 
     async function onDelete(identifier: string) {
-        if (!confirm(`Site „${identifier}" wirklich löschen?`)) return;
+        if (!confirm(t('builder.sitesList.confirmDelete', { name: identifier }))) return;
         setDeleting(identifier);
         try {
             await deleteSite(identifier);
@@ -35,16 +37,16 @@ export function SitesList() {
     return (
         <section className="sites_list">
             <div className="sites_list__head">
-                <span className="sites_list__title">Gespeicherte Sites</span>
+                <span className="sites_list__title">{t('builder.sitesList.title')}</span>
                 <button className="sites_list__refresh" onClick={load}>
                     <RotateCw size={13} strokeWidth={1.75} aria-hidden="true" />
-                    <span>Aktualisieren</span>
+                    <span>{t('builder.sitesList.refreshLabel')}</span>
                 </button>
             </div>
             {error && <p className="sites_list__error">{error}</p>}
-            {sites === null && !error && <p className="sites_list__empty">Lädt…</p>}
+            {sites === null && !error && <p className="sites_list__empty">{t('common.loadingLabel')}</p>}
             {sites !== null && sites.length === 0 && (
-                <p className="sites_list__empty">Noch keine gespeicherte Seite.</p>
+                <p className="sites_list__empty">{t('builder.sitesList.empty')}</p>
             )}
             {sites !== null && sites.length > 0 && (
                 <ul className="sites_list__items">
@@ -63,16 +65,16 @@ export function SitesList() {
                                 <Link
                                     to={`/editor/${encodeURIComponent(s.identifier)}`}
                                     className="sites_list__btn sites_list__btn--open"
-                                    aria-label={`${s.name} bearbeiten`}
+                                    aria-label={t('builder.sitesList.editAriaLabel', { name: s.name })}
                                 >
                                     <Pencil size={13} strokeWidth={1.75} aria-hidden="true" />
-                                    <span>Bearbeiten</span>
+                                    <span>{t('builder.sitesList.editLabel')}</span>
                                 </Link>
                                 <button
                                     className="sites_list__btn sites_list__btn--delete"
                                     onClick={() => onDelete(s.identifier)}
                                     disabled={deleting === s.identifier}
-                                    aria-label={`${s.name} löschen`}
+                                    aria-label={t('builder.sitesList.deleteAriaLabel', { name: s.name })}
                                 >
                                     {deleting === s.identifier ? (
                                         <Loader2
@@ -84,7 +86,7 @@ export function SitesList() {
                                     ) : (
                                         <Trash2 size={13} strokeWidth={1.75} aria-hidden="true" />
                                     )}
-                                    <span>Löschen</span>
+                                    <span>{t('builder.sitesList.deleteLabel')}</span>
                                 </button>
                             </div>
                         </li>

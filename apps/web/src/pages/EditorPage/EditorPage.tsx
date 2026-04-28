@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
-import type { SiteSpec } from '@website-builder/shared';
+import type { SiteSpec, Sitemap } from '@website-builder/shared';
 import './EditorPage.css';
 import { PreviewSurface } from '../../builder/PreviewSurface';
 import { useActivePagePath, useNavigateToPage } from '../../builder/usePageNavigation';
@@ -38,11 +39,13 @@ type FetchStatus =
     | { kind: 'error'; message: string };
 
 export function EditorPage() {
+    const { t } = useTranslation();
     const { identifier } = useParams<{ identifier: string }>();
     const activePagePath = useActivePagePath();
     const navigateToPage = useNavigateToPage(identifier ?? '', 'editor');
     const [spec, setSpec] = useState<SiteSpec | null>(null);
     const [siteName, setSiteName] = useState<string>('');
+    const [sitemap, setSitemap] = useState<Sitemap | null>(null);
     const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ kind: 'loading' });
     const [chatBusy, setChatBusy] = useState<boolean>(false);
     const inFlightRef = useRef<boolean>(false);
@@ -162,6 +165,7 @@ export function EditorPage() {
         fetchSiteGenerationMeta(identifier)
             .then(meta => {
                 if (cancelled) return;
+                setSitemap(meta.sitemap);
                 if (autoTriggeredRef.current) return;
                 if (!meta.initialPrompt) return;
                 if (meta.sitemap !== null) return; // already generated
@@ -192,14 +196,18 @@ export function EditorPage() {
                 durationsRef.current.set('/', { start: performance.now() });
             } else if (event.type === 'subpage_started') {
                 durationsRef.current.set(event.path, { start: performance.now() });
-            } else if (event.type === 'landing_done') {
-                const e = durationsRef.current.get('/');
+            } else if (event.type === 'landing_done' || event.type === 'subpage_done') {
+                const path = event.type === 'landing_done' ? '/' : event.path;
+                const e = durationsRef.current.get(path);
                 if (e) {
                     e.end = performance.now();
                 }
-                // Landing page is now in the DB — refresh the spec.
+                // Refresh sitemap and spec after generation completes.
+                if (identifier) {
+                    void fetchSiteGenerationMeta(identifier).then(meta => setSitemap(meta.sitemap));
+                }
                 setSpecRefreshKey(k => k + 1);
-            } else if (event.type === 'subpage_done' || event.type === 'subpage_failed') {
+            } else if (event.type === 'subpage_failed') {
                 let e = durationsRef.current.get(event.path);
                 if (!e) {
                     e = { start: performance.now() };
@@ -213,7 +221,7 @@ export function EditorPage() {
                 void chat.appendAssistant(msg.content);
             }
         });
-    }, [stream.subscribe, chat.appendAssistant]);
+    }, [stream.subscribe, chat.appendAssistant, identifier]);
 
     // --- Chat-Submit: voller LLM-Turn -------------------------------------
     async function handleChatSubmit(userMessage: string): Promise<void> {
@@ -284,7 +292,7 @@ export function EditorPage() {
     if (fetchStatus.kind === 'loading') {
         return (
             <div className="editor_page__fallback">
-                <p>Lade Editor…</p>
+                <p>{t('editor.loading')}</p>
             </div>
         );
     }
@@ -292,10 +300,10 @@ export function EditorPage() {
     if (fetchStatus.kind === 'error') {
         return (
             <div className="editor_page__fallback">
-                <p>Fehler beim Laden: {fetchStatus.message}</p>
+                <p>{t('editor.loadError', { message: fetchStatus.message })}</p>
                 <Link to="/" className="editor_page__back">
                     <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-                    <span>Zurück</span>
+                    <span>{t('common.backLabel')}</span>
                 </Link>
             </div>
         );
@@ -349,13 +357,14 @@ export function EditorPage() {
                                         aria-hidden="true"
                                     />
                                     <p className="editor_page__preview-loading-text">
-                                        Generiere deine Website… ca. 18s
+                                        {t('editor.generatingLabel')}
                                     </p>
                                 </div>
                             ) : (
                                 <div className="editor_page__preview-frame">
                                     <EditorPreview
                                         spec={spec}
+                                        sitemap={sitemap}
                                         onNavigate={handleNavigate}
                                     />
                                 </div>
@@ -377,15 +386,18 @@ export function EditorPage() {
  */
 function EditorPreview({
     spec,
+    sitemap,
     onNavigate,
 }: {
     spec: SiteSpec;
+    sitemap: Sitemap | null;
     onNavigate: (path: string) => void;
 }) {
     const { isEditMode } = useEditModeState();
     return (
         <PreviewSurface
             spec={spec}
+            sitemap={sitemap ?? undefined}
             editMode={isEditMode}
             onNavigate={onNavigate}
         />
@@ -401,6 +413,7 @@ interface EditorHeaderProps {
 }
 
 function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: EditorHeaderProps) {
+    const { t } = useTranslation();
     const status = useCombinedSaveStatus(autoSave, blockOps);
     const previewHref = `/site/${encodeURIComponent(identifier)}`;
 
@@ -409,15 +422,15 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
             <div className="editor_page__title-row">
                 <Link to="/" className="editor_page__back">
                     <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-                    <span>Zurück</span>
+                    <span>{t('common.backLabel')}</span>
                 </Link>
                 <input
                     type="text"
                     className="editor_page__name-input"
                     value={name}
                     onChange={(e) => onNameChange(e.target.value)}
-                    placeholder="Site-Name"
-                    aria-label="Site-Name"
+                    placeholder={t('editor.header.siteNamePlaceholder')}
+                    aria-label={t('editor.header.siteNameAriaLabel')}
                 />
             </div>
             <div className="editor_page__header-actions">
@@ -429,7 +442,7 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
                     rel="noopener noreferrer"
                     className="editor_page__preview-link"
                 >
-                    <span>In neuem Tab öffnen</span>
+                    <span>{t('editor.header.openInNewTabLabel')}</span>
                     <ExternalLink size={14} strokeWidth={1.75} aria-hidden="true" />
                 </a>
             </div>
@@ -438,6 +451,7 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
 }
 
 function EditModeToggle() {
+    const { t } = useTranslation();
     const { isEditMode } = useEditModeState();
     const { setIsEditMode } = useEditModeActions();
 
@@ -445,7 +459,7 @@ function EditModeToggle() {
         <div
             className="editor_page__mode-toggle"
             role="group"
-            aria-label="Ansicht umschalten"
+            aria-label={t('editor.modeToggle.ariaLabel')}
         >
             <button
                 type="button"
@@ -453,7 +467,7 @@ function EditModeToggle() {
                 aria-pressed={isEditMode}
                 onClick={() => setIsEditMode(true)}
             >
-                Bearbeiten
+                {t('editor.modeToggle.editLabel')}
             </button>
             <button
                 type="button"
@@ -461,7 +475,7 @@ function EditModeToggle() {
                 aria-pressed={!isEditMode}
                 onClick={() => setIsEditMode(false)}
             >
-                Vorschau
+                {t('editor.modeToggle.previewLabel')}
             </button>
         </div>
     );

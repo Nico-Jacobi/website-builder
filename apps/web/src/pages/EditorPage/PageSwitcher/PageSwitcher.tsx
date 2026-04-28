@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './PageSwitcher.css';
 import { useActivePagePath, useNavigateToPage } from '../../../builder/usePageNavigation';
 import { flushAutoSave } from '../../../data/autoSave';
@@ -13,6 +14,7 @@ export function PageSwitcher({
     identifier: string;
     stream: UseGenerationStreamResult;
 }) {
+    const { t } = useTranslation();
     const { state: { sitemap, pages, isGenerating } } = stream;
     const activePagePath = useActivePagePath();
     const navigateToPage = useNavigateToPage(identifier, 'editor');
@@ -29,7 +31,7 @@ export function PageSwitcher({
     };
 
     const handleDelete = async (path: string) => {
-        if (!confirm(`Page "${path}" wirklich löschen? Alle Inhalte gehen verloren.`)) return;
+        if (!confirm(t('editor.pageSwitcher.confirmDelete', { name: path }))) return;
         try {
             await deletePage(identifier, path);
             if (path === activePagePath) navigateToPage('/');
@@ -39,8 +41,8 @@ export function PageSwitcher({
     return (
         <aside className="page-switcher">
             <header className="page-switcher__header">
-                <span className="page-switcher__label">Pages</span>
-                {isGenerating && <span className="page-switcher__spinner" aria-label="generating" />}
+                <span className="page-switcher__label">{t('editor.pageSwitcher.title')}</span>
+                {isGenerating && <span className="page-switcher__spinner" aria-label={t('editor.pageSwitcher.generatingAriaLabel')} />}
             </header>
             <ul className="page-switcher__list">
                 {sitemap?.map(entry => {
@@ -65,13 +67,13 @@ export function PageSwitcher({
                                     className="page-row__retry"
                                     onClick={() => void handleRetry(entry.path)}
                                 >
-                                    Retry
+                                    {t('editor.pageSwitcher.retryLabel')}
                                 </button>
                             )}
                             {entry.path !== '/' && (
                                 <button
                                     className="page-row__delete"
-                                    aria-label="Remove page"
+                                    aria-label={t('editor.pageSwitcher.removePageAriaLabel')}
                                     onClick={() => void handleDelete(entry.path)}
                                 >
                                     ×
@@ -81,14 +83,14 @@ export function PageSwitcher({
                     );
                 })}
                 {!sitemap && (
-                    <li className="page-switcher__empty">No pages yet</li>
+                    <li className="page-switcher__empty">{t('editor.pageSwitcher.noPages')}</li>
                 )}
             </ul>
             <button
                 className="page-switcher__add"
                 onClick={() => setShowAddDialog(true)}
             >
-                + Add Page
+                {t('editor.pageSwitcher.addPageLabel')}
             </button>
             {showAddDialog && (
                 <AddPageDialog

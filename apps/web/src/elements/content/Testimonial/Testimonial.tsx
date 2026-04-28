@@ -1,4 +1,5 @@
 import './Testimonial.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
@@ -6,6 +7,7 @@ import { TestimonialDefaults } from '@website-builder/shared';
 import type { TestimonialProps, TestimonialItem } from '@website-builder/shared';
 
 export default function Testimonial({ heading, items }: TestimonialProps) {
+    const { t } = useTranslation();
     const headingEdit = useEditableText('heading');
     const { addItem } = useEditModeActions();
     const blockIndex  = useBlockIndex();
@@ -27,7 +29,7 @@ export default function Testimonial({ heading, items }: TestimonialProps) {
                     className="edit__add-item"
                     data-edit-only=""
                     onClick={() => addItem(blockIndex, 'items', TestimonialDefaults.items[0])}
-                    title="Testimonial hinzufügen"
+                    title={t('modules.content.testimonial.addItemLabel')}
                 >+</button>
             </div>
         </div>

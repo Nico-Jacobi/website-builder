@@ -1,4 +1,5 @@
 import './Spotlight.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditModeState } from '../../../builder/editModeStore';
 import { EditableImage } from '../../shared/EditableImage';
@@ -14,6 +15,7 @@ export default function Spotlight({
     caption,
     imagePosition,
 }: SpotlightProps) {
+    const { t } = useTranslation();
     const { isEditMode } = useEditModeState();
     const badgeEdit    = useEditableText('badge');
     const overlineEdit = useEditableText('overline');
@@ -38,14 +40,14 @@ export default function Spotlight({
                     <span
                         className="spotlight__badge"
                         data-empty={!badge || undefined}
-                        data-placeholder="Badge"
+                        data-placeholder={t('modules.content.spotlight.badgePlaceholder')}
                         {...badgeEdit}
                     >{badge}</span>
                 )}
                 <p
                     className="spotlight__overline"
                     data-empty={!overline || undefined}
-                    data-placeholder="Kurztitel"
+                    data-placeholder={t('modules.content.spotlight.overlinePlaceholder')}
                     {...overlineEdit}
                 >{overline}</p>
                 <h2 className="spotlight__title" {...titleEdit}>{title}</h2>
@@ -53,7 +55,7 @@ export default function Spotlight({
                 <p
                     className="spotlight__caption"
                     data-empty={!caption || undefined}
-                    data-placeholder="Bildunterschrift"
+                    data-placeholder={t('modules.content.spotlight.captionPlaceholder')}
                     {...captionEdit}
                 >{caption}</p>
             </div>

@@ -1,4 +1,5 @@
 import './Header.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditModeState } from '../../../builder/editModeStore';
 import { EditableImage } from '../../shared/EditableImage';
@@ -6,6 +7,7 @@ import { EditableLink } from '../../shared/EditableLink';
 import type { HeaderProps } from '@website-builder/shared';
 
 export default function Header({ title, subtitle, icon, links, ctaLabel, ctaHref }: HeaderProps) {
+    const { t } = useTranslation();
     const { isEditMode } = useEditModeState();
     const titleEdit    = useEditableText('title');
     const subtitleEdit = useEditableText('subtitle');
@@ -32,7 +34,7 @@ export default function Header({ title, subtitle, icon, links, ctaLabel, ctaHref
                         <p
                             className="header__subtitle"
                             data-empty={!subtitle || undefined}
-                            data-placeholder="Untertitel"
+                            data-placeholder={t('modules.layout.header.subtitlePlaceholder')}
                             {...subtitleEdit}
                         >{subtitle}</p>
                     )}
@@ -54,7 +56,7 @@ export default function Header({ title, subtitle, icon, links, ctaLabel, ctaHref
                             className="header__cta"
                             href={ctaHref || '#'}
                             data-empty={!ctaLabel || undefined}
-                            data-placeholder="CTA"
+                            data-placeholder={t('modules.layout.header.ctaPlaceholder')}
                             {...ctaLabelEdit}
                         >{ctaLabel}</a>
                     )}

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ChangeEvent, DragEvent, KeyboardEvent, MouseEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pencil, X } from 'lucide-react';
 import './EditMode.css';
 import { useEditableField } from './useEditableField';
@@ -25,6 +26,7 @@ export function useEditableImage(
     altPath?: string,
     currentAlt?: string,
 ) {
+    const { t } = useTranslation();
     const { isEditMode, commit: commitSrc } = useEditableField(propPath);
     const { commit: commitAlt } = useEditableField(altPath ?? '_alt_noop');
     const autoSave = useAutoSave();
@@ -115,7 +117,7 @@ export function useEditableImage(
             <button
                 className="edit__image-btn"
                 onClick={openModal}
-                title="Bild tauschen"
+                title={t('editor.image.swapLabel')}
             >
                 <Pencil size={13} strokeWidth={1.75} aria-hidden="true" />
             </button>
@@ -132,11 +134,11 @@ export function useEditableImage(
                                 <label className="edit__image-file-input">
                                     {uploading ? (
                                         <span className="edit__image-upload-status">
-                                            Wird hochgeladen…
+                                            {t('editor.image.uploadingLabel')}
                                         </span>
                                     ) : (
                                         <>
-                                            <span>Bild wählen</span>
+                                            <span>{t('editor.image.chooseFileLabel')}</span>
                                             <input
                                                 type="file"
                                                 accept="image/png,image/jpeg,image/webp"
@@ -151,7 +153,7 @@ export function useEditableImage(
 
                         {hasUpload && (
                             <div className="edit__image-divider">
-                                <span>Oder URL eintragen:</span>
+                                <span>{t('editor.image.orUrlLabel')}</span>
                             </div>
                         )}
 
@@ -162,7 +164,7 @@ export function useEditableImage(
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Bild-URL eingeben…"
+                                placeholder={t('editor.image.urlPlaceholder')}
                                 autoFocus={!hasUpload}
                             />
                         </div>
@@ -174,7 +176,7 @@ export function useEditableImage(
                                     type="text"
                                     value={altInputValue}
                                     onChange={(e) => setAltInputValue(e.target.value)}
-                                    placeholder="Alt-Text (Barrierefreiheit)…"
+                                    placeholder={t('editor.image.altPlaceholder')}
                                 />
                             </div>
                         )}
@@ -186,7 +188,7 @@ export function useEditableImage(
                             <button
                                 className="edit__image-cancel"
                                 onClick={() => setOpen(false)}
-                                aria-label="Abbrechen"
+                                aria-label={t('common.cancelLabel')}
                             >
                                 <X size={14} strokeWidth={1.75} aria-hidden="true" />
                             </button>

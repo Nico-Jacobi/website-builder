@@ -26,6 +26,13 @@ export function useEditableText(propPath: string) {
         'data-edit-mode': 'text' as const,
         onFocus: (e: FocusEvent<HTMLElement>) => {
             originalRef.current = e.currentTarget.textContent ?? '';
+            const sel = window.getSelection();
+            if (sel) {
+                const range = document.createRange();
+                range.selectNodeContents(e.currentTarget);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
         },
         onBlur: (e: FocusEvent<HTMLElement>) => {
             const next = e.currentTarget.textContent ?? '';

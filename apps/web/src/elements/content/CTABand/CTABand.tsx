@@ -1,4 +1,5 @@
 import './CTABand.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import type { CTABandProps } from '@website-builder/shared';
 
@@ -11,6 +12,7 @@ export default function CTABand({
     ctaSecondaryHref,
     style = 'gradient',
 }: CTABandProps) {
+    const { t } = useTranslation();
     const headingEdit    = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
     const ctaLabelEdit   = useEditableText('ctaLabel');
@@ -29,7 +31,7 @@ export default function CTABand({
                     <p
                         className="cta_band__subheading"
                         data-empty={!subheading || undefined}
-                        data-placeholder="Untertext"
+                        data-placeholder={t('modules.content.ctaBand.subheadingPlaceholder')}
                         {...subheadingEdit}
                     >{subheading}</p>
                 )}

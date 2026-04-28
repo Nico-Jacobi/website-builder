@@ -1,9 +1,11 @@
 import './ImageBlock.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import type { ImageBlockProps } from '@website-builder/shared';
 
 export default function ImageBlock({ src, alt, caption, objectFit, maxHeight, aspectRatio }: ImageBlockProps) {
+    const { t } = useTranslation();
     const captionEdit = useEditableText('caption');
 
     return (
@@ -21,7 +23,7 @@ export default function ImageBlock({ src, alt, caption, objectFit, maxHeight, as
             <figcaption
                 className="image_block__caption"
                 data-empty={!caption || undefined}
-                data-placeholder="Bildunterschrift"
+                data-placeholder={t('modules.media.imageBlock.captionPlaceholder')}
                 {...captionEdit}
             >{caption}</figcaption>
         </figure>

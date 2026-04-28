@@ -1,4 +1,5 @@
 import './FeatureGrid.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import type { FeatureGridProps, FeatureItem } from '@website-builder/shared';
 
@@ -8,6 +9,7 @@ export default function FeatureGrid({
     features,
     columns,
 }: FeatureGridProps) {
+    const { t } = useTranslation();
     const headingEdit    = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
 
@@ -21,7 +23,7 @@ export default function FeatureGrid({
                         <h2
                             className="feature_grid__heading"
                             data-empty={!heading || undefined}
-                            data-placeholder="Überschrift"
+                            data-placeholder={t('modules.content.featureGrid.headingPlaceholder')}
                             {...headingEdit}
                         >{heading}</h2>
                     )}
@@ -29,7 +31,7 @@ export default function FeatureGrid({
                         <p
                             className="feature_grid__subheading"
                             data-empty={!subheading || undefined}
-                            data-placeholder="Unterüberschrift"
+                            data-placeholder={t('modules.content.featureGrid.subheadingPlaceholder')}
                             {...subheadingEdit}
                         >{subheading}</p>
                     )}

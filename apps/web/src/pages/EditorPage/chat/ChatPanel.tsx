@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowUp } from 'lucide-react';
 import './ChatPanel.css';
 import type { ChatMessage, ChatStatus } from './types';
@@ -17,6 +18,7 @@ export interface ChatPanelProps {
 }
 
 export function ChatPanel({ messages, status, onSubmit }: ChatPanelProps) {
+    const { t } = useTranslation();
     const [draft, setDraft] = useState<string>('');
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +59,7 @@ export function ChatPanel({ messages, status, onSubmit }: ChatPanelProps) {
                         <span className="chat_panel__thinking-dot" />
                         <span className="chat_panel__thinking-dot" />
                         <span className="chat_panel__thinking-dot" />
-                        <span className="chat_panel__thinking-label">denkt nach</span>
+                        <span className="chat_panel__thinking-label">{t('editor.chat.thinkingLabel')}</span>
                     </div>
                 )}
             </div>
@@ -65,20 +67,20 @@ export function ChatPanel({ messages, status, onSubmit }: ChatPanelProps) {
                 <textarea
                     className="chat_panel__textarea"
                     rows={3}
-                    placeholder="Änderungen beschreiben… (↵ zum Senden, ⇧↵ für neue Zeile)"
+                    placeholder={t('editor.chat.inputPlaceholder')}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={handleKeyDown}
                     disabled={status === 'sending'}
-                    aria-label="Chat-Eingabe"
+                    aria-label={t('editor.chat.inputAriaLabel')}
                 />
                 <button
                     type="submit"
                     className="chat_panel__submit"
                     disabled={status === 'sending' || !draft.trim()}
-                    aria-label="Senden"
+                    aria-label={t('editor.chat.submitAriaLabel')}
                 >
-                    <span>Senden</span>
+                    <span>{t('editor.chat.submitLabel')}</span>
                     <ArrowUp size={14} strokeWidth={2} aria-hidden="true" />
                 </button>
             </form>

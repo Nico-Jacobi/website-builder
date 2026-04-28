@@ -1,5 +1,6 @@
 import './HeroBanner.css';
 import type { CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditableImage } from '../../../builder/useEditableImage';
 import { useEditModeState } from '../../../builder/editModeStore';
@@ -17,6 +18,7 @@ export default function HeroBanner({
     ctaSecondaryLabel,
     ctaSecondaryHref,
 }: HeroBannerProps) {
+    const { t } = useTranslation();
     const { isEditMode }    = useEditModeState();
     const headingEdit       = useEditableText('heading');
     const subheadingEdit    = useEditableText('subheading');
@@ -66,7 +68,7 @@ export default function HeroBanner({
                 <p
                     className="hero_banner__subheading"
                     data-empty={!subheading || undefined}
-                    data-placeholder="Unterüberschrift"
+                    data-placeholder={t('modules.layout.heroBanner.subheadingPlaceholder')}
                     {...subheadingEdit}
                 >{subheading}</p>
 
@@ -77,7 +79,7 @@ export default function HeroBanner({
                                 className="hero_banner__cta-primary"
                                 href={ctaHref || '#'}
                                 data-empty={!ctaLabel || undefined}
-                                data-placeholder="Primary CTA"
+                                data-placeholder={t('modules.layout.heroBanner.primaryCtaPlaceholder')}
                                 {...ctaLabelEdit}
                             >{ctaLabel}</a>
                         )}
@@ -86,7 +88,7 @@ export default function HeroBanner({
                                 className="hero_banner__cta-secondary"
                                 href={ctaSecondaryHref || '#'}
                                 data-empty={!ctaSecondaryLabel || undefined}
-                                data-placeholder="Secondary CTA"
+                                data-placeholder={t('modules.layout.heroBanner.secondaryCtaPlaceholder')}
                                 {...ctaSecLabelEdit}
                             >{ctaSecondaryLabel}</a>
                         )}

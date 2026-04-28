@@ -1,5 +1,6 @@
 import './BlockOverlay.css';
 import { forwardRef, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { GripVertical, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 
 interface BlockOverlayProps {
@@ -37,6 +38,7 @@ export const BlockOverlay = forwardRef<HTMLDivElement, BlockOverlayProps>(functi
     },
     ref,
 ) {
+    const { t } = useTranslation();
     return (
         <div ref={ref} className="block-overlay" style={style} data-edit-only="">
             <button
@@ -53,7 +55,7 @@ export const BlockOverlay = forwardRef<HTMLDivElement, BlockOverlayProps>(functi
                 <button
                     type="button"
                     className="block-overlay__btn"
-                    aria-label="Block nach oben"
+                    aria-label={t('editor.blockOverlay.moveUpLabel')}
                     onClick={onMoveUp}
                     disabled={!canMoveUp}
                 >
@@ -62,7 +64,7 @@ export const BlockOverlay = forwardRef<HTMLDivElement, BlockOverlayProps>(functi
                 <button
                     type="button"
                     className="block-overlay__btn"
-                    aria-label="Block nach unten"
+                    aria-label={t('editor.blockOverlay.moveDownLabel')}
                     onClick={onMoveDown}
                     disabled={!canMoveDown}
                 >
@@ -71,7 +73,7 @@ export const BlockOverlay = forwardRef<HTMLDivElement, BlockOverlayProps>(functi
                 <button
                     type="button"
                     className="block-overlay__btn block-overlay__btn--danger"
-                    aria-label="Block löschen"
+                    aria-label={t('editor.blockOverlay.deleteLabel')}
                     onClick={onDelete}
                 >
                     <Trash2 size={14} aria-hidden="true" />

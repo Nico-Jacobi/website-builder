@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { SitemapEntry } from '@website-builder/shared';
 import { SITEMAP_PATH_REGEX } from '@website-builder/shared';
 import { addPage } from '../../../data/siteClient';
@@ -11,6 +12,7 @@ interface AddPageDialogProps {
 }
 
 export function AddPageDialog({ identifier, sitemap, onClose }: AddPageDialogProps) {
+    const { t } = useTranslation();
     const [path, setPath] = useState('/');
     const [title, setTitle] = useState('');
     const [intent, setIntent] = useState('');
@@ -24,16 +26,16 @@ export function AddPageDialog({ identifier, sitemap, onClose }: AddPageDialogPro
 
     const validate = (): string | undefined => {
         if (!SITEMAP_PATH_REGEX.test(path)) {
-            return 'Path must start with / and only contain lowercase letters, numbers, hyphens, and slashes (e.g. /about).';
+            return t('editor.addPageDialog.errorInvalidPath');
         }
         if (sitemap.some(e => e.path === path)) {
-            return `Path "${path}" already exists in the sitemap.`;
+            return t('editor.addPageDialog.errorPathExists', { path });
         }
         if (!title.trim()) {
-            return 'Title is required.';
+            return t('editor.addPageDialog.errorTitleRequired');
         }
         if (!intent.trim()) {
-            return 'Intent is required.';
+            return t('editor.addPageDialog.errorIntentRequired');
         }
         return undefined;
     };
@@ -67,14 +69,14 @@ export function AddPageDialog({ identifier, sitemap, onClose }: AddPageDialogPro
                 className="add-page-dialog"
                 role="dialog"
                 aria-modal="true"
-                aria-label="Add Page"
+                aria-label={t('editor.addPageDialog.ariaLabel')}
                 onClick={e => e.stopPropagation()}
             >
                 <header className="add-page-dialog__header">
-                    <h2 className="add-page-dialog__title">Add Page</h2>
+                    <h2 className="add-page-dialog__title">{t('editor.addPageDialog.title')}</h2>
                     <button
                         className="add-page-dialog__close"
-                        aria-label="Close"
+                        aria-label={t('common.closeAriaLabel')}
                         onClick={onClose}
                     >
                         ×
@@ -83,7 +85,7 @@ export function AddPageDialog({ identifier, sitemap, onClose }: AddPageDialogPro
 
                 <div className="add-page-dialog__body">
                     <label className="add-page-dialog__field">
-                        <span className="add-page-dialog__field-label">Path</span>
+                        <span className="add-page-dialog__field-label">{t('editor.addPageDialog.pathLabel')}</span>
                         <input
                             ref={pathRef}
                             className="add-page-dialog__input"
@@ -96,7 +98,7 @@ export function AddPageDialog({ identifier, sitemap, onClose }: AddPageDialogPro
                     </label>
 
                     <label className="add-page-dialog__field">
-                        <span className="add-page-dialog__field-label">Title</span>
+                        <span className="add-page-dialog__field-label">{t('editor.addPageDialog.titleLabel')}</span>
                         <input
                             className="add-page-dialog__input"
                             type="text"
@@ -108,7 +110,7 @@ export function AddPageDialog({ identifier, sitemap, onClose }: AddPageDialogPro
 
                     <label className="add-page-dialog__field">
                         <span className="add-page-dialog__field-label">
-                            Intent
+                            {t('editor.addPageDialog.intentLabel')}
                             <span className="add-page-dialog__field-hint">({intent.length}/200)</span>
                         </span>
                         <textarea
@@ -130,14 +132,14 @@ export function AddPageDialog({ identifier, sitemap, onClose }: AddPageDialogPro
                         onClick={onClose}
                         disabled={submitting}
                     >
-                        Cancel
+                        {t('common.cancelLabel')}
                     </button>
                     <button
                         className="add-page-dialog__btn add-page-dialog__btn--submit"
                         onClick={() => void handleSubmit()}
                         disabled={submitting}
                     >
-                        {submitting ? 'Adding…' : 'Add Page'}
+                        {submitting ? t('editor.addPageDialog.submitting') : t('editor.addPageDialog.submit')}
                     </button>
                 </footer>
             </div>

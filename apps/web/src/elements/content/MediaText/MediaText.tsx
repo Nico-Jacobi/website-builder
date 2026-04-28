@@ -1,9 +1,11 @@
 import './MediaText.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import type { MediaTextProps } from '@website-builder/shared';
 
 export default function MediaText({ imageSrc, imageAlt, heading, body, imagePosition }: MediaTextProps) {
+    const { t } = useTranslation();
     const headingEdit = useEditableText('heading');
     const bodyEdit = useEditableText('body');
 
@@ -21,7 +23,7 @@ export default function MediaText({ imageSrc, imageAlt, heading, body, imagePosi
                 <h2
                     className="media_text__heading"
                     data-empty={!heading || undefined}
-                    data-placeholder="Überschrift"
+                    data-placeholder={t('modules.content.mediaText.headingPlaceholder')}
                     {...headingEdit}
                 >{heading}</h2>
                 <p className="media_text__body" {...bodyEdit}>{body}</p>

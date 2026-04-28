@@ -1,9 +1,11 @@
 import './LogoStrip.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import type { LogoStripProps, LogoItem } from '@website-builder/shared';
 
 export default function LogoStrip({ heading, logos, marquee }: LogoStripProps) {
+    const { t } = useTranslation();
     const headingEdit = useEditableText('heading');
 
     return (
@@ -11,12 +13,12 @@ export default function LogoStrip({ heading, logos, marquee }: LogoStripProps) {
             <p
                 className="logo_strip__heading"
                 data-empty={!heading || undefined}
-                data-placeholder="Trusted by leading teams"
+                data-placeholder={t('modules.media.logoStrip.headingPlaceholder')}
                 {...headingEdit}
             >{heading}</p>
             <div
                 className="logo_strip__logos"
-                aria-label={marquee ? 'Partner-Logos' : undefined}
+                aria-label={marquee ? t('modules.media.logoStrip.partnerLogosAriaLabel') : undefined}
             >
                 {logos.map((logo, index) => (
                     <LogoItemView key={index} logo={logo} index={index} />

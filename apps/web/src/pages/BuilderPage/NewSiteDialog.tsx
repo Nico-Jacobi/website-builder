@@ -1,4 +1,5 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { createSite } from '../../data/siteClient';
 
@@ -8,6 +9,7 @@ interface NewSiteDialogProps {
 }
 
 export function NewSiteDialog({ isOpen, onClose }: NewSiteDialogProps) {
+    const { t } = useTranslation();
     const [name,        setName]        = useState('');
     const [description, setDescription] = useState('');
     const [submitting,  setSubmitting]  = useState(false);
@@ -52,9 +54,9 @@ export function NewSiteDialog({ isOpen, onClose }: NewSiteDialogProps) {
     return (
         <div className="new_site_dialog__backdrop" onClick={onClose}>
             <div className="new_site_dialog" onClick={(e) => e.stopPropagation()}>
-                <h2>Neue Site</h2>
+                <h2>{t('builder.newSiteDialog.title')}</h2>
                 <label className="new_site_dialog__label">
-                    Name
+                    {t('builder.newSiteDialog.nameLabel')}
                     <input
                         className="new_site_dialog__input"
                         value={name}
@@ -64,23 +66,23 @@ export function NewSiteDialog({ isOpen, onClose }: NewSiteDialogProps) {
                     />
                 </label>
                 <label className="new_site_dialog__label">
-                    Beschreibung
+                    {t('builder.newSiteDialog.descriptionLabel')}
                     <textarea
                         className="new_site_dialog__textarea"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={5}
-                        placeholder="z.B. Ein Online-Shop für Kettensägen mit Produktgalerie und Kontaktformular… — beschreibe möglichst genau, wie deine Seite aussehen soll."
+                        placeholder={t('builder.newSiteDialog.descriptionPlaceholder')}
                     />
                 </label>
                 {error && <p className="new_site_dialog__error">{error}</p>}
                 <div className="new_site_dialog__actions">
-                    <button onClick={onClose} disabled={submitting}>Abbrechen</button>
+                    <button onClick={onClose} disabled={submitting}>{t('common.cancelLabel')}</button>
                     <button
                         onClick={() => void onSubmit()}
                         disabled={submitting || !name.trim() || !description.trim()}
                     >
-                        {submitting ? 'Erstelle…' : 'Erstellen'}
+                        {submitting ? t('builder.newSiteDialog.submitting') : t('builder.newSiteDialog.submit')}
                     </button>
                 </div>
             </div>
