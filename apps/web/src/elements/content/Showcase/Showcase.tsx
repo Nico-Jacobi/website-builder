@@ -1,4 +1,7 @@
 import './Showcase.css';
+import { useEditableText } from '../../../builder/useEditableText';
+import { EditableImage } from '../../shared/EditableImage';
+import { EditableLink } from '../../shared/EditableLink';
 import type { ShowcaseProps } from '@website-builder/shared';
 
 export default function Showcase({
@@ -12,6 +15,9 @@ export default function Showcase({
     width,
     cta,
 }: ShowcaseProps) {
+    const headingEdit = useEditableText('heading');
+    const bodyEdit    = useEditableText('body');
+
     const sectionClasses = [
         'section',
         'showcase',
@@ -26,17 +32,25 @@ export default function Showcase({
         <div className={sectionClasses}>
             <div className="showcase__inner">
                 <div className="showcase__copy">
-                    <h2 className="showcase__heading">{heading}</h2>
-                    {body && <p className="showcase__body">{body}</p>}
+                    <h2 className="showcase__heading" {...headingEdit}>{heading}</h2>
+                    {body && <p className="showcase__body" {...bodyEdit}>{body}</p>}
                     {cta && (
-                        <a className="showcase__cta" href={cta.href}>{cta.label}</a>
+                        <EditableLink
+                            className="showcase__cta"
+                            href={cta.href}
+                            label={cta.label}
+                            labelPath="cta.label"
+                        />
                     )}
                 </div>
-                {imageSrc && (
-                    <div className="showcase__media">
-                        <img src={imageSrc} alt={imageAlt ?? ''} className={imageClass} />
-                    </div>
-                )}
+                <EditableImage
+                    path="imageSrc"
+                    src={imageSrc}
+                    alt={imageAlt ?? ''}
+                    altPath="imageAlt"
+                    wrapperClassName="showcase__media"
+                    imgClassName={imageClass}
+                />
             </div>
         </div>
     );

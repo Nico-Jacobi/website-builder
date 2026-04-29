@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import './Newsletter.css';
+import { useEditableText } from '../../../builder/useEditableText';
 import type { NewsletterProps } from '@website-builder/shared';
 
 export default function Newsletter({
@@ -11,6 +12,11 @@ export default function Newsletter({
     successMessage,
     width,
 }: NewsletterProps) {
+    const headingEdit        = useEditableText('heading');
+    const bodyEdit           = useEditableText('body');
+    const buttonLabelEdit    = useEditableText('buttonLabel');
+    const successMessageEdit = useEditableText('successMessage');
+
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
 
@@ -39,10 +45,10 @@ export default function Newsletter({
     return (
         <div className={sectionClasses}>
             <div className="newsletter__inner">
-                <h2 className="newsletter__heading">{heading}</h2>
-                {body && <p className="newsletter__body">{body}</p>}
+                <h2 className="newsletter__heading" {...headingEdit}>{heading}</h2>
+                {body && <p className="newsletter__body" {...bodyEdit}>{body}</p>}
                 {submitted ? (
-                    <p className="newsletter__success">{successMessage}</p>
+                    <p className="newsletter__success" {...successMessageEdit}>{successMessage}</p>
                 ) : (
                     <form className="newsletter__form" onSubmit={onSubmit}>
                         <input
@@ -53,7 +59,7 @@ export default function Newsletter({
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                        <button className="newsletter__button" type="submit">
+                        <button className="newsletter__button" type="submit" {...buttonLabelEdit}>
                             {buttonLabel}
                         </button>
                     </form>

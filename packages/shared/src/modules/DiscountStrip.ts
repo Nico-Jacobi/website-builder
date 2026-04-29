@@ -28,7 +28,11 @@ export const DiscountStripMeta: ModuleMeta = {
     tags:        ['discount', 'offer', 'banner', 'promo', 'cta'],
 };
 
-export const DiscountStripContentFields: ContentField[] = [];
+export const DiscountStripContentFields: ContentField[] = [
+    { path: 'label',        type: 'text' },
+    { path: 'code',         type: 'text' },
+    { path: 'expiresLabel', type: 'text' },
+];
 
 export const DiscountStripModuleSpec: ModuleSpec<DiscountStripProps> = {
     meta:          DiscountStripMeta,

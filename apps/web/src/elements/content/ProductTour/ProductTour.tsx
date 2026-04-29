@@ -1,43 +1,85 @@
 import { useState } from 'react';
 import './ProductTour.css';
-import type { ProductTourProps } from '@website-builder/shared';
+import { useEditableText } from '../../../builder/useEditableText';
+import { EditableImage } from '../../shared/EditableImage';
+import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
+import { ProductTourDefaults } from '@website-builder/shared';
+import type { ProductTourProps, ProductTourTab } from '@website-builder/shared';
 
 export default function ProductTour({ heading, subheading, tabs }: ProductTourProps) {
+    const headingEdit    = useEditableText('heading');
+    const subheadingEdit = useEditableText('subheading');
+    const { addItem }    = useEditModeActions();
+    const blockIndex     = useBlockIndex();
+
     const [activeIndex, setActiveIndex] = useState(0);
-    const active = tabs[activeIndex] ?? tabs[0];
+    const safeIndex = Math.min(activeIndex, tabs.length - 1);
+    const active    = tabs[safeIndex];
 
     return (
         <div className="section section--wide product_tour">
             {(heading || subheading) && (
                 <header className="product_tour__header">
-                    {heading && <h2 className="product_tour__heading">{heading}</h2>}
-                    {subheading && <p className="product_tour__subheading">{subheading}</p>}
+                    {heading && <h2 className="product_tour__heading" {...headingEdit}>{heading}</h2>}
+                    {subheading && <p className="product_tour__subheading" {...subheadingEdit}>{subheading}</p>}
                 </header>
             )}
             <div className="product_tour__tablist" role="tablist">
                 {tabs.map((tab, i) => (
-                    <button
-                        key={i}
-                        role="tab"
-                        aria-selected={i === activeIndex}
-                        className={`product_tour__tab${i === activeIndex ? ' product_tour__tab--active' : ''}`}
-                        onClick={() => setActiveIndex(i)}
-                    >
-                        {tab.label}
-                    </button>
+                    <TabButton key={i} tab={tab} index={i} active={i === safeIndex} onSelect={setActiveIndex} prefix={`tabs[${i}]`} />
                 ))}
             </div>
-            <div className="product_tour__panel">
-                <div className="product_tour__copy">
-                    <h3 className="product_tour__title">{active.title}</h3>
-                    <p className="product_tour__body">{active.body}</p>
-                </div>
-                {active.imageSrc && (
-                    <div className="product_tour__media">
-                        <img src={active.imageSrc} alt={active.imageAlt ?? ''} className="perspective-right" />
-                    </div>
-                )}
+            <ActivePanel tab={active} prefix={`tabs[${safeIndex}]`} />
+            <button
+                className="edit__add-item"
+                data-edit-only=""
+                onClick={() => addItem(blockIndex, 'tabs', ProductTourDefaults.tabs[0])}
+                title="Add tab"
+            >+</button>
+        </div>
+    );
+}
+
+interface TabButtonProps {
+    tab: ProductTourTab;
+    index: number;
+    active: boolean;
+    onSelect: (i: number) => void;
+    prefix: string;
+}
+
+function TabButton({ tab, index, active, onSelect, prefix }: TabButtonProps) {
+    const labelEdit = useEditableText(`${prefix}.label`);
+    return (
+        <button
+            role="tab"
+            aria-selected={active}
+            className={`product_tour__tab${active ? ' product_tour__tab--active' : ''}`}
+            onClick={() => onSelect(index)}
+            {...labelEdit}
+        >
+            {tab.label}
+        </button>
+    );
+}
+
+function ActivePanel({ tab, prefix }: { tab: ProductTourTab; prefix: string }) {
+    const titleEdit = useEditableText(`${prefix}.title`);
+    const bodyEdit  = useEditableText(`${prefix}.body`);
+    return (
+        <div className="product_tour__panel">
+            <div className="product_tour__copy">
+                <h3 className="product_tour__title" {...titleEdit}>{tab.title}</h3>
+                <p className="product_tour__body" {...bodyEdit}>{tab.body}</p>
             </div>
+            <EditableImage
+                path={`${prefix}.imageSrc`}
+                src={tab.imageSrc}
+                alt={tab.imageAlt ?? ''}
+                altPath={`${prefix}.imageAlt`}
+                wrapperClassName="product_tour__media"
+                imgClassName="perspective-right"
+            />
         </div>
     );
 }

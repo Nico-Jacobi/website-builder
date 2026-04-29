@@ -24,7 +24,9 @@ export const PillMeta: ModuleMeta = {
     tags:        ['pill', 'badge', 'label', 'announcement'],
 };
 
-export const PillContentFields: ContentField[] = [];
+export const PillContentFields: ContentField[] = [
+    { path: 'label', type: 'text' },
+];
 
 export const PillModuleSpec: ModuleSpec<PillProps> = {
     meta:          PillMeta,

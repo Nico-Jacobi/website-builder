@@ -26,7 +26,9 @@ export const RatingBadgeMeta: ModuleMeta = {
     tags:        ['rating', 'reviews', 'stars', 'social-proof'],
 };
 
-export const RatingBadgeContentFields: ContentField[] = [];
+export const RatingBadgeContentFields: ContentField[] = [
+    { path: 'source', type: 'text' },
+];
 
 export const RatingBadgeModuleSpec: ModuleSpec<RatingBadgeProps> = {
     meta:          RatingBadgeMeta,

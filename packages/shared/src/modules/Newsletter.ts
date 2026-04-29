@@ -31,7 +31,13 @@ export const NewsletterMeta: ModuleMeta = {
     tags:        ['newsletter', 'email', 'signup', 'cta', 'form'],
 };
 
-export const NewsletterContentFields: ContentField[] = [];
+export const NewsletterContentFields: ContentField[] = [
+    { path: 'heading',        type: 'text' },
+    { path: 'body',           type: 'rich_text' },
+    { path: 'buttonLabel',    type: 'text' },
+    { path: 'successMessage', type: 'text' },
+    { path: 'placeholder',    type: 'text' },
+];
 
 export const NewsletterModuleSpec: ModuleSpec<NewsletterProps> = {
     meta:          NewsletterMeta,

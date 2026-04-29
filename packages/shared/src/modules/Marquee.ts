@@ -45,7 +45,11 @@ export const MarqueeMeta: ModuleMeta = {
     tags:        ['marquee', 'scroll', 'ticker', 'logos', 'partners'],
 };
 
-export const MarqueeContentFields: ContentField[] = [];
+export const MarqueeContentFields: ContentField[] = [
+    { path: 'items[].text',     type: 'text' },
+    { path: 'items[].imageAlt', type: 'text' },
+    { path: 'items[].imageSrc', type: 'image_ref' },
+];
 
 export const MarqueeModuleSpec: ModuleSpec<MarqueeProps> = {
     meta:          MarqueeMeta,

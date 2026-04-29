@@ -1,4 +1,6 @@
 import './VideoFeature.css';
+import { useEditableText } from '../../../builder/useEditableText';
+import { EditableLink } from '../../shared/EditableLink';
 import type { VideoFeatureProps } from '@website-builder/shared';
 
 export default function VideoFeature({
@@ -12,6 +14,8 @@ export default function VideoFeature({
     glow,
     cta,
 }: VideoFeatureProps) {
+    const headingEdit = useEditableText('heading');
+    const bodyEdit    = useEditableText('body');
     const sectionClasses = [
         'section',
         'video_feature',
@@ -52,10 +56,15 @@ export default function VideoFeature({
         <div className={sectionClasses}>
             <div className="video_feature__inner">
                 <div className="video_feature__copy">
-                    <h2 className="video_feature__heading">{heading}</h2>
-                    {body && <p className="video_feature__body">{body}</p>}
+                    <h2 className="video_feature__heading" {...headingEdit}>{heading}</h2>
+                    {body && <p className="video_feature__body" {...bodyEdit}>{body}</p>}
                     {cta && (
-                        <a className="video_feature__cta" href={cta.href}>{cta.label}</a>
+                        <EditableLink
+                            className="video_feature__cta"
+                            href={cta.href}
+                            label={cta.label}
+                            labelPath="cta.label"
+                        />
                     )}
                 </div>
                 <div className="video_feature__media">{videoEl}</div>

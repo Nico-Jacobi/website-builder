@@ -36,7 +36,12 @@ export const VideoFeatureMeta: ModuleMeta = {
     tags:        ['video', 'feature', 'product', 'demo'],
 };
 
-export const VideoFeatureContentFields: ContentField[] = [];
+export const VideoFeatureContentFields: ContentField[] = [
+    { path: 'heading',   type: 'text' },
+    { path: 'body',      type: 'rich_text' },
+    { path: 'cta.label', type: 'text' },
+    { path: 'cta.href',  type: 'url' },
+];
 
 export const VideoFeatureModuleSpec: ModuleSpec<VideoFeatureProps> = {
     meta:          VideoFeatureMeta,

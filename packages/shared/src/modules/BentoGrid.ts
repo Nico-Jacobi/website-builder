@@ -42,7 +42,15 @@ export const BentoGridMeta: ModuleMeta = {
     tags:        ['bento', 'grid', 'features', 'showcase'],
 };
 
-export const BentoGridContentFields: ContentField[] = [];
+export const BentoGridContentFields: ContentField[] = [
+    { path: 'heading',           type: 'text' },
+    { path: 'subheading',        type: 'text' },
+    { path: 'cells[].title',     type: 'text' },
+    { path: 'cells[].body',      type: 'rich_text' },
+    { path: 'cells[].imageAlt',  type: 'text' },
+    { path: 'cells[].imageQuery', type: 'image_ref' },
+    { path: 'cells[].imageSrc',  type: 'image_ref' },
+];
 
 export const BentoGridModuleSpec: ModuleSpec<BentoGridProps> = {
     meta:          BentoGridMeta,

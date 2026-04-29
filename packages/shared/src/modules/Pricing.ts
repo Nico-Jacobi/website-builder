@@ -74,7 +74,17 @@ export const PricingMeta: ModuleMeta = {
     tags:        ['pricing', 'plans', 'tiers', 'subscription'],
 };
 
-export const PricingContentFields: ContentField[] = [];
+export const PricingContentFields: ContentField[] = [
+    { path: 'heading',              type: 'text' },
+    { path: 'subheading',           type: 'text' },
+    { path: 'tiers[].name',         type: 'text' },
+    { path: 'tiers[].price',        type: 'text' },
+    { path: 'tiers[].period',       type: 'text' },
+    { path: 'tiers[].highlight',    type: 'text' },
+    { path: 'tiers[].features[]',   type: 'text' },
+    { path: 'tiers[].cta.label',    type: 'text' },
+    { path: 'tiers[].cta.href',     type: 'url' },
+];
 
 export const PricingModuleSpec: ModuleSpec<PricingProps> = {
     meta:          PricingMeta,

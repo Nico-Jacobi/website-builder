@@ -53,7 +53,12 @@ export const FAQMeta: ModuleMeta = {
     tags:        ['faq', 'questions', 'help', 'accordion'],
 };
 
-export const FAQContentFields: ContentField[] = [];
+export const FAQContentFields: ContentField[] = [
+    { path: 'heading',         type: 'text' },
+    { path: 'subheading',      type: 'text' },
+    { path: 'items[].question', type: 'text' },
+    { path: 'items[].answer',   type: 'rich_text' },
+];
 
 export const FAQModuleSpec: ModuleSpec<FAQProps> = {
     meta:          FAQMeta,

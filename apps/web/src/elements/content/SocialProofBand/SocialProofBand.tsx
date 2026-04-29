@@ -1,4 +1,5 @@
 import './SocialProofBand.css';
+import { useEditableText } from '../../../builder/useEditableText';
 import type { SocialProofBandProps } from '@website-builder/shared';
 
 const GRAPHIC_GLYPH: Record<string, string> = {
@@ -21,6 +22,7 @@ function renderStars(rating: number) {
 }
 
 export default function SocialProofBand({ tagline, rating, reviewCount, avatars, graphic }: SocialProofBandProps) {
+    const taglineEdit = useEditableText('tagline');
     return (
         <div className="section social_proof">
             <div className="social_proof__inner">
@@ -41,7 +43,7 @@ export default function SocialProofBand({ tagline, rating, reviewCount, avatars,
                 {typeof reviewCount === 'number' && (
                     <span className="social_proof__review-count">({reviewCount.toLocaleString()} reviews)</span>
                 )}
-                <span className="social_proof__tagline">{tagline}</span>
+                <span className="social_proof__tagline" {...taglineEdit}>{tagline}</span>
             </div>
         </div>
     );

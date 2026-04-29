@@ -53,7 +53,16 @@ export const ProductTourMeta: ModuleMeta = {
     tags:        ['product-tour', 'tabs', 'features', 'demo'],
 };
 
-export const ProductTourContentFields: ContentField[] = [];
+export const ProductTourContentFields: ContentField[] = [
+    { path: 'heading',           type: 'text' },
+    { path: 'subheading',        type: 'text' },
+    { path: 'tabs[].label',      type: 'text' },
+    { path: 'tabs[].title',      type: 'text' },
+    { path: 'tabs[].body',       type: 'rich_text' },
+    { path: 'tabs[].imageAlt',   type: 'text' },
+    { path: 'tabs[].imageQuery', type: 'image_ref' },
+    { path: 'tabs[].imageSrc',   type: 'image_ref' },
+];
 
 export const ProductTourModuleSpec: ModuleSpec<ProductTourProps> = {
     meta:          ProductTourMeta,

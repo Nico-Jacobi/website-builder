@@ -38,7 +38,9 @@ export const SocialProofBandMeta: ModuleMeta = {
     tags:        ['social-proof', 'rating', 'testimonial', 'trust'],
 };
 
-export const SocialProofBandContentFields: ContentField[] = [];
+export const SocialProofBandContentFields: ContentField[] = [
+    { path: 'tagline', type: 'text' },
+];
 
 export const SocialProofBandModuleSpec: ModuleSpec<SocialProofBandProps> = {
     meta:          SocialProofBandMeta,

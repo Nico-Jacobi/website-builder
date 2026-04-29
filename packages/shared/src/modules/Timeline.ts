@@ -37,7 +37,13 @@ export const TimelineMeta: ModuleMeta = {
     tags:        ['timeline', 'history', 'milestones', 'roadmap'],
 };
 
-export const TimelineContentFields: ContentField[] = [];
+export const TimelineContentFields: ContentField[] = [
+    { path: 'heading',          type: 'text' },
+    { path: 'subheading',       type: 'text' },
+    { path: 'entries[].date',   type: 'text' },
+    { path: 'entries[].title',  type: 'text' },
+    { path: 'entries[].body',   type: 'rich_text' },
+];
 
 export const TimelineModuleSpec: ModuleSpec<TimelineProps> = {
     meta:          TimelineMeta,

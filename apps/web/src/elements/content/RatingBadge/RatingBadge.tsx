@@ -1,4 +1,5 @@
 import './RatingBadge.css';
+import { useEditableText } from '../../../builder/useEditableText';
 import type { RatingBadgeProps } from '@website-builder/shared';
 
 function renderStars(rating: number) {
@@ -21,6 +22,7 @@ function renderStars(rating: number) {
 }
 
 export default function RatingBadge({ rating, reviewCount, source, align }: RatingBadgeProps) {
+    const sourceEdit = useEditableText('source');
     return (
         <div className={`section rating_badge rating_badge--align-${align}`}>
             <div className="rating_badge__inner">
@@ -31,7 +33,7 @@ export default function RatingBadge({ rating, reviewCount, source, align }: Rati
                 {typeof reviewCount === 'number' && (
                     <span className="rating_badge__count">({reviewCount.toLocaleString()} reviews)</span>
                 )}
-                {source && <span className="rating_badge__source">on {source}</span>}
+                {source && <span className="rating_badge__source" {...sourceEdit}>on {source}</span>}
             </div>
         </div>
     );

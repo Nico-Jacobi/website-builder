@@ -1,4 +1,6 @@
 import './AboutVisionMission.css';
+import { useEditableText } from '../../../builder/useEditableText';
+import { EditableImage } from '../../shared/EditableImage';
 import type { AboutVisionMissionProps } from '@website-builder/shared';
 
 export default function AboutVisionMission({
@@ -10,29 +12,40 @@ export default function AboutVisionMission({
     founderName,
     founderRole,
 }: AboutVisionMissionProps) {
+    const headingEdit      = useEditableText('heading');
+    const visionLabelEdit  = useEditableText('vision.label');
+    const visionBodyEdit   = useEditableText('vision.body');
+    const missionLabelEdit = useEditableText('mission.label');
+    const missionBodyEdit  = useEditableText('mission.body');
+    const founderNameEdit  = useEditableText('founderName');
+    const founderRoleEdit  = useEditableText('founderRole');
+
     const hasFounder = founderName || founderPhotoSrc;
 
     return (
         <div className="section section--narrow about_vision_mission">
-            {heading && <h2 className="about_vision_mission__heading">{heading}</h2>}
+            {heading && <h2 className="about_vision_mission__heading" {...headingEdit}>{heading}</h2>}
             <div className="about_vision_mission__columns">
                 <div className="about_vision_mission__statement">
-                    <span className="about_vision_mission__label">{vision.label}</span>
-                    <p className="about_vision_mission__body">{vision.body}</p>
+                    <span className="about_vision_mission__label" {...visionLabelEdit}>{vision.label}</span>
+                    <p className="about_vision_mission__body" {...visionBodyEdit}>{vision.body}</p>
                 </div>
                 <div className="about_vision_mission__statement">
-                    <span className="about_vision_mission__label">{mission.label}</span>
-                    <p className="about_vision_mission__body">{mission.body}</p>
+                    <span className="about_vision_mission__label" {...missionLabelEdit}>{mission.label}</span>
+                    <p className="about_vision_mission__body" {...missionBodyEdit}>{mission.body}</p>
                 </div>
             </div>
             {hasFounder && (
                 <figure className="about_vision_mission__founder">
-                    {founderPhotoSrc && (
-                        <img src={founderPhotoSrc} alt={founderPhotoAlt ?? founderName ?? ''} />
-                    )}
+                    <EditableImage
+                        path="founderPhotoSrc"
+                        src={founderPhotoSrc}
+                        alt={founderPhotoAlt ?? founderName ?? ''}
+                        altPath="founderPhotoAlt"
+                    />
                     <figcaption>
-                        {founderName && <span className="about_vision_mission__founder-name">{founderName}</span>}
-                        {founderRole && <span className="about_vision_mission__founder-role">{founderRole}</span>}
+                        {founderName && <span className="about_vision_mission__founder-name" {...founderNameEdit}>{founderName}</span>}
+                        {founderRole && <span className="about_vision_mission__founder-role" {...founderRoleEdit}>{founderRole}</span>}
                     </figcaption>
                 </figure>
             )}

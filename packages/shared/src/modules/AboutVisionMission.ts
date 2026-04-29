@@ -42,7 +42,18 @@ export const AboutVisionMissionMeta: ModuleMeta = {
     tags:        ['about', 'vision', 'mission', 'company'],
 };
 
-export const AboutVisionMissionContentFields: ContentField[] = [];
+export const AboutVisionMissionContentFields: ContentField[] = [
+    { path: 'heading',           type: 'text' },
+    { path: 'vision.label',      type: 'text' },
+    { path: 'vision.body',       type: 'rich_text' },
+    { path: 'mission.label',     type: 'text' },
+    { path: 'mission.body',      type: 'rich_text' },
+    { path: 'founderName',       type: 'text' },
+    { path: 'founderRole',       type: 'text' },
+    { path: 'founderPhotoAlt',   type: 'text' },
+    { path: 'founderPhotoQuery', type: 'image_ref' },
+    { path: 'founderPhotoSrc',   type: 'image_ref' },
+];
 
 export const AboutVisionMissionModuleSpec: ModuleSpec<AboutVisionMissionProps> = {
     meta:          AboutVisionMissionMeta,

@@ -41,7 +41,16 @@ export const TeamGridMeta: ModuleMeta = {
     tags:        ['team', 'about', 'people', 'staff'],
 };
 
-export const TeamGridContentFields: ContentField[] = [];
+export const TeamGridContentFields: ContentField[] = [
+    { path: 'heading',              type: 'text' },
+    { path: 'subheading',           type: 'text' },
+    { path: 'members[].name',       type: 'text' },
+    { path: 'members[].role',       type: 'text' },
+    { path: 'members[].bio',        type: 'rich_text' },
+    { path: 'members[].photoAlt',   type: 'text' },
+    { path: 'members[].photoQuery', type: 'image_ref' },
+    { path: 'members[].photoSrc',   type: 'image_ref' },
+];
 
 export const TeamGridModuleSpec: ModuleSpec<TeamGridProps> = {
     meta:          TeamGridMeta,

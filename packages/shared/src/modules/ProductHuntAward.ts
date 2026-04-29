@@ -29,7 +29,9 @@ export const ProductHuntAwardMeta: ModuleMeta = {
     tags:        ['award', 'product-hunt', 'badge', 'social-proof'],
 };
 
-export const ProductHuntAwardContentFields: ContentField[] = [];
+export const ProductHuntAwardContentFields: ContentField[] = [
+    { path: 'productName', type: 'text' },
+];
 
 export const ProductHuntAwardModuleSpec: ModuleSpec<ProductHuntAwardProps> = {
     meta:          ProductHuntAwardMeta,

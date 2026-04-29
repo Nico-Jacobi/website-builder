@@ -6,11 +6,13 @@ export const ComparisonColumnSchema = z.object({
     name:      z.string(),
     highlight: z.boolean().optional(),
 });
+export type ComparisonColumn = z.infer<typeof ComparisonColumnSchema>;
 
 export const ComparisonRowSchema = z.object({
     label:  z.string(),
     values: z.array(z.union([z.string(), z.boolean()])),
 });
+export type ComparisonRow = z.infer<typeof ComparisonRowSchema>;
 
 export const ComparisonTablePropsSchema = z.object({
     heading:    z.string().optional(),
@@ -47,7 +49,12 @@ export const ComparisonTableMeta: ModuleMeta = {
     tags:        ['comparison', 'table', 'pricing', 'features'],
 };
 
-export const ComparisonTableContentFields: ContentField[] = [];
+export const ComparisonTableContentFields: ContentField[] = [
+    { path: 'heading',          type: 'text' },
+    { path: 'subheading',       type: 'text' },
+    { path: 'columns[].name',   type: 'text' },
+    { path: 'rows[].label',     type: 'text' },
+];
 
 export const ComparisonTableModuleSpec: ModuleSpec<ComparisonTableProps> = {
     meta:          ComparisonTableMeta,
