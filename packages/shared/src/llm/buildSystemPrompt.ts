@@ -1,6 +1,7 @@
 import type { RegistryLLMSurface } from '../types';
 import type { SiteChrome } from '../schemas';
 import type { Sitemap, SitemapEntry } from '../sitemap';
+import { themePresets } from '../themes';
 
 /**
  * Mode selector for {@link buildSystemPrompt}.
@@ -79,7 +80,7 @@ export function buildSystemPrompt({ surface, mode, locked }: BuildSystemPromptAr
         '4. Fill `props` per block according to that module\'s Props JSON Schema (see module reference).',
         '5. You **must** include a `Header` (navigation) and a `Footer`. Either place them as the first and last entries in `blocks`, OR put them directly in a top-level `chrome: { "header": {...}, "footer": {...} }` field. Between the header and footer, build a coherent landing-page narrative.',
         '6. Use `Container` for grouping only when a section clearly needs a distinct background or max-width. Max ONE level of nesting — do not put Containers inside Containers.',
-        '7. **Header and Footer `links` MUST point to paths from your `sitemap` output.** Do not invent dead anchors like `"#about"` or `"#features"`. Every href in Header/Footer navigation must match a `path` value in the sitemap you produce.',
+        '7. **Header and Footer `links` MUST point to paths from your `sitemap` output.** Do not invent dead anchors like `"#about"` or `"#features"`. Every href in Header/Footer navigation must match a `path` value in the sitemap you produce. The Header `ctaLabel` must NOT duplicate a nav link (e.g. don\'t pair a "Shop" link with a "Shop now" CTA) — pick a distinct conversion action like "Sign up", "Get started", "Book a demo", or omit `ctaLabel` entirely.',
         '8. **Never write image URLs.** For any image field use the corresponding `imageQuery` field with descriptive English keywords (e.g. `"trailer rental truck"`). The builder fetches real photos automatically. Leave `imageSrc`, `image`, `backgroundImage`, and `src` fields empty or omit them entirely.',
         '',
         '## Theme',
@@ -105,6 +106,22 @@ export function buildSystemPrompt({ surface, mode, locked }: BuildSystemPromptAr
         '  lightness/saturation levels. Avoid picking colors from opposite sides of the',
         '  color wheel unless intentional (e.g. complementary brand identity).',
         'Pick a palette that matches the user\'s brief — warm, cool, minimal, etc.',
+        '',
+        '### Theme presets',
+        '',
+        'Named presets are available — start from one and override only what the brief requires:',
+        Object.keys(themePresets).map((name) => `- \`${name}\``).join('\n'),
+        '',
+        'To use a preset, copy its key/value map into `spec.theme`. Pick `dark` when the brief calls for a dark mode aesthetic; pick `light` (or omit `theme`) otherwise.',
+        '',
+        '## Visual Variants',
+        '',
+        'Several of the newer modules expose presentation knobs you can use to make pages feel less generic. Use them deliberately, not on every block:',
+        '',
+        '- **`perspective`** (`Showcase`, `HeroPerspective`, `VideoFeature`, `ProductTour`): tilts the image with a 3D transform. Values: `none`, `left`, `right`, `bottom`, `bottom-lg`, `paper`, `paper-left`. Use on hero/feature shots — pairs with `imageQuery`.',
+        '- **`glow`** (`Showcase`, `HeroPerspective`, `VideoFeature`): radial-gradient backdrop. Values: `none`, `primary`, `secondary`. Use sparingly (1–2 per page) on the hero or a single feature spotlight.',
+        '- **`width`** (`Showcase`, `HeroPerspective`, `Newsletter`, …): inner content width. Values: `normal`, `narrow`, `wide`, `ultrawide`. Use `wide`/`ultrawide` for image-heavy blocks; `narrow` for prose-heavy or form blocks.',
+        '- **`tone`** on `BentoGrid` cells via `accent: true`: highlights one cell as the gradient/feature cell. Use at most twice per grid.',
         '',
         '## Section Tones',
         '',

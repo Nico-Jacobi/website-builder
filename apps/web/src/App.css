@@ -19,10 +19,90 @@
 .section {
     width: 100%;
     padding: var(--space_xl) calc(var(--space_xl) * 1.5);
+    position: relative;
 }
 
 @media (max-width: 640px) {
     .section { padding: var(--space_md); }
+}
+
+/* Width modifiers — clamp inner content. Direct children are centered with max-width. */
+.section--narrow > *,
+.section--wide > *,
+.section--ultrawide > * {
+    margin-left: auto;
+    margin-right: auto;
+}
+.section--narrow > *    { max-width: var(--container_narrow); }
+.section--wide > *      { max-width: var(--container_wide); }
+.section--ultrawide > * { max-width: var(--container_ultrawide); }
+
+/* Backdrop variants — applied to the .section itself */
+.section--glow-primary,
+.section--glow-secondary {
+    isolation: isolate;
+    overflow: hidden;
+}
+.section--glow-primary::before,
+.section--glow-secondary::before {
+    content: "";
+    position: absolute;
+    inset: -20% -10% auto -10%;
+    height: 60%;
+    z-index: -1;
+    pointer-events: none;
+}
+.section--glow-primary::before   { background: var(--glow_primary); }
+.section--glow-secondary::before { background: var(--glow_secondary); }
+
+.section--gradient-subtle { background: var(--gradient_subtle); }
+
+/* ── Hard shadow utilities ─────────────────────────────────── */
+.hard-shadow      { box-shadow: var(--hard_shadow); }
+.hard-shadow-left { box-shadow: var(--hard_shadow_left); }
+
+/* ── Perspective image utilities ───────────────────────────── */
+/* Apply to <img> or wrapper. Combine with .hard-shadow for full Page-UI feel. */
+.perspective-none {
+    transform: none;
+}
+.perspective-left {
+    box-shadow: var(--hard_shadow);
+    transform: perspective(400em) rotateY(-15deg) rotateX(6deg)
+               skew(-8deg, 4deg) translate3d(-4%, -2%, 0) scale(0.85);
+}
+.perspective-right {
+    box-shadow: var(--hard_shadow_left);
+    transform: perspective(400em) rotateY(15deg) rotateX(6deg)
+               skew(8deg, -4deg) translate3d(4%, -2%, 0) scale(0.85);
+}
+.perspective-bottom {
+    box-shadow: var(--hard_shadow);
+    transform: translateY(-4%) perspective(400em) rotateX(18deg) scale(0.92);
+}
+.perspective-bottom-lg {
+    box-shadow: var(--hard_shadow);
+    transform: perspective(400em) translate3d(0, -6%, 0) rotateX(34deg) scale(0.85);
+}
+.perspective-paper {
+    box-shadow: var(--hard_shadow);
+    transform: rotateX(40deg) rotate(40deg) scale(0.85);
+}
+.perspective-paper-left {
+    box-shadow: var(--hard_shadow_left);
+    transform: rotateX(40deg) rotate(-40deg) scale(0.85);
+}
+
+@media (max-width: 640px) {
+    /* Tone perspective effects down on mobile so content stays readable */
+    .perspective-left,
+    .perspective-right,
+    .perspective-bottom,
+    .perspective-bottom-lg,
+    .perspective-paper,
+    .perspective-paper-left {
+        transform: none;
+    }
 }
 
 /* Shared image-title-body card used by CardRow and CardGrid */

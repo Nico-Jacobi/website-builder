@@ -1,20 +1,65 @@
-/* Sticky base */
+/* ─── Base ──────────────────────────────────────────────────── */
 .header {
-    position: sticky;
-    top: 0;
     z-index: 100;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space_sm) var(--space_xl);
     color: var(--inverted_text);
-
-    /* Tone applied by SectionShell via data-tone; inherit keeps sticky bg correct */
-    background-color: inherit;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Brand */
+/* ─── Variant: solid ────────────────────────────────────────── */
+/* Taller, modern opaque bar. Sticky at top. */
+.header--solid {
+    position: sticky;
+    top: 0;
+    min-height: 80px;
+    padding: var(--space_md) var(--space_xl);
+    background-color: inherit;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    /* Soft shadow to lift it off the page */
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06),
+                0 4px 24px rgba(0, 0, 0, 0.18);
+}
+
+/* ─── Variant: glass ────────────────────────────────────────── */
+/* Sticky glassmorphism — frosted look over any background. */
+.header--glass {
+    position: sticky;
+    top: 0;
+    min-height: 80px;
+    padding: var(--space_md) var(--space_xl);
+    background: rgba(15, 15, 30, 0.45);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+}
+
+/* ─── Variant: floating ─────────────────────────────────────── */
+/* Centered pill that hovers above page content. */
+/* NOTE: uses fixed positioning — the block below will flow under it. */
+/* Add padding-top ≥ 90px to the first section when using this variant. */
+.header--floating {
+    position: fixed;
+    top: var(--space_md);
+    left: 50%;
+    transform: translateX(-50%);
+    min-height: 60px;
+    width: max-content;
+    max-width: calc(100% - var(--space_xl) * 2);
+    padding: 0 var(--space_lg);
+    background: rgba(10, 10, 20, 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius_pill);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.32),
+        0 16px 48px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Brand ─────────────────────────────────────────────────── */
 .header__brand {
     display: flex;
     align-items: center;
@@ -27,22 +72,37 @@
 }
 
 .header__icon {
-    height: 40px;
-    width: 40px;
+    height: 36px;
+    width: 36px;
+    border-radius: var(--radius_sm);
 }
 
 .header__title {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+/* floating variant: slightly tighter title */
+.header--floating .header__title {
+    font-size: 1rem;
 }
 
 .header__subtitle {
     margin: 0;
-    opacity: 0.85;
-    font-size: 0.95rem;
+    margin-top: 2px;
+    opacity: 0.65;
+    font-size: 0.82rem;
+    letter-spacing: 0.01em;
 }
 
-/* Nav links */
+.header--floating .header__subtitle {
+    display: none;
+}
+
+/* ─── Nav ───────────────────────────────────────────────────── */
 .header__nav {
     display: flex;
     align-items: center;
@@ -52,34 +112,39 @@
 .header__nav a {
     color: var(--inverted_text);
     text-decoration: none;
+    font-size: 0.88rem;
     font-weight: 500;
     letter-spacing: -0.01em;
+    opacity: 0.8;
     transition: opacity var(--dur_normal) var(--ease),
-                transform var(--dur_normal) var(--ease);
+                transform var(--dur_fast) var(--ease);
 }
 
 .header__nav a:hover {
-    opacity: 0.7;
+    opacity: 1;
     transform: translateY(-1px);
 }
 
-/* CTA pill button */
-.header__cta {
+/* ─── CTA pill ──────────────────────────────────────────────── */
+.header__nav a.header__cta {
     display: inline-flex;
     align-items: center;
-    padding: var(--space_xs) var(--space_md);
+    padding: 6px var(--space_md);
     background: var(--inverted_text);
     color: var(--primary);
     border-radius: var(--radius_pill);
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    text-decoration: none;
-    transition: opacity var(--dur_normal) var(--ease),
-                transform var(--dur_normal) var(--ease);
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    opacity: 1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    transition: transform var(--dur_fast) var(--ease),
+                box-shadow var(--dur_normal) var(--ease);
 }
 
-.header__cta:hover {
-    opacity: 0.85;
-    transform: translateY(-1px);
+.header__nav a.header__cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.06) inset;
 }

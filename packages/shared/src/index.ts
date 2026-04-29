@@ -3,6 +3,7 @@ export * from './schemas';
 export * from './sitemap';
 export * from './content';
 export * from './modules';
+export * from './themes';
 export * from './validateSpec';
 export { buildSystemPrompt } from './llm/buildSystemPrompt';
 export type { BuildSystemPromptMode, BuildSystemPromptArgs } from './llm/buildSystemPrompt';

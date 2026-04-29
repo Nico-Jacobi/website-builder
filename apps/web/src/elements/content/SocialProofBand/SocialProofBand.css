@@ -1,0 +1,66 @@
+.social_proof {
+    padding-top: var(--space_lg);
+    padding-bottom: var(--space_lg);
+}
+
+.social_proof__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space_md);
+    max-width: var(--container_wide);
+    margin: 0 auto;
+}
+
+.social_proof__avatars {
+    display: flex;
+    align-items: center;
+}
+
+.social_proof__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius_pill);
+    border: 2px solid var(--surface);
+    margin-left: -8px;
+    object-fit: cover;
+    background: var(--background);
+}
+
+.social_proof__avatar:first-child {
+    margin-left: 0;
+}
+
+.social_proof__stars {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.social_proof__star {
+    color: var(--border_subtle);
+    font-size: 1.1rem;
+}
+
+.social_proof__star--filled {
+    color: var(--accent);
+}
+
+.social_proof__rating-value {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.social_proof__review-count {
+    color: var(--muted_text);
+    font-size: 0.95rem;
+}
+
+.social_proof__tagline {
+    color: var(--muted_text);
+    font-size: 0.95rem;
+}
+
+.social_proof__graphic {
+    font-size: 1.25rem;
+}

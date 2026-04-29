@@ -1,0 +1,75 @@
+.about_vision_mission__heading {
+    margin: 0 0 var(--space_xl);
+    font-size: 2.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-align: center;
+}
+
+.about_vision_mission__columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space_xl);
+}
+
+.about_vision_mission__statement {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space_sm);
+}
+
+.about_vision_mission__label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.about_vision_mission__body {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--text);
+}
+
+.about_vision_mission__founder {
+    display: flex;
+    align-items: center;
+    gap: var(--space_md);
+    margin: var(--space_xl) auto 0;
+    padding: var(--space_md);
+    border-radius: var(--radius_lg);
+    background: var(--surface_elevated);
+    border: 1px solid var(--border_subtle);
+    width: fit-content;
+}
+
+.about_vision_mission__founder img {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius_pill);
+    object-fit: cover;
+}
+
+.about_vision_mission__founder figcaption {
+    display: flex;
+    flex-direction: column;
+}
+
+.about_vision_mission__founder-name {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.about_vision_mission__founder-role {
+    font-size: 0.9rem;
+    color: var(--muted_text);
+}
+
+@media (max-width: 700px) {
+    .about_vision_mission__columns {
+        grid-template-columns: 1fr;
+    }
+}

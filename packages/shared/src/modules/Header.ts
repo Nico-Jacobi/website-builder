@@ -12,13 +12,21 @@ export const HeaderPropsSchema = z.object({
     ctaLabel: z.string().optional(),
     /** Optional pill-button CTA target URL. Only rendered when ctaLabel is also set. */
     ctaHref:  z.string().optional(),
+    /**
+     * Visual variant:
+     *  - solid    — taller opaque bar, modern feel (default)
+     *  - glass    — sticky glassmorphism with backdrop blur
+     *  - floating — centered pill that hovers above page content
+     */
+    variant:  z.enum(['solid', 'glass', 'floating']).optional(),
 });
 
 export type HeaderProps = z.infer<typeof HeaderPropsSchema>;
 
 export const HeaderDefaults: HeaderProps = {
-    title: 'Website',
+    title:   'Website',
     subtitle: 'Ein kurzer Tagline',
+    variant: 'solid',
 };
 
 export const HeaderMeta: ModuleMeta = {
@@ -36,7 +44,7 @@ export const HeaderContentFields: ContentField[] = [
     { path: 'links[].href',  type: 'url'  },
     { path: 'icon',          type: 'image_ref' },
     { path: 'ctaLabel',      type: 'text' },
-    { path: 'ctaHref',        type: 'url'  },
+    { path: 'ctaHref',       type: 'url'  },
 ];
 
 export const HeaderModuleSpec: ModuleSpec<HeaderProps> = {

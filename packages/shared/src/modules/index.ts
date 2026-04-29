@@ -30,6 +30,25 @@ export * from './Gallery';
 export * from './LogoStrip';
 export * from './FeatureGrid';
 export * from './CTABand';
+// Page-UI inspired additions
+export * from './Showcase';
+export * from './Pricing';
+export * from './FAQ';
+export * from './BentoGrid';
+export * from './ComparisonTable';
+export * from './TeamGrid';
+export * from './HeroPerspective';
+export * from './Marquee';
+export * from './SocialProofBand';
+export * from './AboutVisionMission';
+export * from './VideoFeature';
+export * from './Newsletter';
+export * from './ProductTour';
+export * from './Pill';
+export * from './ProductHuntAward';
+export * from './RatingBadge';
+export * from './DiscountStrip';
+export * from './Timeline';
 
 import { HeaderModuleSpec       } from './Header';
 import { HeroBannerModuleSpec   } from './HeroBanner';
@@ -47,6 +66,24 @@ import { GalleryModuleSpec      } from './Gallery';
 import { LogoStripModuleSpec    } from './LogoStrip';
 import { FeatureGridModuleSpec  } from './FeatureGrid';
 import { CTABandModuleSpec      } from './CTABand';
+import { ShowcaseModuleSpec           } from './Showcase';
+import { PricingModuleSpec            } from './Pricing';
+import { FAQModuleSpec                } from './FAQ';
+import { BentoGridModuleSpec          } from './BentoGrid';
+import { ComparisonTableModuleSpec    } from './ComparisonTable';
+import { TeamGridModuleSpec           } from './TeamGrid';
+import { HeroPerspectiveModuleSpec    } from './HeroPerspective';
+import { MarqueeModuleSpec            } from './Marquee';
+import { SocialProofBandModuleSpec    } from './SocialProofBand';
+import { AboutVisionMissionModuleSpec } from './AboutVisionMission';
+import { VideoFeatureModuleSpec       } from './VideoFeature';
+import { NewsletterModuleSpec         } from './Newsletter';
+import { ProductTourModuleSpec        } from './ProductTour';
+import { PillModuleSpec               } from './Pill';
+import { ProductHuntAwardModuleSpec   } from './ProductHuntAward';
+import { RatingBadgeModuleSpec        } from './RatingBadge';
+import { DiscountStripModuleSpec      } from './DiscountStrip';
+import { TimelineModuleSpec           } from './Timeline';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const allSpecs: ModuleSpec<any>[] = [
@@ -56,6 +93,13 @@ const allSpecs: ModuleSpec<any>[] = [
     TestimonialModuleSpec, StatRowModuleSpec,  ImageBlockModuleSpec,
     GalleryModuleSpec,   LogoStripModuleSpec,  FeatureGridModuleSpec,
     CTABandModuleSpec,
+    // Page-UI inspired additions
+    ShowcaseModuleSpec,        PricingModuleSpec,         FAQModuleSpec,
+    BentoGridModuleSpec,       ComparisonTableModuleSpec, TeamGridModuleSpec,
+    HeroPerspectiveModuleSpec, MarqueeModuleSpec,         SocialProofBandModuleSpec,
+    AboutVisionMissionModuleSpec, VideoFeatureModuleSpec, NewsletterModuleSpec,
+    ProductTourModuleSpec,     PillModuleSpec,            ProductHuntAwardModuleSpec,
+    RatingBadgeModuleSpec,     DiscountStripModuleSpec,   TimelineModuleSpec,
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

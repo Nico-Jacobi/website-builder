@@ -6,7 +6,7 @@ import { EditableImage } from '../../shared/EditableImage';
 import { EditableLink } from '../../shared/EditableLink';
 import type { HeaderProps } from '@website-builder/shared';
 
-export default function Header({ title, subtitle, icon, links, ctaLabel, ctaHref }: HeaderProps) {
+export default function Header({ title, subtitle, icon, links, ctaLabel, ctaHref, variant = 'solid' }: HeaderProps) {
     const { t } = useTranslation();
     const { isEditMode } = useEditModeState();
     const titleEdit    = useEditableText('title');
@@ -18,7 +18,7 @@ export default function Header({ title, subtitle, icon, links, ctaLabel, ctaHref
     const showNav  = hasLinks || showCta;
 
     return (
-        <header className="header">
+        <header className={`header header--${variant}`}>
             <div className="header__brand">
                 <div data-empty={!icon || undefined} data-edit-only={!icon || undefined}>
                     <EditableImage

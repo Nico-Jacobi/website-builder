@@ -1,0 +1,94 @@
+.hero_perspective {
+    text-align: center;
+    padding-top: calc(var(--space_xl) * 1.5);
+    padding-bottom: calc(var(--space_xl) * 1.5);
+}
+
+.hero_perspective__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space_xl);
+}
+
+.hero_perspective__copy {
+    max-width: var(--container_narrow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space_md);
+}
+
+.hero_perspective__pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space_xs) var(--space_md);
+    border-radius: var(--radius_pill);
+    background: var(--accent);
+    color: var(--inverted_text);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hero_perspective__headline {
+    margin: 0;
+    font-size: 3rem;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+}
+
+.hero_perspective__subheadline {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--muted_text);
+}
+
+.hero_perspective__ctas {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space_md);
+    margin-top: var(--space_md);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hero_perspective__cta {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space_sm) var(--space_lg);
+    border-radius: var(--radius_pill);
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform var(--dur_fast) var(--ease);
+}
+.hero_perspective__cta:hover { transform: translateY(-1px); }
+.hero_perspective__cta--primary {
+    background: var(--primary);
+    color: var(--inverted_text);
+}
+.hero_perspective__cta--secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border_subtle);
+}
+
+.hero_perspective__media {
+    width: 100%;
+    max-width: var(--container_ultrawide);
+    perspective: 1200px;
+    margin-top: var(--space_lg);
+}
+.hero_perspective__media img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius_lg);
+    display: block;
+}
+
+@media (max-width: 700px) {
+    .hero_perspective__headline { font-size: 2rem; }
+}
