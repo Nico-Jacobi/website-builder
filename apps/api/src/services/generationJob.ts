@@ -6,6 +6,7 @@ import { insertPage, replacePageBlocksTx, replacePageBlocks, setPageStatus, getP
 import { generateLandingAndSitemap } from './llm/generateLandingAndSitemap';
 import type { LandingAndSitemapResult } from './llm/generateLandingAndSitemap';
 import { generateSubpage } from './llm/generateSubpage';
+import { planSubpages } from './llm/planSubpages';
 import { withLimit } from './llm/concurrencyLimit';
 import type { PageStatus } from './sites/pageOps';
 
@@ -146,6 +147,19 @@ async function runJob(
             return;
         }
 
+        // Phase A.5 — Content planning (optional, best-effort)
+        let contentPlanPages: import('@website-builder/shared').ContentPlanEntry[] = [];
+        if (subpageEntries.length > 0) {
+            const planResult = await planSubpages({
+                userPrompt,
+                landingBlocks: phaseA.landingBlocks,
+                sitemap: phaseA.sitemap,
+                theme: phaseA.theme,
+                chrome: phaseA.chrome,
+            });
+            contentPlanPages = planResult.plan?.pages ?? [];
+        }
+
         state.setPhase('subpages');
 
         // Initialise snapshot with pending status for all subpages
@@ -160,12 +174,14 @@ async function runJob(
             events.emit('event', { type: 'subpage_started', path: entry.path } satisfies JobEvent);
 
             try {
+                const contentPlan = contentPlanPages.find(p => p.path === entry.path);
                 const sub = await generateSubpage({
                     userPrompt,
                     theme: phaseA.theme,
                     chrome: phaseA.chrome,
                     sitemap: phaseA.sitemap,
                     pageBrief: entry,
+                    contentPlan,
                 });
                 await replacePageBlocks(identifier, entry.path, sub.blocks);
                 await setPageStatus(pageId, 'ready');

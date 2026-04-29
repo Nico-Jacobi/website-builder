@@ -34,3 +34,20 @@ export const ChromeRefineOutputSchema = z.object({
     _explanation: z.string().optional(),
 });
 export type ChromeRefineOutput = z.infer<typeof ChromeRefineOutputSchema>;
+
+/** Ein Planungs-Eintrag pro Subpage, produziert von Phase A.5. */
+export const ContentPlanEntrySchema = z.object({
+    path:             z.string(),
+    focus:            z.array(z.string()),
+    avoid:            z.array(z.string()),
+    suggestedModules: z.array(z.string()).optional(),
+});
+export type ContentPlanEntry = z.infer<typeof ContentPlanEntrySchema>;
+
+/** Output von mode 'plan': ein ContentPlan-Eintrag pro Subpage. */
+export const ContentPlanOutputSchema = z.object({
+    pages:        z.array(ContentPlanEntrySchema),
+    _explanation: z.string().optional(),
+});
+export type ContentPlanOutput = z.infer<typeof ContentPlanOutputSchema>;
+export type ContentPlan = ContentPlanOutput;

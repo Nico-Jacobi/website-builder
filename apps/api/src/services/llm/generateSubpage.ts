@@ -2,6 +2,7 @@ import { buildSystemPrompt, getRegistryLLMSurface } from '@website-builder/share
 import { SubpageOutputSchema } from '@website-builder/shared';
 import { findSitemapEntry } from '@website-builder/shared';
 import type { BlockSpec, SiteChrome, Sitemap, SitemapEntry } from '@website-builder/shared';
+import type { ContentPlanEntry } from '@website-builder/shared';
 import { db } from '../../db/client';
 import { getClient } from './client';
 import { fillBlocksArray } from './imageFiller';
@@ -17,6 +18,7 @@ export interface GenerateSubpageArgs {
     chrome: SiteChrome;
     sitemap: Sitemap;
     pageBrief: SitemapEntry;
+    contentPlan?: ContentPlanEntry;
 }
 
 export interface GenerateSubpageResult {
@@ -25,7 +27,7 @@ export interface GenerateSubpageResult {
 }
 
 export async function generateSubpage(args: GenerateSubpageArgs): Promise<GenerateSubpageResult> {
-    const { userPrompt, theme, chrome, sitemap, pageBrief } = args;
+    const { userPrompt, theme, chrome, sitemap, pageBrief, contentPlan } = args;
     const collector = createLogCollector();
     collector.log(
         'step',
@@ -42,7 +44,7 @@ export async function generateSubpage(args: GenerateSubpageArgs): Promise<Genera
     const systemInstruction = buildSystemPrompt({
         surface,
         mode: 'subpage',
-        locked: { theme, chrome, sitemap, pageBrief },
+        locked: { theme, chrome, sitemap, pageBrief, contentPlan },
     });
     collector.log('ok', `System-Prompt gebaut (${systemInstruction.length} chars)`);
 

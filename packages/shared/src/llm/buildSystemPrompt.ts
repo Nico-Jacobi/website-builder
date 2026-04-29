@@ -2,6 +2,13 @@ import type { RegistryLLMSurface } from '../types';
 import type { SiteChrome } from '../schemas';
 import type { Sitemap, SitemapEntry } from '../sitemap';
 import { themePresets } from '../themes';
+import type { ContentPlanEntry } from './outputSchemas';
+
+/** Komprimierte Darstellung eines Landing-Blocks für den Plan-Prompt. */
+interface LandingBlockSummary {
+    type: string;
+    heading?: string;
+}
 
 /**
  * Mode selector for {@link buildSystemPrompt}.
@@ -11,7 +18,7 @@ import { themePresets } from '../themes';
  * - `subpage`       — generates content blocks for a single subpage; theme/chrome/sitemap are locked.
  * - `refine-chrome` — refines only the site-level chrome (header/footer); output is `{ chrome }`.
  */
-export type BuildSystemPromptMode = 'initial' | 'refine' | 'subpage' | 'refine-chrome';
+export type BuildSystemPromptMode = 'initial' | 'refine' | 'subpage' | 'refine-chrome' | 'plan';
 
 export interface BuildSystemPromptArgs {
     surface: RegistryLLMSurface;
@@ -22,6 +29,8 @@ export interface BuildSystemPromptArgs {
         chrome?: SiteChrome;
         sitemap?: Sitemap;
         pageBrief?: SitemapEntry;
+        contentPlan?: ContentPlanEntry;           // Phase A.5: Planungs-Eintrag für diese Subpage
+        landingBlocks?: LandingBlockSummary[];    // Phase A.5 plan-mode: komprimierte Landing-Blöcke
     };
 }
 
@@ -356,6 +365,73 @@ export function buildSystemPrompt({ surface, mode, locked }: BuildSystemPromptAr
         return initialPrompt + subpageTail;
     }
 
+    if (mode === 'plan') {
+        const sitemap = locked?.sitemap ?? [];
+        const landingBlocks = locked?.landingBlocks ?? [];
+
+        const landingBlocksSummary = landingBlocks.length > 0
+            ? [
+                '',
+                '**Landing page blocks (already generated):**',
+                '```json',
+                JSON.stringify(landingBlocks, null, 2),
+                '```',
+              ].join('\n')
+            : '';
+
+        const sitemapSummary = sitemap.length > 0
+            ? [
+                '',
+                '**Sitemap:**',
+                '```json',
+                JSON.stringify(sitemap, null, 2),
+                '```',
+              ].join('\n')
+            : '';
+
+        const subpagePaths = sitemap
+            .filter(e => e.path !== '/')
+            .map(e => `- \`${e.path}\` ("${e.title}"): ${e.intent}`)
+            .join('\n');
+
+        return [
+            'You are a website content strategist. Your job is to create a content plan',
+            'for each subpage of a website, based on the already-generated landing page.',
+            '',
+            '## Your task',
+            '',
+            'Analyse what topics and modules the landing page already covers.',
+            'Then, for each subpage listed below, define:',
+            '- `focus`: 3–5 specific content topics to cover on that page',
+            '- `avoid`: 2–4 topics that are already covered on the landing page (or other subpages) and must NOT be repeated',
+            '- `suggestedModules`: 3–6 module type names that fit the page (optional)',
+            '',
+            '## Output format',
+            '',
+            'Respond with a single JSON object matching this shape exactly:',
+            '```json',
+            '{',
+            '  "pages": [',
+            '    {',
+            '      "path": "/about",',
+            '      "focus": ["Company history since 2019", "Team of 12 engineers", "Open-source mission"],',
+            '      "avoid": ["Feature comparison (on landing)", "Pricing (separate page)"],',
+            '      "suggestedModules": ["TextBlock", "TeamGrid", "Timeline", "CTABand"]',
+            '    }',
+            '  ]',
+            '}',
+            '```',
+            '',
+            'Output only the JSON — no prose, no markdown fences, no commentary.',
+            '',
+            '## Subpages to plan',
+            '',
+            subpagePaths,
+            landingBlocksSummary,
+            sitemapSummary,
+        ].join('\n');
+    }
+
     if (mode === 'refine-chrome') {
         const lockedContext = buildLockedContext(locked);
         const refineChromeTail = [
@@ -451,6 +527,17 @@ function buildLockedContext(locked: BuildSystemPromptArgs['locked']): string {
         parts.push('```');
         parts.push('');
         parts.push(`Generate content blocks for the page at \`${locked.pageBrief.path}\` ("${locked.pageBrief.title}"). Intent: ${locked.pageBrief.intent}`);
+    }
+
+    if (locked.contentPlan) {
+        parts.push('');
+        parts.push('**Content plan for this page (from Phase A.5 — follow this strictly):**');
+        parts.push('');
+        parts.push(`- **Focus on:** ${locked.contentPlan.focus.join(' | ')}`);
+        parts.push(`- **Do NOT repeat (already on landing page or other pages):** ${locked.contentPlan.avoid.join(' | ')}`);
+        if (locked.contentPlan.suggestedModules?.length) {
+            parts.push(`- **Suggested modules:** ${locked.contentPlan.suggestedModules.join(', ')}`);
+        }
     }
 
     return parts.join('\n');
