@@ -59,17 +59,22 @@ llmRouter.post('/refine', async (c) => {
         return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
     }
 
-    const result = await refineSpec(parsed.data);
-    return c.json({
-        kind:    'ok',
-        nextSpec: {
-            theme:  result.theme,
-            blocks: result.blocks,
-            chrome: result.chrome,
-        },
-        log:   result.log,
-        trace: result.trace,
-    }, 200);
+    try {
+        const result = await refineSpec(parsed.data);
+        return c.json({
+            kind:    'ok',
+            nextSpec: {
+                theme:  result.theme,
+                blocks: result.blocks,
+                chrome: result.chrome,
+            },
+            log:   result.log,
+            trace: result.trace,
+        }, 200);
+    } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return c.json({ kind: 'api_error', message }, 500);
+    }
 });
 
 /** Chrome-Refinement: LLM bekommt aktuelles Chrome + locked theme/sitemap, liefert updated chrome. */
@@ -85,6 +90,11 @@ llmRouter.post('/refine-chrome', async (c) => {
         return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
     }
 
-    const result = await refineChrome(parsed.data);
-    return c.json(result, 200);
+    try {
+        const result = await refineChrome(parsed.data);
+        return c.json(result, 200);
+    } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return c.json({ kind: 'api_error', message }, 500);
+    }
 });

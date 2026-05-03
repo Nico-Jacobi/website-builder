@@ -52,17 +52,28 @@ export async function callLLM(args: CallLLMArgs): Promise<CoreResult> {
         rawResponse: null,
     });
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60_000);
+
     let response;
     try {
         collector.log('step', 'Gemini API-Call abgesetzt…');
-        response = await client.models.generateContent({
-            model: MODEL,
-            contents: args.userPrompt,
-            config: {
-                systemInstruction: args.systemInstruction,
-                responseMimeType: 'application/json',
-            },
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            controller.signal.addEventListener('abort', () =>
+                reject(new Error('LLM request timed out after 60s'))
+            );
         });
+        response = await Promise.race([
+            client.models.generateContent({
+                model: MODEL,
+                contents: args.userPrompt,
+                config: {
+                    systemInstruction: args.systemInstruction,
+                    responseMimeType: 'application/json',
+                },
+            }),
+            timeoutPromise,
+        ]);
         collector.log('ok', 'Antwort erhalten');
         collector.setTrace({
             systemPrompt: args.systemInstruction,
@@ -73,6 +84,8 @@ export async function callLLM(args: CallLLMArgs): Promise<CoreResult> {
         const message = err instanceof Error ? err.message : String(err);
         collector.log('error', `API-Fehler: ${message}`);
         return { kind: 'api_error', message };
+    } finally {
+        clearTimeout(timeoutId);
     }
 
     const text = response.text;

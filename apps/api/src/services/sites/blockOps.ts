@@ -207,7 +207,7 @@ export async function addBlock(input: AddBlockInput): Promise<AddBlockResult> {
     }
 
     const fields = moduleContentFields[block.type] ?? [];
-    if (!moduleContentFields[block.type] && !isKnownContainerlessType(block.type)) {
+    if (!block.type.trim()) {
         throw new BlockOpFailure({ kind: 'unknown_type', type: block.type });
     }
 
@@ -258,12 +258,6 @@ export async function addBlock(input: AddBlockInput): Promise<AddBlockResult> {
     });
 }
 
-function isKnownContainerlessType(type: string): boolean {
-    // Module types without entries in `moduleContentFields` (e.g. Container) are
-    // valid as long as the client registry knows them. We can't know the
-    // registry on the server, so we accept any non-empty type here.
-    return type.trim().length > 0;
-}
 
 export async function removeBlock(input: RemoveBlockInput): Promise<void> {
     const { identifier, blockId } = input;

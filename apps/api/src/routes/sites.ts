@@ -296,14 +296,27 @@ sitesRouter.patch('/:identifier/theme', async (c) => {
 
 // --- Block content patch (existing) ---------------------------------------
 
+const ContentPatchBody = z.object({
+    fieldPath: z.string().min(1),
+    value:     z.string().nullable(),
+});
+
 sitesRouter.patch('/:identifier/blocks/:blockId/content', async (c) => {
     const identifier = c.req.param('identifier');
     const blockId = c.req.param('blockId');
 
-    const body = await c.req.json<{ fieldPath: string; value: string | null }>();
-    if (!body.fieldPath) {
-        return c.json({ error: 'fieldPath is required' }, 400);
+    let rawBody: unknown;
+    try {
+        rawBody = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
     }
+
+    const parsed = ContentPatchBody.safeParse(rawBody);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+    const body = parsed.data;
 
     const block = await db.query.pageBlocks.findFirst({
         where: eq(schema.pageBlocks.id, blockId),
