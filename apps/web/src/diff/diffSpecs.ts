@@ -50,7 +50,7 @@ export function diffSpecs(before: SiteSpec, after: SiteSpec): PatchOp[] {
     indexBlocks(before.blocks, null, beforeById);
     indexBlocks(after.blocks, null, afterById);
 
-    const themeUpdates: PatchOp[] = [];
+    const headerOps: PatchOp[] = [];
     const removes: PatchOp[] = [];
     const moves: PatchOp[] = [];
     const adds: PatchOp[] = [];
@@ -59,7 +59,7 @@ export function diffSpecs(before: SiteSpec, after: SiteSpec): PatchOp[] {
 
     // --- chrome: whole-replace diff (chrome is small; granular would be overhead).
     if (!sameChrome(before.chrome, after.chrome)) {
-        themeUpdates.push({
+        headerOps.push({
             type: 'updateChrome',
             chrome: after.chrome ?? {},
             previousChrome: before.chrome ?? null,
@@ -71,7 +71,7 @@ export function diffSpecs(before: SiteSpec, after: SiteSpec): PatchOp[] {
     const prevTheme = before.theme ?? null;
     const nextTheme = after.theme ?? null;
     if (!sameTheme(prevTheme, nextTheme)) {
-        themeUpdates.push({
+        headerOps.push({
             type: 'updateTheme',
             theme: nextTheme,
             previousTheme: prevTheme,
@@ -154,7 +154,7 @@ export function diffSpecs(before: SiteSpec, after: SiteSpec): PatchOp[] {
         }
     });
 
-    return [...themeUpdates, ...removes, ...moves, ...adds, ...toneUpdates, ...fieldUpdates];
+    return [...headerOps, ...removes, ...moves, ...adds, ...toneUpdates, ...fieldUpdates];
 }
 
 function sameTheme(

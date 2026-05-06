@@ -1,5 +1,6 @@
 import './Marquee.css';
 import { useEditableText } from '../../../builder/useEditableText';
+import { useEditableImage } from '../../../builder/useEditableImage';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
 import { MarqueeDefaults } from '@website-builder/shared';
 import type { MarqueeProps, MarqueeItem } from '@website-builder/shared';
@@ -59,11 +60,20 @@ interface MarqueeItemCardProps {
 
 function MarqueeItemCard({ item, prefix, style }: MarqueeItemCardProps) {
     const textEdit = useEditableText(`${prefix}.text`);
+    const { overlayElement: imgOverlay } = useEditableImage(
+        item.imageSrc ?? '',
+        `${prefix}.imageSrc`,
+        `${prefix}.imageAlt`,
+        item.imageAlt ?? '',
+    );
+
     const inner = style === 'image' && item.imageSrc
         ? <img src={item.imageSrc} alt={item.imageAlt ?? ''} />
         : <span className={`marquee__label marquee__label--${style}`} {...textEdit}>{item.text ?? ''}</span>;
 
+    const content = <>{inner}{imgOverlay}</>;
+
     return item.href
-        ? <a className="marquee__item" href={item.href}>{inner}</a>
-        : <span className="marquee__item">{inner}</span>;
+        ? <a className="marquee__item" href={item.href}>{content}</a>
+        : <span className="marquee__item">{content}</span>;
 }

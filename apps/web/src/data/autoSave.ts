@@ -9,12 +9,25 @@ interface AutoSaveOptions {
     savedResetMs?: number;
 }
 
+interface PendingTimer {
+    timerId: ReturnType<typeof setTimeout>;
+    blockId: string;
+    fieldPath: string;
+    value: unknown;
+}
+
+function serializeFieldValue(v: unknown): string | null {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'string') return v;
+    return JSON.stringify(v);
+}
+
 export function makeAutoSaveAdapter({
     identifier,
     debounceMs = 500,
     savedResetMs = 2000,
 }: AutoSaveOptions): AutoSaveAdapter & { dispose: () => void } {
-    const timers = new Map<string, ReturnType<typeof setTimeout>>();
+    const timers = new Map<string, PendingTimer>();
     const listeners = new Set<(s: SaveStatus) => void>();
     let status: SaveStatus = 'idle';
     let inflight = 0;
@@ -43,7 +56,7 @@ export function makeAutoSaveAdapter({
         inflight++;
         setStatus('saving');
         try {
-            await patchBlockContent(identifier, blockId, fieldPath, value as string | null);
+            await patchBlockContent(identifier, blockId, fieldPath, serializeFieldValue(value));
             inflight--;
             if (!disposed && inflight === 0 && status === 'saving') setStatus('saved');
         } catch {
@@ -57,15 +70,13 @@ export function makeAutoSaveAdapter({
             if (disposed) return;
             const key = `${blockId}:${fieldPath}`;
             const existing = timers.get(key);
-            if (existing) clearTimeout(existing);
+            if (existing) clearTimeout(existing.timerId);
 
-            timers.set(
-                key,
-                setTimeout(() => {
-                    timers.delete(key);
-                    void executePatch(blockId, fieldPath, value);
-                }, debounceMs),
-            );
+            const timerId = setTimeout(() => {
+                timers.delete(key);
+                void executePatch(blockId, fieldPath, value);
+            }, debounceMs);
+            timers.set(key, { timerId, blockId, fieldPath, value });
         },
 
         async uploadAsset(file) {
@@ -94,9 +105,14 @@ export function makeAutoSaveAdapter({
         },
 
         dispose() {
-            disposed = true;
-            timers.forEach(clearTimeout);
+            // Flush all pending debounced patches synchronously before disposing
+            // so that in-flight typed changes are not silently dropped.
+            timers.forEach((entry) => {
+                clearTimeout(entry.timerId);
+                void executePatch(entry.blockId, entry.fieldPath, entry.value);
+            });
             timers.clear();
+            disposed = true;
             if (resetTimer) clearTimeout(resetTimer);
             listeners.clear();
         },

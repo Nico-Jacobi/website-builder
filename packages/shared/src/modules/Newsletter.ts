@@ -36,7 +36,6 @@ export const NewsletterContentFields: ContentField[] = [
     { path: 'body',           type: 'rich_text' },
     { path: 'buttonLabel',    type: 'text' },
     { path: 'successMessage', type: 'text' },
-    { path: 'placeholder',    type: 'text' },
 ];
 
 export const NewsletterModuleSpec: ModuleSpec<NewsletterProps> = {

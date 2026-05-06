@@ -42,6 +42,7 @@ export function useChatHistory(identifier: string): UseChatHistoryResult {
     // ---------------------------------------------------------------
     const loadInitial = useCallback(
         async (cancelledRef: { cancelled: boolean }): Promise<void> => {
+            if (!identifier) return;
             try {
                 const rows = await listMessages(identifier);
                 if (cancelledRef.cancelled) return;
@@ -66,6 +67,7 @@ export function useChatHistory(identifier: string): UseChatHistoryResult {
     }, [loadInitial]);
 
     const refresh = useCallback(async (): Promise<void> => {
+        if (!identifier) return;
         const rows = await listMessages(identifier);
         setMessages(rows.map((r) => rowToMessage(r)));
     }, [identifier]);

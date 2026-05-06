@@ -4,10 +4,10 @@ import type { CardData } from './schemas';
 
 interface CardProps {
     card: CardData;
-    propPathPrefix?: string;
+    propPathPrefix: string;
 }
 
-export function Card({ card, propPathPrefix = 'cards[0]' }: CardProps) {
+export function Card({ card, propPathPrefix }: CardProps) {
     const titleEdit = useEditableText(`${propPathPrefix}.title`);
     const bodyEdit = useEditableText(`${propPathPrefix}.body`);
 

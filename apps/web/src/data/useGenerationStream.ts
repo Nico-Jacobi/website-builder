@@ -76,9 +76,15 @@ export function useGenerationStream(identifier: string): UseGenerationStreamResu
     const listenersRef = useRef<Set<StreamListener>>(new Set());
 
     useEffect(() => {
+        if (!identifier) return;
         const es = new EventSource(`${apiBase}/api/sites/${identifier}/generation-stream`);
         es.onmessage = (msg) => {
-            const event = JSON.parse(msg.data as string) as StreamEvent;
+            let event: StreamEvent;
+            try {
+                event = JSON.parse(msg.data as string) as StreamEvent;
+            } catch {
+                return;
+            }
             setState(prev => reduceEvent(prev, event));
             for (const listener of listenersRef.current) listener(event);
         };
