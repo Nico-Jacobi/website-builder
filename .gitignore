@@ -19,6 +19,7 @@ test-results
 
 # Claude Code
 .claude/
+CLAUDE.md
 docs/features/
 
 # Uploaded assets (local dev storage)
