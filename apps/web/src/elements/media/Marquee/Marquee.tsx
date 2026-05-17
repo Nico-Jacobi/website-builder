@@ -1,4 +1,5 @@
 import './Marquee.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditableImage } from '../../../builder/useEditableImage';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
@@ -16,6 +17,7 @@ function renderItemGhost(item: MarqueeItem, style: MarqueeProps['style'], key: s
 }
 
 export default function Marquee({ items, direction, speed, pauseOnHover, style }: MarqueeProps) {
+    const { t }       = useTranslation();
     const { addItem } = useEditModeActions();
     const blockIndex  = useBlockIndex();
 
@@ -46,7 +48,7 @@ export default function Marquee({ items, direction, speed, pauseOnHover, style }
                 className="edit__add-item"
                 data-edit-only=""
                 onClick={() => addItem(blockIndex, 'items', MarqueeDefaults.items[0])}
-                title="Add item"
+                title={t('modules.media.marquee.addItemLabel')}
             >+</button>
         </div>
     );

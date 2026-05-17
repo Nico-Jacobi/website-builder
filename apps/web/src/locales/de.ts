@@ -42,6 +42,24 @@ const de = {
             testimonial: {
                 addItemLabel: 'Testimonial hinzufügen',
             },
+            bentoGrid: {
+                addItemLabel: 'Zelle hinzufügen',
+            },
+            teamGrid: {
+                addItemLabel: 'Mitglied hinzufügen',
+            },
+            productTour: {
+                addItemLabel: 'Tab hinzufügen',
+            },
+            faq: {
+                addItemLabel: 'FAQ-Eintrag hinzufügen',
+            },
+            pricing: {
+                addItemLabel: 'Preisstufe hinzufügen',
+            },
+            timeline: {
+                addItemLabel: 'Zeitleisteneintrag hinzufügen',
+            },
         },
         media: {
             imageBlock: {
@@ -55,8 +73,16 @@ const de = {
                 captionPlaceholder: 'Bildunterschrift',
             },
             logoStrip: {
-                headingPlaceholder: 'Trusted by leading teams',
+                headingPlaceholder: 'Vertraut von führenden Teams',
                 partnerLogosAriaLabel: 'Partner-Logos',
+            },
+            marquee: {
+                addItemLabel: 'Element hinzufügen',
+            },
+        },
+        shared: {
+            card: {
+                bodyPlaceholder: 'Kartentext',
             },
         },
     },
@@ -71,6 +97,7 @@ const de = {
             deleteLabel: 'Block löschen',
         },
         image: {
+            addPlaceholder: 'Bild hinzufügen',
             swapLabel: 'Bild tauschen',
             chooseFileLabel: 'Bild wählen',
             uploadingLabel: 'Wird hochgeladen…',

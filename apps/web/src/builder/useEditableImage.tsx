@@ -47,7 +47,9 @@ export function useEditableImage(
     }
 
     function commitAll(src: string) {
-        if (src) commitSrc(src);
+        // Commit unconditionally — an empty string is a valid edit (clears the
+        // image). Guarding on `if (src)` made it impossible to remove an image.
+        if (src !== currentSrc) commitSrc(src);
         if (altPath && altInputValue !== (currentAlt ?? '')) commitAlt(altInputValue);
         setOpen(false);
     }
@@ -85,6 +87,9 @@ export function useEditableImage(
 
     async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
+        // Reset so picking the *same* file again still fires `onChange`
+        // (e.g. after a failed upload the user retries the identical file).
+        e.target.value = '';
         if (file) await uploadFile(file);
     }
 

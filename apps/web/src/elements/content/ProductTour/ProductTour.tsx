@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './ProductTour.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
@@ -7,6 +8,7 @@ import { ProductTourDefaults } from '@website-builder/shared';
 import type { ProductTourProps, ProductTourTab } from '@website-builder/shared';
 
 export default function ProductTour({ heading, subheading, tabs }: ProductTourProps) {
+    const { t }          = useTranslation();
     const headingEdit    = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
     const { addItem }    = useEditModeActions();
@@ -19,9 +21,9 @@ export default function ProductTour({ heading, subheading, tabs }: ProductTourPr
     return (
         <div className="section section--wide product_tour">
             {(heading || subheading) && (
-                <header className="product_tour__header">
-                    {heading && <h2 className="product_tour__heading" {...headingEdit}>{heading}</h2>}
-                    {subheading && <p className="product_tour__subheading" {...subheadingEdit}>{subheading}</p>}
+                <header className="product_tour__header section__header">
+                    {heading && <h2 className="product_tour__heading section__heading" {...headingEdit}>{heading}</h2>}
+                    {subheading && <p className="product_tour__subheading section__subheading" {...subheadingEdit}>{subheading}</p>}
                 </header>
             )}
             <div className="product_tour__tablist" role="tablist">
@@ -34,7 +36,7 @@ export default function ProductTour({ heading, subheading, tabs }: ProductTourPr
                 className="edit__add-item"
                 data-edit-only=""
                 onClick={() => addItem(blockIndex, 'tabs', ProductTourDefaults.tabs[0])}
-                title="Add tab"
+                title={t('modules.content.productTour.addItemLabel')}
             >+</button>
         </div>
     );

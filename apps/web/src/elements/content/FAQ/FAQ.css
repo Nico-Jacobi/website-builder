@@ -9,18 +9,7 @@
 }
 
 .faq__heading {
-    margin: 0 0 var(--space_md);
-    font-size: 2.25rem;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    color: var(--text);
-}
-
-.faq__subheading {
-    margin: 0;
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: var(--muted_text);
+    margin-bottom: var(--space_md);
 }
 
 .faq__list {

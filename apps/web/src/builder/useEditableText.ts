@@ -25,14 +25,11 @@ export function useEditableText(propPath: string) {
         suppressContentEditableWarning: true,
         'data-edit-mode': 'text' as const,
         onFocus: (e: FocusEvent<HTMLElement>) => {
+            // Snapshot the text so onBlur can skip a no-op commit. We do NOT
+            // force a select-all here: that overrode the browser's natural
+            // click-to-place-caret, so clicking into existing text to fix a
+            // typo selected everything and the next keystroke wiped it.
             originalRef.current = e.currentTarget.textContent ?? '';
-            const sel = window.getSelection();
-            if (sel) {
-                const range = document.createRange();
-                range.selectNodeContents(e.currentTarget);
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
         },
         onBlur: (e: FocusEvent<HTMLElement>) => {
             const next = e.currentTarget.textContent ?? '';

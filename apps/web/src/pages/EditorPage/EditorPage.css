@@ -9,34 +9,19 @@
     display: grid;
     grid-template-rows: auto 1fr;
     height: 100vh;
-    background: var(--ui_bg);
     color: var(--ui_text);
-    isolation: isolate;
 }
 
-/* Subtle grid overlay — 64px mesh, 1px hairlines */
-.editor_page::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background-image:
-        linear-gradient(to right, var(--ui_grid_line) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--ui_grid_line) 1px, transparent 1px);
-    background-size: var(--ui_grid_size) var(--ui_grid_size);
-    pointer-events: none;
-}
-
-/* Spectrum glow — top-center, dezent, nur hinter Header/Hero-Zone */
+/* Spectrum glow — colorful blurred halo */
 .editor_page::after {
     content: '';
-    position: absolute;
+    position: fixed;
     top: -40vh;
     left: 50%;
     transform: translateX(-50%);
     width: 90vw;
     height: 80vh;
-    z-index: -1;
+    z-index: 0;
     background: var(--ui_spectrum);
     filter: blur(120px);
     opacity: 0.15;

@@ -158,7 +158,7 @@ html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    background-color: var(--background);
+    background-color: #0b0d12;
     color: var(--text);
     font-family: var(--font_family);
 }

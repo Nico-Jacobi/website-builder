@@ -5,18 +5,24 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { BuilderPage } from './pages/BuilderPage';
 import { SitePreview } from './pages/SitePreview';
 import { EditorPage } from './pages/EditorPage';
+import DotGridBackground from './DotGridBackground';
 
 function App() {
     return (
-        <Suspense fallback={null}>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<BuilderPage />} />
-                    <Route path="/site/:identifier/:pagePath?" element={<SitePreview />} />
-                    <Route path="/editor/:identifier/:pagePath?" element={<EditorPage />} />
-                </Routes>
-            </BrowserRouter>
-        </Suspense>
+        <>
+            <DotGridBackground />
+            <div className="app-content">
+                <Suspense fallback={null}>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/" element={<BuilderPage />} />
+                            <Route path="/site/:identifier/:pagePath?" element={<SitePreview />} />
+                            <Route path="/editor/:identifier/:pagePath?" element={<EditorPage />} />
+                        </Routes>
+                    </BrowserRouter>
+                </Suspense>
+            </div>
+        </>
     );
 }
 

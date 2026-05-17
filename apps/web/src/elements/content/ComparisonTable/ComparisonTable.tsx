@@ -15,9 +15,9 @@ export default function ComparisonTable({ heading, subheading, columns, rows }: 
     return (
         <div className="section comparison_table">
             {(heading || subheading) && (
-                <header className="comparison_table__header">
-                    {heading && <h2 className="comparison_table__heading" {...headingEdit}>{heading}</h2>}
-                    {subheading && <p className="comparison_table__subheading" {...subheadingEdit}>{subheading}</p>}
+                <header className="comparison_table__header section__header">
+                    {heading && <h2 className="comparison_table__heading section__heading" {...headingEdit}>{heading}</h2>}
+                    {subheading && <p className="comparison_table__subheading section__subheading" {...subheadingEdit}>{subheading}</p>}
                 </header>
             )}
             <div className="comparison_table__scroll">

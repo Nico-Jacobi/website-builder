@@ -1,5 +1,6 @@
 import './SocialProofBand.css';
 import { useEditableText } from '../../../builder/useEditableText';
+import { StarRating } from '../../shared/StarRating';
 import type { SocialProofBandProps } from '@website-builder/shared';
 
 const GRAPHIC_GLYPH: Record<string, string> = {
@@ -9,17 +10,6 @@ const GRAPHIC_GLYPH: Record<string, string> = {
     trophy:  '🏆',
     none:    '',
 };
-
-function renderStars(rating: number) {
-    const full = Math.round(rating);
-    const stars = [];
-    for (let i = 0; i < 5; i++) {
-        stars.push(
-            <span key={i} className={`social_proof__star${i < full ? ' social_proof__star--filled' : ''}`}>★</span>
-        );
-    }
-    return <span className="social_proof__stars" aria-label={`${rating} out of 5`}>{stars}</span>;
-}
 
 export default function SocialProofBand({ tagline, rating, reviewCount, avatars, graphic }: SocialProofBandProps) {
     const taglineEdit = useEditableText('tagline');
@@ -36,7 +26,9 @@ export default function SocialProofBand({ tagline, rating, reviewCount, avatars,
                 {graphic !== 'none' && graphic !== 'rating' && (
                     <span className="social_proof__graphic" aria-hidden="true">{GRAPHIC_GLYPH[graphic]}</span>
                 )}
-                {typeof rating === 'number' && renderStars(rating)}
+                {typeof rating === 'number' && (
+                    <StarRating rating={rating} className="social_proof__stars" />
+                )}
                 {typeof rating === 'number' && (
                     <span className="social_proof__rating-value">{rating.toFixed(1)}</span>
                 )}

@@ -115,10 +115,14 @@ export function EditModeProvider({
             const block = current.blocks[blockIndex];
             if (!block) return;
 
+            // `structuredClone` so each added item is independent — otherwise
+            // every new item (and the module's `defaults`) would share one
+            // object reference, and editing one would alias the others.
+            const fresh = structuredClone(defaultItem);
             const existingArray = getNestedProp(block.props, listPath);
             const nextArray = Array.isArray(existingArray)
-                ? [...existingArray, defaultItem]
-                : [defaultItem];
+                ? [...existingArray, fresh]
+                : [fresh];
 
             const blockId = block.id;
             if (blockId) {
@@ -349,10 +353,11 @@ export function ChromeActionsGuard({ children }: { children: ReactNode }) {
     const chromeAwareAddItem = useCallback(
         (blockIndex: number, listPath: string, defaultItem: unknown) => {
             if (target?.kind === 'chrome' && chromeHelpers) {
+                const fresh = structuredClone(defaultItem);
                 const existing = chromeHelpers.getChromeProp(target.position, listPath);
                 const nextArray = Array.isArray(existing)
-                    ? [...existing, defaultItem]
-                    : [defaultItem];
+                    ? [...existing, fresh]
+                    : [fresh];
                 chromeHelpers.updateChromeList(target.position, listPath, nextArray);
             } else {
                 baseActions.addItem(blockIndex, listPath, defaultItem);

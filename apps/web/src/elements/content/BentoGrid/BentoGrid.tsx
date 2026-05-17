@@ -1,4 +1,5 @@
 import './BentoGrid.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
@@ -6,6 +7,7 @@ import { BentoGridDefaults } from '@website-builder/shared';
 import type { BentoGridProps, BentoCell } from '@website-builder/shared';
 
 export default function BentoGrid({ heading, subheading, cells }: BentoGridProps) {
+    const { t }          = useTranslation();
     const headingEdit    = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
     const { addItem }    = useEditModeActions();
@@ -14,9 +16,9 @@ export default function BentoGrid({ heading, subheading, cells }: BentoGridProps
     return (
         <div className="section bento_grid">
             {(heading || subheading) && (
-                <header className="bento_grid__header">
-                    {heading && <h2 className="bento_grid__heading" {...headingEdit}>{heading}</h2>}
-                    {subheading && <p className="bento_grid__subheading" {...subheadingEdit}>{subheading}</p>}
+                <header className="bento_grid__header section__header">
+                    {heading && <h2 className="bento_grid__heading section__heading" {...headingEdit}>{heading}</h2>}
+                    {subheading && <p className="bento_grid__subheading section__subheading" {...subheadingEdit}>{subheading}</p>}
                 </header>
             )}
             <div className="bento_grid__grid">
@@ -28,7 +30,7 @@ export default function BentoGrid({ heading, subheading, cells }: BentoGridProps
                 className="edit__add-item"
                 data-edit-only=""
                 onClick={() => addItem(blockIndex, 'cells', BentoGridDefaults.cells[0])}
-                title="Add cell"
+                title={t('modules.content.bentoGrid.addItemLabel')}
             >+</button>
         </div>
     );

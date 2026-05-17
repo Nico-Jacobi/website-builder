@@ -1,4 +1,5 @@
 import type { CSSProperties, ImgHTMLAttributes } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditableImage } from '../../builder/useEditableImage';
 
 /**
@@ -37,6 +38,7 @@ export function EditableImage({
     imgStyle,
     imgProps,
 }: EditableImageProps) {
+    const { t } = useTranslation();
     const { overlayElement, dragProps, openModal } = useEditableImage(src ?? '', path, altPath, alt);
 
     return (
@@ -50,7 +52,7 @@ export function EditableImage({
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => e.key === 'Enter' && openModal?.()}
-                  >Bild hinzufügen</div>
+                  >{t('editor.image.addPlaceholder')}</div>
             }
             {overlayElement}
         </div>

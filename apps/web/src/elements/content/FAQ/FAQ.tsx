@@ -1,10 +1,12 @@
 import './FAQ.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
 import { FAQDefaults } from '@website-builder/shared';
 import type { FAQProps, FAQItem } from '@website-builder/shared';
 
 export default function FAQ({ heading, subheading, items, layout }: FAQProps) {
+    const { t }          = useTranslation();
     const headingEdit    = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
     const { addItem }    = useEditModeActions();
@@ -15,8 +17,8 @@ export default function FAQ({ heading, subheading, items, layout }: FAQProps) {
             <div className="faq__inner">
                 {(heading || subheading) && (
                     <header className="faq__header">
-                        {heading && <h2 className="faq__heading" {...headingEdit}>{heading}</h2>}
-                        {subheading && <p className="faq__subheading" {...subheadingEdit}>{subheading}</p>}
+                        {heading && <h2 className="faq__heading section__heading" {...headingEdit}>{heading}</h2>}
+                        {subheading && <p className="faq__subheading section__subheading" {...subheadingEdit}>{subheading}</p>}
                     </header>
                 )}
 
@@ -37,7 +39,7 @@ export default function FAQ({ heading, subheading, items, layout }: FAQProps) {
                     className="edit__add-item"
                     data-edit-only=""
                     onClick={() => addItem(blockIndex, 'items', FAQDefaults.items[0])}
-                    title="Add FAQ item"
+                    title={t('modules.content.faq.addItemLabel')}
                 >+</button>
             </div>
         </div>

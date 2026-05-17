@@ -1,22 +1,5 @@
-.bento_grid__header {
-    text-align: center;
-    margin: 0 auto var(--space_xl);
-    max-width: var(--container_narrow);
-}
-
 .bento_grid__heading {
-    margin: 0 0 var(--space_md);
-    font-size: 2.25rem;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    color: var(--text);
-}
-
-.bento_grid__subheading {
-    margin: 0;
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: var(--muted_text);
+    margin-bottom: var(--space_md);
 }
 
 .bento_grid__grid {

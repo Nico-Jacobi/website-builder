@@ -1,4 +1,5 @@
 import './Pricing.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableLink } from '../../shared/EditableLink';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
@@ -6,6 +7,7 @@ import { PricingDefaults } from '@website-builder/shared';
 import type { PricingProps, PricingTier } from '@website-builder/shared';
 
 export default function Pricing({ heading, subheading, tiers }: PricingProps) {
+    const { t }          = useTranslation();
     const headingEdit    = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
     const { addItem }    = useEditModeActions();
@@ -14,9 +16,9 @@ export default function Pricing({ heading, subheading, tiers }: PricingProps) {
     return (
         <div className="section pricing">
             {(heading || subheading) && (
-                <header className="pricing__header">
-                    {heading && <h2 className="pricing__heading" {...headingEdit}>{heading}</h2>}
-                    {subheading && <p className="pricing__subheading" {...subheadingEdit}>{subheading}</p>}
+                <header className="pricing__header section__header">
+                    {heading && <h2 className="pricing__heading section__heading" {...headingEdit}>{heading}</h2>}
+                    {subheading && <p className="pricing__subheading section__subheading" {...subheadingEdit}>{subheading}</p>}
                 </header>
             )}
             <div className="pricing__grid">
@@ -28,7 +30,7 @@ export default function Pricing({ heading, subheading, tiers }: PricingProps) {
                 className="edit__add-item"
                 data-edit-only=""
                 onClick={() => addItem(blockIndex, 'tiers', PricingDefaults.tiers[0])}
-                title="Add pricing tier"
+                title={t('modules.content.pricing.addItemLabel')}
             >+</button>
         </div>
     );

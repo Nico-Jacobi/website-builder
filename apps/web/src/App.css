@@ -1,3 +1,9 @@
+/* ── App content sits above the fixed canvas background ─── */
+.app-content {
+    position: relative;
+    z-index: 1;
+}
+
 /* ── Layout primitives ─────────────────────────────────────── */
 
 .vertical_layout {
@@ -103,6 +109,30 @@
     .perspective-paper-left {
         transform: none;
     }
+}
+
+/* ── Section heading / subheading utilities ────────────────── */
+/* Used by modules that render a centred section header block.
+   Compose with the module's own BEM class for targeting.       */
+.section__header {
+    text-align: center;
+    margin: 0 auto var(--space_xl);
+    max-width: var(--container_narrow);
+}
+
+.section__heading {
+    margin: 0;
+    font-size: 2.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+.section__subheading {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--muted_text);
 }
 
 /* Shared image-title-body card used by CardRow and CardGrid */

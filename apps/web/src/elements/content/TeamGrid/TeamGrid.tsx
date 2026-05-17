@@ -1,4 +1,5 @@
 import './TeamGrid.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { EditableImage } from '../../shared/EditableImage';
 import { EditableLink } from '../../shared/EditableLink';
@@ -7,6 +8,7 @@ import { TeamGridDefaults } from '@website-builder/shared';
 import type { TeamGridProps, TeamMember } from '@website-builder/shared';
 
 export default function TeamGrid({ heading, subheading, members }: TeamGridProps) {
+    const { t }          = useTranslation();
     const headingEdit    = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
     const { addItem }    = useEditModeActions();
@@ -15,9 +17,9 @@ export default function TeamGrid({ heading, subheading, members }: TeamGridProps
     return (
         <div className="section team_grid">
             {(heading || subheading) && (
-                <header className="team_grid__header">
-                    {heading && <h2 className="team_grid__heading" {...headingEdit}>{heading}</h2>}
-                    {subheading && <p className="team_grid__subheading" {...subheadingEdit}>{subheading}</p>}
+                <header className="team_grid__header section__header">
+                    {heading && <h2 className="team_grid__heading section__heading" {...headingEdit}>{heading}</h2>}
+                    {subheading && <p className="team_grid__subheading section__subheading" {...subheadingEdit}>{subheading}</p>}
                 </header>
             )}
             <div className="team_grid__grid">
@@ -29,7 +31,7 @@ export default function TeamGrid({ heading, subheading, members }: TeamGridProps
                 className="edit__add-item"
                 data-edit-only=""
                 onClick={() => addItem(blockIndex, 'members', TeamGridDefaults.members[0])}
-                title="Add member"
+                title={t('modules.content.teamGrid.addItemLabel')}
             >+</button>
         </div>
     );

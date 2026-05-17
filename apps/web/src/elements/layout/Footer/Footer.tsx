@@ -7,7 +7,6 @@ export default function Footer({ tagline, copyright, columns, compact }: FooterP
     const taglineEdit   = useEditableText('tagline');
     const copyrightEdit = useEditableText('copyright');
 
-    /* ── Compact-Layout (Single-Row, ex FooterSimple) ── */
     if (compact) {
         // Im Compact-Modus: alle Links aus allen Spalten flach in eine Nav-Zeile
         const flatLinks: { colIndex: number; linkIndex: number; label: string; href: string }[] =

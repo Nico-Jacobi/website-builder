@@ -1,10 +1,12 @@
 import './Timeline.css';
+import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditModeActions, useBlockIndex } from '../../../builder/editModeStore';
 import { TimelineDefaults } from '@website-builder/shared';
 import type { TimelineProps, TimelineEntry } from '@website-builder/shared';
 
 export default function Timeline({ heading, subheading, entries }: TimelineProps) {
+    const { t }          = useTranslation();
     const headingEdit    = useEditableText('heading');
     const subheadingEdit = useEditableText('subheading');
     const { addItem }    = useEditModeActions();
@@ -14,8 +16,8 @@ export default function Timeline({ heading, subheading, entries }: TimelineProps
         <div className="section section--narrow timeline">
             {(heading || subheading) && (
                 <header className="timeline__header">
-                    {heading && <h2 className="timeline__heading" {...headingEdit}>{heading}</h2>}
-                    {subheading && <p className="timeline__subheading" {...subheadingEdit}>{subheading}</p>}
+                    {heading && <h2 className="timeline__heading section__heading" {...headingEdit}>{heading}</h2>}
+                    {subheading && <p className="timeline__subheading section__subheading" {...subheadingEdit}>{subheading}</p>}
                 </header>
             )}
             <ol className="timeline__list">
@@ -27,7 +29,7 @@ export default function Timeline({ heading, subheading, entries }: TimelineProps
                 className="edit__add-item"
                 data-edit-only=""
                 onClick={() => addItem(blockIndex, 'entries', TimelineDefaults.entries[0])}
-                title="Add timeline entry"
+                title={t('modules.content.timeline.addItemLabel')}
             >+</button>
         </div>
     );
