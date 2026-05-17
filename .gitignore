@@ -17,6 +17,9 @@ dist-ssr
 playwright-report
 test-results
 
+# TypeScript incremental build info
+*.tsbuildinfo
+
 # Claude Code
 .claude/
 CLAUDE.md
