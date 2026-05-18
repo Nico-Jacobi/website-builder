@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import './BuilderPage.css';
 import { SitesList } from './SitesList';
 import { NewSiteDialog } from './NewSiteDialog';
@@ -10,6 +11,12 @@ export function BuilderPage() {
     const [dialogOpen, setDialogOpen] = useState(false);
     return (
         <div className="builder_page">
+            <nav className="builder_page__topnav">
+                <Link to="/" className="builder_page__brand">
+                    <Sparkles size={16} />
+                    <span>OneP<span className="builder_page__brand-ai">ai</span>ge</span>
+                </Link>
+            </nav>
             <header className="builder_page__header">
                 <div className="builder_page__hero">
                     <h1 className="builder_page__title">{t('builder.title')}</h1>

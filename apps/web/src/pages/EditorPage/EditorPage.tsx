@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Moon, Sparkles, Sun } from 'lucide-react';
 import type { SiteSpec, Sitemap } from '@website-builder/shared';
 import './EditorPage.css';
 import { PreviewSurface } from '../../builder/PreviewSurface';
 import { useActivePagePath, useNavigateToPage } from '../../builder/usePageNavigation';
 import { EditModeProvider } from '../../builder/EditModeContext';
 import { useEditModeActions, useEditModeState } from '../../builder/editModeStore';
-import { fetchSiteMeta, fetchSiteGenerationMeta, fetchSiteSpec, renameSite } from '../../data/siteClient';
+import { fetchSiteMeta, fetchSiteGenerationMeta, fetchSiteSpec, renameSite, patchSiteTheme } from '../../data/siteClient';
 import { makeAutoSaveAdapter, flushAutoSave } from '../../data/autoSave';
 import { makeBlockOpsAdapter } from '../../data/blockOps';
 import type { BlockOpsAdapter } from '../../data/blockOps';
@@ -140,6 +140,20 @@ export function EditorPage() {
         }, 600);
     }, [identifier]);
     useEffect(() => () => { if (renameTimer.current) clearTimeout(renameTimer.current); }, []);
+
+    // --- Dark/Light toggle ------------------------------------------------
+    const colorScheme: 'light' | 'dark' =
+        spec?.theme?.colorScheme === 'light' ? 'light' : 'dark';
+    const handleToggleColorScheme = useCallback(() => {
+        if (!identifier) return;
+        setSpec((prev) => {
+            if (!prev) return prev;
+            const next = prev.theme?.colorScheme === 'light' ? 'dark' : 'light';
+            const nextTheme = { ...(prev.theme ?? {}), colorScheme: next };
+            void patchSiteTheme(identifier, nextTheme);
+            return { ...prev, theme: nextTheme };
+        });
+    }, [identifier]);
 
     // --- Generation stream (SSE) — one connection per editor session -----
     const stream = useGenerationStream(identifier ?? '');
@@ -338,6 +352,8 @@ export function EditorPage() {
                     identifier={identifier}
                     autoSave={autoSave}
                     blockOps={blockOps}
+                    colorScheme={colorScheme}
+                    onToggleColorScheme={handleToggleColorScheme}
                 />
                 <div className="editor_page__body">
                     <EditorDndProvider>
@@ -351,13 +367,43 @@ export function EditorPage() {
                         <main className="editor_page__preview">
                             {showLoadingOverlay ? (
                                 <div className="editor_page__preview-loading">
-                                    <Loader2
-                                        className="editor_page__preview-loading-spinner"
-                                        size={40}
-                                        strokeWidth={1.75}
-                                        aria-hidden="true"
-                                    />
+                                    <div className="epl-mockup">
+                                        <div className="epl-bar">
+                                            <span className="epl-dot" /><span className="epl-dot" /><span className="epl-dot" />
+                                            <span className="epl-skel epl-pulse epl-url" style={{ '--d': '0s' } as React.CSSProperties} />
+                                        </div>
+                                        <div className="epl-body">
+                                            <div className="epl-nav">
+                                                <span className="epl-skel epl-pulse" style={{ '--d': '0.05s', width: '72px', height: '13px' } as React.CSSProperties} />
+                                                <div className="epl-nav-links">
+                                                    {[55,48,52].map((w,i) => <span key={i} className="epl-skel epl-pulse" style={{ '--d': `${0.1+i*0.08}s`, width:`${w}px`, height:'10px' } as React.CSSProperties} />)}
+                                                </div>
+                                                <span className="epl-skel epl-pulse epl-pill" style={{ '--d': '0.35s', width:'68px', height:'24px' } as React.CSSProperties} />
+                                            </div>
+                                            <div className="epl-hero">
+                                                <span className="epl-skel epl-pulse" style={{ '--d': '0.4s', width:'58%', height:'26px' } as React.CSSProperties} />
+                                                <span className="epl-skel epl-pulse" style={{ '--d': '0.5s', width:'72%', height:'26px' } as React.CSSProperties} />
+                                                <span className="epl-skel epl-pulse" style={{ '--d': '0.62s', width:'50%', height:'13px', marginTop:'4px' } as React.CSSProperties} />
+                                                <span className="epl-skel epl-pulse" style={{ '--d': '0.7s', width:'42%', height:'13px' } as React.CSSProperties} />
+                                                <div className="epl-btns">
+                                                    <span className="epl-skel epl-pulse epl-pill" style={{ '--d': '0.82s', width:'96px', height:'30px' } as React.CSSProperties} />
+                                                    <span className="epl-skel epl-pulse epl-pill" style={{ '--d': '0.92s', width:'84px', height:'30px', opacity:.45 } as React.CSSProperties} />
+                                                </div>
+                                            </div>
+                                            <div className="epl-cards">
+                                                {[0,1,2].map(i => (
+                                                    <div key={i} className="epl-card">
+                                                        <span className="epl-card-img epl-pulse" style={{ '--d': `${1.05+i*0.14}s` } as React.CSSProperties} />
+                                                        <span className="epl-skel epl-pulse" style={{ '--d': `${1.15+i*0.14}s`, width:'68%', height:'11px' } as React.CSSProperties} />
+                                                        <span className="epl-skel epl-pulse" style={{ '--d': `${1.25+i*0.14}s`, width:'88%', height:'9px' } as React.CSSProperties} />
+                                                        <span className="epl-skel epl-pulse" style={{ '--d': `${1.35+i*0.14}s`, width:'55%', height:'9px' } as React.CSSProperties} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <p className="editor_page__preview-loading-text">
+                                        <Sparkles size={14} />
                                         {t('editor.generatingLabel')}
                                     </p>
                                 </div>
@@ -406,14 +452,16 @@ function EditorPreview({
 }
 
 interface EditorHeaderProps {
-    name:         string;
-    onNameChange: (next: string) => void;
-    identifier:   string;
-    autoSave:     AutoSaveAdapter | undefined;
-    blockOps:     BlockOpsAdapter | undefined;
+    name:                string;
+    onNameChange:        (next: string) => void;
+    identifier:          string;
+    autoSave:            AutoSaveAdapter | undefined;
+    blockOps:            BlockOpsAdapter | undefined;
+    colorScheme:         'light' | 'dark';
+    onToggleColorScheme: () => void;
 }
 
-function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: EditorHeaderProps) {
+function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps, colorScheme, onToggleColorScheme }: EditorHeaderProps) {
     const { t } = useTranslation();
     const status = useCombinedSaveStatus(autoSave, blockOps);
     const previewHref = `/site/${encodeURIComponent(identifier)}`;
@@ -436,6 +484,7 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps }: Ed
             </div>
             <div className="editor_page__header-actions">
                 <SaveStatusIndicator status={status} />
+                <ThemeModeToggle scheme={colorScheme} onToggle={onToggleColorScheme} />
                 <LanguageToggle />
                 <EditModeToggle />
                 <a
@@ -480,6 +529,33 @@ function EditModeToggle() {
                 {t('editor.modeToggle.previewLabel')}
             </button>
         </div>
+    );
+}
+
+function ThemeModeToggle({
+    scheme,
+    onToggle,
+}: {
+    scheme: 'light' | 'dark';
+    onToggle: () => void;
+}) {
+    const { t } = useTranslation();
+    const isDark = scheme === 'dark';
+    return (
+        <button
+            type="button"
+            className={`editor_page__theme-toggle${isDark ? ' editor_page__theme-toggle--dark' : ''}`}
+            role="switch"
+            aria-checked={isDark}
+            aria-label={t('editor.themeToggle.ariaLabel', 'Toggle dark mode')}
+            title={t('editor.themeToggle.ariaLabel', 'Toggle dark mode')}
+            onClick={onToggle}
+        >
+            <span className="editor_page__theme-thumb" aria-hidden="true">
+                <Sun size={13} strokeWidth={2} className="editor_page__theme-icon editor_page__theme-icon--sun" />
+                <Moon size={13} strokeWidth={2} className="editor_page__theme-icon editor_page__theme-icon--moon" />
+            </span>
+        </button>
     );
 }
 
