@@ -36,6 +36,7 @@ const MAX_MATERIALIZE_DEPTH = 32;
  */
 export default function Renderer({ spec }: { spec: SiteSpec }) {
     const themeStyle = themeToCssVars(spec.theme);
+    const colorScheme = spec.theme?.colorScheme === 'light' ? 'light' : 'dark';
     const { reorderBlocks, removeBlock } = useEditModeActions();
 
     const paletteModuleType = useContext(PaletteModuleTypeContext);
@@ -54,7 +55,7 @@ export default function Renderer({ spec }: { spec: SiteSpec }) {
 
     return (
         <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-            <div ref={setCanvasRef} className="vertical_layout" style={themeStyle}>
+            <div ref={setCanvasRef} className="vertical_layout" data-theme={colorScheme} style={themeStyle}>
                 {/* Chrome header — outside sortable items, site-wide, no move/delete */}
                 {spec.chrome?.header && (
                     <BlockTargetContext.Provider value={{ kind: 'chrome', position: 'header' }}>
@@ -137,6 +138,9 @@ function themeToCssVars(theme: SiteSpec['theme']): CSSProperties | undefined {
     if (!theme) return undefined;
     const vars: Record<string, string> = {};
     for (const [key, value] of Object.entries(theme)) {
+        // colorScheme is a reserved control key, not a CSS variable — the
+        // Renderer maps it to the data-theme attribute instead.
+        if (key === 'colorScheme') continue;
         vars[`--${key}`] = value;
     }
     return vars as CSSProperties;

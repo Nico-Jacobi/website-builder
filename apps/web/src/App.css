@@ -9,6 +9,7 @@
 .vertical_layout {
     display: flex;
     flex-direction: column;
+    background-color: var(--background);
 }
 
 .horizontal_layout {

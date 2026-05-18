@@ -23,7 +23,7 @@
     object-fit: cover;
     border-radius: var(--radius_lg);
     border: 1px solid var(--border_subtle);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 24px var(--border_subtle);
 }
 
 .media_text__content { flex: 1; min-width: 0; }

@@ -37,7 +37,7 @@
 .discount_strip__code code {
     padding: var(--space_xs) var(--space_sm);
     border-radius: var(--radius_sm);
-    background: rgba(255, 255, 255, 0.18);
+    background: var(--on_brand_fill);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-weight: 600;
 }
@@ -54,7 +54,7 @@
     background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(255, 255, 255, 0.18) 50%,
+        var(--on_brand_fill) 50%,
         transparent 100%
     );
     animation: discount_shimmer 3s linear infinite;

@@ -36,6 +36,15 @@
     /* Borders */
     --border_subtle: rgba(0, 0, 0, 0.08);
 
+    /* Theme-aware surface effects (light values; dark overrides below) */
+    --glass_bg:           rgba(255, 255, 255, 0.72);
+    --glass_border:       rgba(0, 0, 0, 0.08);
+    --glass_shadow:       0 8px 24px rgba(0, 0, 0, 0.10);
+    --grid_overlay:       rgba(0, 0, 0, 0.05);
+    --scrim:              rgba(0, 0, 0, 0.45);
+    --on_brand_fill:      rgba(255, 255, 255, 0.18);
+    --avatar_placeholder: #c0c0c0;
+
     /* Elevated surface (slightly above --surface for card backgrounds) */
     --surface_elevated: #FFFFFF;
 
@@ -142,6 +151,40 @@
     --ui_shadow_cta:
         0 1px 2px rgba(0, 0, 0, 0.6),
         0 8px 24px rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================================
+   Dark mode — overrides neutral tokens only. Brand hues
+   (--primary/--secondary/--accent/--alt_*) are intentionally
+   left untouched so per-site branding survives the toggle.
+   Applied via [data-theme="dark"] on the render root.
+   ============================================================ */
+[data-theme="dark"] {
+    --background:        #0B0D12;
+    --surface:           #151821;
+    --surface_elevated:  #1C2029;
+    --text:              #ECEEF3;
+    --muted_text:        #9AA3B4;
+    --border_subtle:     rgba(255, 255, 255, 0.10);
+    --modal_overlay:     rgba(0, 0, 0, 0.66);
+
+    --glass_bg:          rgba(15, 17, 23, 0.62);
+    --glass_border:      rgba(255, 255, 255, 0.10);
+    --glass_shadow:      0 8px 28px rgba(0, 0, 0, 0.5);
+    --grid_overlay:      rgba(255, 255, 255, 0.06);
+    --scrim:             rgba(0, 0, 0, 0.55);
+    --avatar_placeholder: #3A3F4B;
+
+    /* Elevation reads as depth-on-dark, not a black blob */
+    --hard_shadow:
+        0 24px 60px -12px rgba(0, 0, 0, 0.7),
+        0 8px 24px -8px rgba(0, 0, 0, 0.5);
+    --hard_shadow_left:
+        0 24px 60px -12px rgba(0, 0, 0, 0.7),
+        -8px 8px 24px -8px rgba(0, 0, 0, 0.5);
+
+    /* Subtle gradient should fall toward the dark background */
+    --gradient_subtle: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
 }
 
 /* Global reset */

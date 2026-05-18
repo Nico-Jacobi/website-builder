@@ -64,7 +64,7 @@
     justify-content: space-between;
     gap: var(--space_sm);
     padding-top: var(--space_md);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--glass_border);
 }
 
 .footer__tagline {
@@ -88,7 +88,7 @@
     justify-content: space-between;
     gap: var(--space_md);
     padding: var(--space_md) var(--space_xl);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--glass_border);
 }
 
 .footer--compact .footer__compact-left {

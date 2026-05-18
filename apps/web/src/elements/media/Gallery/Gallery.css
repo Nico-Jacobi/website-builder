@@ -72,7 +72,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.25) 100%);
+    background: linear-gradient(to bottom, transparent 40%, var(--scrim) 100%);
     opacity: 0;
     transition: opacity var(--dur_normal) var(--ease);
     pointer-events: none;
