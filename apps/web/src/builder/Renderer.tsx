@@ -133,17 +133,31 @@ function GhostBlock({ moduleType }: { moduleType: string }) {
     );
 }
 
+// Neutral tokens managed exclusively by [data-theme="dark"] CSS.
+// If these arrive as LLM-generated inline styles they would override the
+// CSS block (inline styles beat class rules), breaking dark mode.
+const DARK_CONTROLLED_TOKENS = new Set([
+    'background', 'surface', 'surface_elevated',
+    'text', 'muted_text', 'inverted_text',
+    'border_subtle', 'modal_overlay',
+    'glass_bg', 'glass_border', 'glass_shadow',
+    'grid_overlay', 'scrim', 'avatar_placeholder',
+    'hard_shadow', 'hard_shadow_left', 'gradient_subtle',
+]);
+
 /** Turns `{ primary: "#f06" }` into `{ "--primary": "#f06" }`. */
 function themeToCssVars(theme: SiteSpec['theme']): CSSProperties | undefined {
     if (!theme) return undefined;
+    const isDark = theme.colorScheme !== 'light';
     const vars: Record<string, string> = {};
     for (const [key, value] of Object.entries(theme)) {
-        // colorScheme is a reserved control key, not a CSS variable — the
-        // Renderer maps it to the data-theme attribute instead.
         if (key === 'colorScheme') continue;
+        // In dark mode, neutral tokens are controlled by the [data-theme="dark"]
+        // CSS block. Emitting them as inline styles would override that block.
+        if (isDark && DARK_CONTROLLED_TOKENS.has(key)) continue;
         vars[`--${key}`] = value;
     }
-    return vars as CSSProperties;
+    return Object.keys(vars).length > 0 ? (vars as CSSProperties) : undefined;
 }
 
 /** Renders a single block: lookup → validate → recurse children → render. */
