@@ -37,7 +37,7 @@ export async function createSite(input: CreateSiteInput): Promise<CreateSiteResu
                 .values({
                     identifier,
                     name,
-                    theme:         null,
+                    theme:         { colorScheme: 'dark' },
                     initialPrompt: input.initialPrompt,
                 })
                 .returning();

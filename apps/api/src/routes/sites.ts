@@ -482,7 +482,17 @@ sitesRouter.get('/:identifier/generation-stream', async (c) => {
 
         try {
             // 1. Send a snapshot so reconnects are loss-free.
-            const pages = await getSitePagesWithStatus(identifier);
+            let pages: Awaited<ReturnType<typeof getSitePagesWithStatus>>;
+            try {
+                pages = await getSitePagesWithStatus(identifier);
+            } catch (e: unknown) {
+                const msg = e instanceof Error ? e.message : String(e);
+                if (msg.includes('site not found')) {
+                    await writeSseEvent(stream, { type: 'error', message: msg });
+                    return;
+                }
+                throw e;
+            }
             const site = await db.query.sites.findFirst({
                 where: eq(schema.sites.identifier, identifier),
             });

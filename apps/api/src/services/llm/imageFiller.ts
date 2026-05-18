@@ -210,6 +210,155 @@ function collectFromBlock(block: BlockSpec, slots: ImageSlot[], path: string[]):
             break;
         }
 
+        case 'HeroPerspective':
+        case 'Showcase': {
+            if (!hasUrl(props.imageSrc)) {
+                slots.push({
+                    imageQuery: typeof props.imageQuery === 'string' ? props.imageQuery : '',
+                    width: 1200, height: 800,
+                    label: `${where}.imageSrc`,
+                    apply: (url) => { props.imageSrc = url; },
+                });
+            }
+            break;
+        }
+
+        case 'BentoGrid': {
+            const cells = props.cells;
+            if (Array.isArray(cells)) {
+                cells.forEach((cell, idx) => {
+                    if (cell && typeof cell === 'object') {
+                        const entry = cell as { imageSrc?: unknown; imageQuery?: unknown };
+                        if (
+                            !hasUrl(entry.imageSrc) &&
+                            typeof entry.imageQuery === 'string' &&
+                            entry.imageQuery !== ''
+                        ) {
+                            slots.push({
+                                imageQuery: entry.imageQuery,
+                                width: 600, height: 400,
+                                label: `${where}.cells[${idx}].imageSrc`,
+                                apply: (url) => { entry.imageSrc = url; },
+                            });
+                        }
+                    }
+                });
+            }
+            break;
+        }
+
+        case 'ProductTour': {
+            const tabs = props.tabs;
+            if (Array.isArray(tabs)) {
+                tabs.forEach((tab, idx) => {
+                    if (tab && typeof tab === 'object') {
+                        const entry = tab as { imageSrc?: unknown; imageQuery?: unknown };
+                        if (
+                            !hasUrl(entry.imageSrc) &&
+                            typeof entry.imageQuery === 'string' &&
+                            entry.imageQuery !== ''
+                        ) {
+                            slots.push({
+                                imageQuery: entry.imageQuery,
+                                width: 1200, height: 800,
+                                label: `${where}.tabs[${idx}].imageSrc`,
+                                apply: (url) => { entry.imageSrc = url; },
+                            });
+                        }
+                    }
+                });
+            }
+            break;
+        }
+
+        case 'LogoStrip': {
+            const logos = props.logos;
+            if (Array.isArray(logos)) {
+                logos.forEach((logo, idx) => {
+                    if (logo && typeof logo === 'object') {
+                        const entry = logo as { src?: unknown; imageQuery?: unknown };
+                        if (
+                            !hasUrl(entry.src) &&
+                            typeof entry.imageQuery === 'string' &&
+                            entry.imageQuery !== ''
+                        ) {
+                            slots.push({
+                                imageQuery: entry.imageQuery,
+                                width: 200, height: 80,
+                                label: `${where}.logos[${idx}].src`,
+                                apply: (url) => { entry.src = url; },
+                            });
+                        }
+                    }
+                });
+            }
+            break;
+        }
+
+        case 'Testimonial': {
+            const items = props.items;
+            if (Array.isArray(items)) {
+                items.forEach((item, idx) => {
+                    if (item && typeof item === 'object') {
+                        const entry = item as { avatarSrc?: unknown; avatarQuery?: unknown };
+                        if (
+                            !hasUrl(entry.avatarSrc) &&
+                            typeof entry.avatarQuery === 'string' &&
+                            entry.avatarQuery !== ''
+                        ) {
+                            slots.push({
+                                imageQuery: entry.avatarQuery,
+                                width: 100, height: 100,
+                                label: `${where}.items[${idx}].avatarSrc`,
+                                apply: (url) => { entry.avatarSrc = url; },
+                            });
+                        }
+                    }
+                });
+            }
+            break;
+        }
+
+        case 'TeamGrid': {
+            const members = props.members;
+            if (Array.isArray(members)) {
+                members.forEach((member, idx) => {
+                    if (member && typeof member === 'object') {
+                        const entry = member as { photoSrc?: unknown; photoQuery?: unknown };
+                        if (
+                            !hasUrl(entry.photoSrc) &&
+                            typeof entry.photoQuery === 'string' &&
+                            entry.photoQuery !== ''
+                        ) {
+                            slots.push({
+                                imageQuery: entry.photoQuery,
+                                width: 200, height: 200,
+                                label: `${where}.members[${idx}].photoSrc`,
+                                apply: (url) => { entry.photoSrc = url; },
+                            });
+                        }
+                    }
+                });
+            }
+            break;
+        }
+
+        case 'AboutVisionMission': {
+            if (
+                !hasUrl(props.founderPhotoSrc) &&
+                typeof props.founderPhotoQuery === 'string' &&
+                props.founderPhotoQuery !== ''
+            ) {
+                slots.push({
+                    imageQuery: props.founderPhotoQuery,
+                    width: 400, height: 400,
+                    label: `${where}.founderPhotoSrc`,
+                    apply: (url) => { props.founderPhotoSrc = url; },
+                });
+            }
+            break;
+        }
+
         case 'Container': {
             const children = props.children;
             if (Array.isArray(children)) {

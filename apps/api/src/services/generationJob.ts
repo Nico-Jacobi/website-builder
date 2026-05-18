@@ -235,7 +235,9 @@ async function persistLandingPhase(
         await tx
             .update(schema.sites)
             .set({
-                theme: phase.theme ?? null,
+                // Generated sites default to dark mode; LLM brand-hue overrides
+                // are preserved alongside the reserved colorScheme key.
+                theme: { colorScheme: 'dark', ...(phase.theme ?? {}) },
                 sitemap: phase.sitemap,
                 chrome: phase.chrome,
             })
