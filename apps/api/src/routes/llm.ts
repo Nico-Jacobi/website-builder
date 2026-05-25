@@ -68,8 +68,9 @@ llmRouter.post('/refine', async (c) => {
                 blocks: result.blocks,
                 chrome: result.chrome,
             },
-            log:   result.log,
-            trace: result.trace,
+            explanation: result.explanation ?? '',
+            log:         result.log,
+            trace:       result.trace,
         }, 200);
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

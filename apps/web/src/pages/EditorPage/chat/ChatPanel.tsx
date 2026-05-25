@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import './ChatPanel.css';
 import type { ChatMessage, ChatStatus } from './types';
 
@@ -15,6 +15,10 @@ export interface ChatPanelProps {
     messages:  ChatMessage[];
     status:    ChatStatus;
     onSubmit:  (userMessage: string) => Promise<void>;
+}
+
+function isStatusMessage(m: ChatMessage): boolean {
+    return m.role === 'assistant' && (m.metadata as { kind?: string })?.kind === 'status';
 }
 
 export function ChatPanel({ messages, status, onSubmit }: ChatPanelProps) {
@@ -44,9 +48,24 @@ export function ChatPanel({ messages, status, onSubmit }: ChatPanelProps) {
         }
     }
 
+    const isEmpty = messages.length === 0 && status !== 'sending';
+
     return (
         <section className="chat_panel">
             <div className="chat_panel__messages" ref={scrollRef}>
+                {isEmpty && (
+                    <div className="chat_panel__empty">
+                        <span className="chat_panel__empty-icon" aria-hidden="true">
+                            <Sparkles size={20} strokeWidth={1.75} />
+                        </span>
+                        <h2 className="chat_panel__empty-title">
+                            {t('editor.chat.emptyTitle')}
+                        </h2>
+                        <p className="chat_panel__empty-body">
+                            {t('editor.chat.emptyBody')}
+                        </p>
+                    </div>
+                )}
                 {messages.map((m) => (
                     <ChatMessageItem key={m.id} message={m} />
                 ))}
@@ -80,8 +99,7 @@ export function ChatPanel({ messages, status, onSubmit }: ChatPanelProps) {
                     disabled={status === 'sending' || !draft.trim()}
                     aria-label={t('editor.chat.submitAriaLabel')}
                 >
-                    <span>{t('editor.chat.submitLabel')}</span>
-                    <ArrowUp size={14} strokeWidth={2} aria-hidden="true" />
+                    <ArrowUp size={16} strokeWidth={2.25} aria-hidden="true" />
                 </button>
             </form>
         </section>
@@ -95,6 +113,25 @@ interface ChatMessageItemProps {
 }
 
 function ChatMessageItem({ message }: ChatMessageItemProps) {
+    // Generation-Status-Events: kompakte Zeile statt voller Bubble.
+    if (isStatusMessage(message)) {
+        const failed = /fehlgeschlagen|failed/i.test(message.content);
+        const cls = [
+            'chat_panel__status',
+            failed ? 'chat_panel__status--error' : '',
+        ].join(' ').trim();
+        return (
+            <div className={cls}>
+                <span className="chat_panel__status-icon" aria-hidden="true">
+                    {failed
+                        ? <AlertCircle size={13} strokeWidth={2} />
+                        : <CheckCircle2 size={13} strokeWidth={2} />}
+                </span>
+                <span className="chat_panel__status-text">{message.content}</span>
+            </div>
+        );
+    }
+
     const classes: string[] = [
         'chat_panel__message',
         `chat_panel__message--${message.role}`,

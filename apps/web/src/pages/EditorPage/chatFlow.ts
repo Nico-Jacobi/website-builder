@@ -11,6 +11,7 @@ import type { ChatHistoryEntry, GenerateResult, RefineResult } from '../../llm/t
 import type { ApplyResult } from './applyPatchOps';
 import type { RejectedOp } from '../../diff/types';
 import type { StreamEvent } from '../../data/useGenerationStream';
+import i18n from '../../i18n';
 
 /** Maximum number of turns we ship to the LLM — matches REFINE_HISTORY_MAX. */
 export const CHAT_HISTORY_MAX = 10;
@@ -49,21 +50,21 @@ export function adaptGenerateResult(r: GenerateResult): RefineResult {
  * UI konsistent ist.
  */
 export function formatLLMError(r: RefineResult): string {
+    const t = i18n.t.bind(i18n);
     switch (r.kind) {
         case 'missing_key':
-            return 'Kein API-Key im Backend gesetzt (GOOGLE_API_KEY in apps/api/.env fehlt).';
+            return t('editor.chat.errorNoApiKey');
         case 'api_error':
-            return `LLM-Aufruf fehlgeschlagen: ${r.message}`;
+            return t('editor.chat.errorApiCall', { message: r.message });
         case 'safety_block':
-            return `LLM-Antwort blockiert: ${r.message}`;
+            return t('editor.chat.errorSafetyBlock', { message: r.message });
         case 'invalid_json':
-            return `LLM hat kein gültiges JSON geliefert: ${r.message}`;
+            return t('editor.chat.errorInvalidJson', { message: r.message });
         case 'validation_failed': {
             const count = r.errors.length;
-            return `LLM-Antwort ist keine gültige Spec (${count} Validation-Fehler).`;
+            return t('editor.chat.errorValidationFailed', { count });
         }
         case 'ok':
-            // Nicht erreichbar — Caller prüft das vorher. Defensiv:
             return '';
     }
 }
@@ -96,34 +97,33 @@ export function summarizeApply(
     _scope?:     string,
     pagePath?:   string,
 ): ApplySummary {
+    const t = i18n.t.bind(i18n);
     const parts: string[] = [];
     if (explanation.trim()) parts.push(explanation.trim());
 
     if (apply.kind === 'ok') {
         if (apply.applied === 0 && rejected.length === 0) {
-            parts.push('Keine Änderungen angewendet.');
+            parts.push(t('editor.chat.noChanges'));
         } else if (initial && apply.applied > 0) {
             const seconds = Math.max(1, Math.round(initial.durationMs / 1000));
-            parts.push(`Website nach ${seconds}s generiert.`);
+            parts.push(t('editor.chat.siteGenerated', { seconds }));
         } else if (apply.applied > 0) {
             if (pagePath) {
-                parts.push(`Page ${pagePath} aktualisiert (${apply.applied} Op${apply.applied === 1 ? '' : 's'}).`);
+                parts.push(t('editor.chat.pageUpdated', { pagePath, n: apply.applied }));
             } else {
-                parts.push(`Angewendet: ${apply.applied} Änderung${apply.applied === 1 ? '' : 'en'}.`);
+                parts.push(t('editor.chat.changesApplied', { n: apply.applied }));
             }
         }
     } else {
-        parts.push(
-            `Teilweise angewendet: ${apply.applied} Änderung${apply.applied === 1 ? '' : 'en'} vor Fehler (${apply.error}).`,
-        );
+        parts.push(t('editor.chat.partialApply', { n: apply.applied }));
     }
 
     const conflictWarning = rejected.length === 0
         ? ''
-        : `Hinweis: ${rejected.length} Änderung${rejected.length === 1 ? '' : 'en'} des LLM verworfen, weil du dieselbe Stelle gerade selbst bearbeitet hast.`;
+        : t('editor.chat.conflictWarning', { n: rejected.length });
 
     return {
-        assistant:       parts.join(' ').trim() || 'Ok.',
+        assistant:       parts.join(' ').trim() || t('editor.chat.ok'),
         conflictWarning,
     };
 }
@@ -148,26 +148,27 @@ export function summarizeGenerationEvent(
         return `${secs}s`;
     }
 
+    const t = i18n.t.bind(i18n);
     switch (event.type) {
         case 'landing_done':
             return {
                 role:    'assistant',
-                content: `Landing generiert in ${dur('/')}; ${event.sitemap.length - 1} Subpage(s) werden generiert…`,
+                content: t('editor.chat.landingDone', { dur: dur('/'), n: event.sitemap.length - 1 }),
             };
         case 'subpage_done':
             return {
                 role:    'assistant',
-                content: `Page ${event.path} fertig (${dur(event.path)})`,
+                content: t('editor.chat.subpageDone', { path: event.path, dur: dur(event.path) }),
             };
         case 'subpage_failed':
             return {
                 role:    'assistant',
-                content: `Page ${event.path} fehlgeschlagen: ${event.reason}. Nutze Retry in der Sidebar.`,
+                content: t('editor.chat.subpageFailed', { path: event.path, reason: event.reason }),
             };
         case 'complete':
-            return { role: 'assistant', content: 'Site komplett generiert.' };
+            return { role: 'assistant', content: t('editor.chat.complete') };
         case 'error':
-            return { role: 'assistant', content: `Generation fehlgeschlagen: ${event.reason}` };
+            return { role: 'assistant', content: t('editor.chat.generationFailed', { reason: event.reason }) };
         default:
             return null;
     }

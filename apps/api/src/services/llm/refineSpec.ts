@@ -18,11 +18,12 @@ export interface PageRefineArgs {
 }
 
 export interface PageRefineResult {
-    theme?:  Record<string, string>;
-    blocks:  BlockSpec[];
-    chrome?: SiteChrome;
-    log:     LogEntry[];
-    trace:   LLMTrace | null;
+    theme?:       Record<string, string>;
+    blocks:       BlockSpec[];
+    chrome?:      SiteChrome;
+    explanation?: string;
+    log:          LogEntry[];
+    trace:        LLMTrace | null;
 }
 
 /**
@@ -82,8 +83,8 @@ export async function refineSpec(args: PageRefineArgs): Promise<PageRefineResult
         };
     }
 
-    // Parse with PageRefineOutputSchema to get {theme?, blocks, chrome?}
-    let validated: { theme?: Record<string, string>; blocks: BlockSpec[]; chrome?: SiteChrome };
+    // Parse with PageRefineOutputSchema to get {theme?, blocks, chrome?, _explanation?}
+    let validated: { theme?: Record<string, string>; blocks: BlockSpec[]; chrome?: SiteChrome; _explanation?: string };
     try {
         const raw: unknown = JSON.parse(core.rawText);
         validated = PageRefineOutputSchema.parse(raw);
@@ -112,11 +113,12 @@ export async function refineSpec(args: PageRefineArgs): Promise<PageRefineResult
     }
 
     return {
-        theme:  validated.theme,
-        blocks: validated.blocks,
-        chrome: outChrome,
-        log:    collector.getLog(),
-        trace:  collector.getTrace(),
+        theme:       validated.theme,
+        blocks:      validated.blocks,
+        chrome:      outChrome,
+        explanation: validated._explanation,
+        log:         collector.getLog(),
+        trace:       collector.getTrace(),
     };
 }
 
