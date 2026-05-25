@@ -5,6 +5,31 @@
     align-items: center;
     justify-content: space-between;
     color: var(--text);
+    position: relative;
+}
+
+/* ─── Mobile menu toggle (hamburger) ────────────────────────── */
+/* Hidden on desktop; revealed below 768px. */
+.header__menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+}
+
+.header__menu-bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
 }
 
 /* ─── Variant: solid ────────────────────────────────────────── */
@@ -127,7 +152,7 @@
 .header__nav a.header__cta {
     display: inline-flex;
     align-items: center;
-    padding: 6px var(--space_md);
+    padding: 10px var(--space_md);
     background: var(--primary);
     color: var(--inverted_text);
     border-radius: var(--radius_pill);
@@ -145,4 +170,43 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 16px var(--border_subtle),
                 0 0 0 1px var(--glass_border) inset;
+}
+
+/* ─── Mobile (≤768px): collapse nav into a toggled dropdown ─── */
+@media (max-width: 768px) {
+    .header__menu-toggle {
+        display: flex;
+    }
+
+    .header__nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: var(--space_md);
+        left: var(--space_md);
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space_sm);
+        margin-top: var(--space_sm);
+        padding: var(--space_md);
+        background: var(--surface);
+        border: 1px solid var(--glass_border);
+        border-radius: var(--radius_md);
+        box-shadow: var(--glass_shadow);
+    }
+
+    .header__nav--open {
+        display: flex;
+    }
+
+    .header__nav a {
+        padding: var(--space_sm) 0;
+        font-size: 1rem;
+        opacity: 1;
+    }
+
+    .header__nav a.header__cta {
+        justify-content: center;
+        padding: var(--space_sm) var(--space_md);
+    }
 }

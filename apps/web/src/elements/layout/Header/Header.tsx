@@ -1,4 +1,5 @@
 import './Header.css';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEditableText } from '../../../builder/useEditableText';
 import { useEditModeState } from '../../../builder/editModeStore';
@@ -9,6 +10,7 @@ import type { HeaderProps } from '@website-builder/shared';
 export default function Header({ title, subtitle, icon, links, ctaLabel, ctaHref, variant = 'solid' }: HeaderProps) {
     const { t } = useTranslation();
     const { isEditMode } = useEditModeState();
+    const [menuOpen, setMenuOpen] = useState(false);
     const titleEdit    = useEditableText('title');
     const subtitleEdit = useEditableText('subtitle');
     const ctaLabelEdit = useEditableText('ctaLabel');
@@ -42,25 +44,39 @@ export default function Header({ title, subtitle, icon, links, ctaLabel, ctaHref
             </div>
 
             {showNav && (
-                <nav className="header__nav">
-                    {links?.map((link, i) => (
-                        <EditableLink
-                            key={i}
-                            href={link.href}
-                            label={link.label}
-                            labelPath={`links[${i}].label`}
-                        />
-                    ))}
-                    {showCta && (
-                        <a
-                            className="header__cta"
-                            href={ctaHref || '#'}
-                            data-empty={!ctaLabel || undefined}
-                            data-placeholder={t('modules.layout.header.ctaPlaceholder')}
-                            {...ctaLabelEdit}
-                        >{ctaLabel}</a>
-                    )}
-                </nav>
+                <>
+                    <button
+                        type="button"
+                        className="header__menu-toggle"
+                        aria-label={t('modules.layout.header.menuToggle', { defaultValue: 'Menu' })}
+                        aria-expanded={menuOpen}
+                        onClick={() => setMenuOpen((open) => !open)}
+                    >
+                        <span className="header__menu-bar" />
+                        <span className="header__menu-bar" />
+                        <span className="header__menu-bar" />
+                    </button>
+                    <nav className={`header__nav${menuOpen ? ' header__nav--open' : ''}`}>
+                        {links?.map((link, i) => (
+                            <EditableLink
+                                key={i}
+                                href={link.href}
+                                label={link.label}
+                                labelPath={`links[${i}].label`}
+                                hrefPath={`links[${i}].href`}
+                            />
+                        ))}
+                        {showCta && (
+                            <a
+                                className="header__cta"
+                                href={ctaHref || '#'}
+                                data-empty={!ctaLabel || undefined}
+                                data-placeholder={t('modules.layout.header.ctaPlaceholder')}
+                                {...ctaLabelEdit}
+                            >{ctaLabel}</a>
+                        )}
+                    </nav>
+                </>
             )}
         </header>
     );

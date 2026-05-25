@@ -41,6 +41,7 @@ export default function Footer({ tagline, copyright, columns, compact }: FooterP
                                     href={link.href}
                                     label={link.label}
                                     labelPath={`columns[${link.colIndex}].links[${link.linkIndex}].label`}
+                                    hrefPath={`columns[${link.colIndex}].links[${link.linkIndex}].href`}
                                 />
                             ))}
                         </nav>
@@ -96,6 +97,7 @@ function FooterColumnItem({
                             href={link.href}
                             label={link.label}
                             labelPath={`columns[${colIndex}].links[${i}].label`}
+                            hrefPath={`columns[${colIndex}].links[${i}].href`}
                         />
                     </li>
                 ))}
