@@ -58,7 +58,7 @@ function TestimonialCard({ item, propPathPrefix }: TestimonialCardProps) {
                     src={item.avatarSrc}
                     alt={item.author}
                     altPath={`${propPathPrefix}.author`}
-                    wrapperClassName="testimonial__avatar-wrap"
+                    wrapperClassName={`testimonial__avatar-wrap${item.avatarSrc ? ' testimonial__avatar-wrap--has-image' : ''}`}
                     imgClassName="testimonial__avatar"
                 />
                 <div className="testimonial__author-meta">

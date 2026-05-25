@@ -18,6 +18,7 @@
     gap: var(--space_lg);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
     scrollbar-width: thin;
     scrollbar-color: var(--border_subtle) transparent;
     padding-bottom: var(--space_sm);
@@ -26,4 +27,12 @@
 /* Cards in a scroll row have a fixed width instead of growing */
 .card_row .card {
     flex: 0 0 300px;
+    scroll-snap-align: start;
+}
+
+@media (max-width: 640px) {
+    /* Near-full-width cards so one snaps into view at a time */
+    .card_row .card {
+        flex-basis: 80vw;
+    }
 }

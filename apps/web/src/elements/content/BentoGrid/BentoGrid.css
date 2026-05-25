@@ -69,6 +69,21 @@
     color: var(--muted_text);
 }
 
+@media (min-width: 701px) and (max-width: 1000px) {
+    .bento_grid__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .bento_grid__cell--sm,
+    .bento_grid__cell--tall {
+        grid-column: span 1;
+    }
+    .bento_grid__cell--md,
+    .bento_grid__cell--lg,
+    .bento_grid__cell--wide {
+        grid-column: span 2;
+    }
+}
+
 @media (max-width: 700px) {
     .bento_grid__grid {
         grid-template-columns: 1fr;

@@ -29,6 +29,10 @@
     position: relative;
 }
 
+@media (max-width: 900px) {
+    .section { padding: var(--space_lg) var(--space_xl); }
+}
+
 @media (max-width: 640px) {
     .section { padding: var(--space_md); }
 }
@@ -123,7 +127,7 @@
 
 .section__heading {
     margin: 0;
-    font-size: 2.25rem;
+    font-size: clamp(1.5rem, 1rem + 2.5vw, 2.25rem);
     line-height: 1.15;
     letter-spacing: -0.02em;
     color: var(--text);

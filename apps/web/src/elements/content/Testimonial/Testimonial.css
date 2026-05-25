@@ -78,6 +78,10 @@
     background: var(--surface);
 }
 
+.testimonial__avatar-wrap--has-image::before {
+    display: none;
+}
+
 .testimonial__avatar-wrap::before {
     content: "";
     position: absolute;
@@ -118,4 +122,20 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+    .testimonial__heading {
+        font-size: 1.5rem;
+        margin-bottom: var(--space_lg);
+    }
+
+    .testimonial__card {
+        padding: var(--space_md);
+    }
+
+    .testimonial__quote-mark {
+        left: var(--space_md);
+        font-size: 3.5rem;
+    }
 }

@@ -16,7 +16,6 @@ import type { AutoSaveAdapter, SaveStatus } from '../../builder/autoSaveTypes';
 import { ChatPanel } from './chat/ChatPanel';
 import { ModulePalette } from './ModulePalette';
 import { EditorDndProvider } from '../../builder/EditorDndProvider';
-import { LanguageToggle } from '../../builder/LanguageToggle';
 import { useChatHistory } from './chat/useChatHistory';
 import { useInlineEditTracker } from './useInlineEditTracker';
 import { applyPatchOps } from './applyPatchOps';
@@ -186,6 +185,7 @@ export function EditorPage() {
                 if (meta.sitemap !== null) return; // already generated
                 autoTriggeredRef.current = true;
                 setGenerationPending(true);
+                durationsRef.current.set('/', { start: performance.now() });
                 void startGeneration(identifier, meta.initialPrompt);
             })
             .catch(() => { /* ignore — main fetch handles the error display */ });
@@ -233,7 +233,7 @@ export function EditorPage() {
 
             const msg = summarizeGenerationEvent(event, durationsRef.current);
             if (msg) {
-                void chat.appendAssistant(msg.content);
+                void chat.appendAssistant(msg.content, { kind: 'status' });
             }
         });
     }, [stream.subscribe, chat.appendAssistant, identifier]);
@@ -265,7 +265,7 @@ export function EditorPage() {
 
             const ops = diffSpecs(spec, llmResult.nextSpec);
             if (ops.length === 0) {
-                await chat.appendAssistant(llmResult.explanation || 'Keine Änderungen.');
+                await chat.appendAssistant(llmResult.explanation || t('editor.chat.noChanges'));
                 return;
             }
 
@@ -340,7 +340,7 @@ export function EditorPage() {
             spec={spec}
             onSpecChange={setSpec}
             autoSave={autoSave}
-            initialEditMode={true}
+            initialEditMode={false}
             onInlineEdit={tracker.markEdited}
             activePagePath={activePagePath}
             identifier={identifier}
@@ -485,7 +485,6 @@ function EditorHeader({ name, onNameChange, identifier, autoSave, blockOps, colo
             <div className="editor_page__header-actions">
                 <SaveStatusIndicator status={status} />
                 <ThemeModeToggle scheme={colorScheme} onToggle={onToggleColorScheme} />
-                <LanguageToggle />
                 <EditModeToggle />
                 <a
                     href={previewHref}
@@ -547,8 +546,8 @@ function ThemeModeToggle({
             className={`editor_page__theme-toggle${isDark ? ' editor_page__theme-toggle--dark' : ''}`}
             role="switch"
             aria-checked={isDark}
-            aria-label={t('editor.themeToggle.ariaLabel', 'Toggle dark mode')}
-            title={t('editor.themeToggle.ariaLabel', 'Toggle dark mode')}
+            aria-label={t('editor.themeToggle.ariaLabel')}
+            title={t('editor.themeToggle.ariaLabel')}
             onClick={onToggle}
         >
             <span className="editor_page__theme-thumb" aria-hidden="true">
@@ -592,7 +591,14 @@ function useCombinedSaveStatus(
 }
 
 function SaveStatusIndicator({ status }: { status: SaveStatus }) {
-    const label = labelForStatus(status);
+    const { t } = useTranslation();
+    if (status === 'idle') return null;
+    const labels: Record<SaveStatus, string> = {
+        saving: t('editor.saveStatus.saving'),
+        saved:  t('editor.saveStatus.saved'),
+        error:  t('editor.saveStatus.error'),
+        idle:   t('editor.saveStatus.idle'),
+    };
     return (
         <div
             className={`editor_page__status editor_page__status--${status}`}
@@ -600,17 +606,8 @@ function SaveStatusIndicator({ status }: { status: SaveStatus }) {
             aria-live="polite"
         >
             <span className="editor_page__status-dot" aria-hidden="true" />
-            <span className="editor_page__status-label">{label}</span>
+            <span className="editor_page__status-label">{labels[status]}</span>
         </div>
     );
 }
 
-function labelForStatus(status: SaveStatus): string {
-    switch (status) {
-        case 'saving': return 'Speichern…';
-        case 'saved':  return 'Gespeichert';
-        case 'error':  return 'Fehler beim Speichern';
-        case 'idle':
-        default:       return 'Bereit';
-    }
-}

@@ -22,7 +22,7 @@ export function ModulePalette() {
 
     const grouped = useMemo(() => groupByCategory(listModules()), []);
     const categoryLabel = {
-        layout:  'Layout',
+        layout:  t('editor.palette.categoryLayout'),
         content: t('editor.palette.categoryContent'),
         media:   t('editor.palette.categoryMedia'),
         other:   t('editor.palette.categoryOther'),

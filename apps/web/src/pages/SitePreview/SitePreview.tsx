@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import type { SiteSpec } from '@website-builder/shared';
+import type { SiteSpec, Sitemap } from '@website-builder/shared';
 import './SitePreview.css';
 import { PreviewSurface } from '../../builder/PreviewSurface';
 import { useActivePagePath, useNavigateToPage } from '../../builder/usePageNavigation';
-import { fetchSiteSpec } from '../../data/siteClient';
+import { fetchSiteSpec, fetchSiteGenerationMeta } from '../../data/siteClient';
 
 type FetchStatus =
     | { kind: 'loading' }
@@ -17,16 +17,21 @@ export function SitePreview() {
     const navigateToPage = useNavigateToPage(identifier ?? '', 'site');
 
     const [spec, setSpec] = useState<SiteSpec | null>(null);
+    const [sitemap, setSitemap] = useState<Sitemap | null>(null);
     const [fetchStatus, setFetchStatus] = useState<FetchStatus>({ kind: 'loading' });
 
     useEffect(() => {
         if (!identifier) return;
         let cancelled = false;
         setFetchStatus({ kind: 'loading' });
-        fetchSiteSpec(identifier, activePagePath)
-            .then((loaded) => {
+        Promise.all([
+            fetchSiteSpec(identifier, activePagePath),
+            fetchSiteGenerationMeta(identifier),
+        ])
+            .then(([loadedSpec, meta]) => {
                 if (!cancelled) {
-                    setSpec(loaded);
+                    setSpec(loadedSpec);
+                    setSitemap(meta.sitemap);
                     setFetchStatus({ kind: 'ok' });
                 }
             })
@@ -72,6 +77,7 @@ export function SitePreview() {
             <Link to="/" className="site_preview__back-overlay">← Zurück</Link>
             <PreviewSurface
                 spec={spec}
+                sitemap={sitemap ?? undefined}
                 editMode={false}
                 onNavigate={navigateToPage}
             />

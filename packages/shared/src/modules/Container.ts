@@ -4,7 +4,7 @@ import type { ModuleSpec } from './index';
 import { BlockSpecSchema } from '../schemas';
 
 export const ContainerPropsSchema = z.object({
-    children:   z.array(BlockSpecSchema).min(1),
+    children:   z.array(BlockSpecSchema).min(1).default([{ type: 'TextBlock', props: { body: 'Content' } }]),
     paddingY:   z.enum(['none', 'sm', 'md', 'lg']).optional(),
     maxWidth:   z.number().optional(),
     scrollable: z.boolean().optional(),

@@ -60,7 +60,7 @@ export function PageSwitcher({
                             >
                                 <span className="page-row__path">{entry.path}</span>
                                 <span className="page-row__title">{entry.title}</span>
-                                <span className={`page-row__status page-row__status--${status}`}>{status}</span>
+                                <span className={`page-row__status page-row__status--${status}`}>{t(`editor.pageSwitcher.status${status.charAt(0).toUpperCase() + status.slice(1)}`)}</span>
                             </button>
                             {status === 'failed' && (
                                 <button

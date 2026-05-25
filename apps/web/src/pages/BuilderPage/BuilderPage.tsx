@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import './BuilderPage.css';
 import { SitesList } from './SitesList';
 import { NewSiteDialog } from './NewSiteDialog';
+import { LanguageToggle } from '../../builder/LanguageToggle';
 
 export function BuilderPage() {
     const { t } = useTranslation();
@@ -16,6 +17,7 @@ export function BuilderPage() {
                     <Sparkles size={16} />
                     <span>OneP<span className="builder_page__brand-ai">ai</span>ge</span>
                 </Link>
+                <LanguageToggle />
             </nav>
             <header className="builder_page__header">
                 <div className="builder_page__hero">

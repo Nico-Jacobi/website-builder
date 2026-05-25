@@ -221,8 +221,8 @@ describe('ContainerPropsSchema', () => {
         expect(fails(ContainerPropsSchema, { children: [] })).toBe(true);
     });
 
-    it('rejects missing children', () => {
-        expect(fails(ContainerPropsSchema, {})).toBe(true);
+    it('accepts missing children (defaults are injected)', () => {
+        expect(parses(ContainerPropsSchema, {})).toBe(true);
     });
 
     it('rejects children as non-array', () => {
