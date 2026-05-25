@@ -32,6 +32,8 @@ import ProductHuntAward   from '../elements/content/ProductHuntAward/ProductHunt
 import RatingBadge        from '../elements/content/RatingBadge/RatingBadge';
 import DiscountStrip      from '../elements/content/DiscountStrip/DiscountStrip';
 import Timeline           from '../elements/content/Timeline/Timeline';
+import Contact            from '../elements/content/Contact/Contact';
+import Map               from '../elements/content/Map/Map';
 
 // Media
 import ImageBlock   from '../elements/media/ImageBlock/ImageBlock';
@@ -78,6 +80,8 @@ export const componentMap: Record<string, ComponentType<any>> = {
     RatingBadge,
     DiscountStrip,
     Timeline,
+    Contact,
+    Map,
     // Media
     ImageBlock,
     Gallery,

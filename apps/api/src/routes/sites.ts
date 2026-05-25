@@ -614,6 +614,49 @@ sitesRouter.post('/:identifier/pages/:path/regenerate', async (c) => {
     return c.body(null, 202);
 });
 
+// --- Contact submissions ---------------------------------------------------
+
+const ContactSubmissionBody = z.object({
+    name:    z.string().trim().min(1).max(200),
+    email:   z.string().trim().email().max(200),
+    message: z.string().trim().min(1).max(5000),
+});
+
+/** Store a visitor contact form submission for a site. */
+sitesRouter.post('/:identifier/contact', async (c) => {
+    const identifier = c.req.param('identifier');
+
+    const site = await db.query.sites.findFirst({
+        where: eq(schema.sites.identifier, identifier),
+    });
+    if (!site) return c.json({ error: 'site not found' }, 404);
+
+    let body: unknown;
+    try {
+        body = await c.req.json();
+    } catch {
+        return c.json({ error: 'body must be JSON' }, 400);
+    }
+    const parsed = ContactSubmissionBody.safeParse(body);
+    if (!parsed.success) {
+        return c.json({ error: 'invalid body', issues: parsed.error.issues }, 400);
+    }
+
+    const ip = c.req.header('x-forwarded-for')?.split(',')[0].trim()
+        ?? c.req.header('x-real-ip')
+        ?? null;
+
+    await db.insert(schema.contactSubmissions).values({
+        siteId:  site.id,
+        name:    parsed.data.name,
+        email:   parsed.data.email,
+        message: parsed.data.message,
+        ip,
+    });
+
+    return c.body(null, 201);
+});
+
 // --- Helpers --------------------------------------------------------------
 
 function blockOpErrorResponse(c: Context, err: unknown) {

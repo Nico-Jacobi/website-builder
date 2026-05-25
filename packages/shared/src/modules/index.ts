@@ -43,12 +43,14 @@ export * from './SocialProofBand';
 export * from './AboutVisionMission';
 export * from './VideoFeature';
 export * from './Newsletter';
+export * from './Contact';
 export * from './ProductTour';
 export * from './Pill';
 export * from './ProductHuntAward';
 export * from './RatingBadge';
 export * from './DiscountStrip';
 export * from './Timeline';
+export * from './Map';
 
 import { HeaderModuleSpec       } from './Header';
 import { HeroBannerModuleSpec   } from './HeroBanner';
@@ -78,12 +80,14 @@ import { SocialProofBandModuleSpec    } from './SocialProofBand';
 import { AboutVisionMissionModuleSpec } from './AboutVisionMission';
 import { VideoFeatureModuleSpec       } from './VideoFeature';
 import { NewsletterModuleSpec         } from './Newsletter';
+import { ContactModuleSpec           } from './Contact';
 import { ProductTourModuleSpec        } from './ProductTour';
 import { PillModuleSpec               } from './Pill';
 import { ProductHuntAwardModuleSpec   } from './ProductHuntAward';
 import { RatingBadgeModuleSpec        } from './RatingBadge';
 import { DiscountStripModuleSpec      } from './DiscountStrip';
 import { TimelineModuleSpec           } from './Timeline';
+import { MapModuleSpec                } from './Map';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const allSpecs: ModuleSpec<any>[] = [
@@ -100,6 +104,8 @@ const allSpecs: ModuleSpec<any>[] = [
     AboutVisionMissionModuleSpec, VideoFeatureModuleSpec, NewsletterModuleSpec,
     ProductTourModuleSpec,     PillModuleSpec,            ProductHuntAwardModuleSpec,
     RatingBadgeModuleSpec,     DiscountStripModuleSpec,   TimelineModuleSpec,
+    ContactModuleSpec,
+    MapModuleSpec,
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
