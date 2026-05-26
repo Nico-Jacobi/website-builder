@@ -11,16 +11,15 @@
 ![Gemini](https://img.shields.io/badge/Google_Gemini-4285F4?style=flat&logo=google&logoColor=white)
 ![Zod](https://img.shields.io/badge/Zod-3E67B1?style=flat&logo=zod&logoColor=white)
 
-![](demo%20images/landing.png)
+![](demo%20images/LandingPage.png)
 
 ## How it works
 
 Sites are JSON specs: a list of typed blocks, each mapped to a React module through a central registry. The LLM generates and refines specs from chat; the renderer walks the spec and renders modules. The same modules are editable inline directly in the preview.
 
 ```
-chat prompt ──▶ LLM (Gemini) ──▶ SiteSpec (JSON) ──▶ Registry ──▶ Live Preview
-                                                                       ↕
-                                                                 Inline editing
+chat prompt ──▶ LLM (Gemini) ──▶ SiteSpec (JSON) ──▶ Registry ──▶ Live Preview ◀──▶ inline editing
+
 ```
 
 Because the spec is the source of truth, the LLM and the visual editor operate on the exact same data — chat edits and click-to-edit changes round-trip cleanly without diverging representations.
@@ -29,13 +28,13 @@ Because the spec is the source of truth, the LLM and the visual editor operate o
 
 Generate a site from chat, then refine it — either by talking to the LLM or by clicking directly on the rendered page.
 
-![Generation and chat refinement](demo%20images/generation.png)
+![Generation and chat refinement](demo%20images/GenerationExample.png)
 
 - Generates a landing page first, then expands into subpages in parallel
 - Chat refinement with diff-style operation logs (`Page / updated (3 op(s))`)
 - Light / dark preview, code view, and "open in new tab" for the published site
 
-![Inline visual editing](demo%20images/edit.png)
+![Inline visual editing](demo%20images/EditExample.png)
 
 - Click any text, image or module to edit it directly — no separate inspector panel
 - Module palette for inserting new blocks; drag to reorder, arrows to nudge
